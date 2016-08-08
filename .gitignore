@@ -1,0 +1,4 @@
+*.pyc
+FindingProblems/settings_secret.py
+problems/migrations/*
+db.sqlite3
