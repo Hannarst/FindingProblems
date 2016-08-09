@@ -1,1 +1,4 @@
-<h1> HELLO </h1>
+{% extends 'problems/base.html' %}
+{% block content %}
+  <a href="{% url 'add_problem' %}" class="btn btn-primary">Add Problem</a>
+{% endblock %}

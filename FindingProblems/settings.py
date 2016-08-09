@@ -30,6 +30,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'bootstrap3',
     'problems.apps.ProblemsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
