@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from django.forms import ModelForm
 from django.db import models
 
 class Problem(models.Model):
@@ -20,7 +19,3 @@ class Category(models.Model):
     problems = models.ManyToManyField(Problem)
     name = models.TextField(max_length=200)
 
-class ProblemForm(ModelForm):
-    class Meta:
-        model = Problem
-        fields = '__all__'
