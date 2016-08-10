@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from models import *
 
 class ProblemForm(ModelForm):
     class Meta:
@@ -8,4 +9,4 @@ class ProblemForm(ModelForm):
 class EditProblemForm(ModelForm):
     class Meta:
 	model = Problem
-	fields = '__all___'
+	fields = '__all__'
