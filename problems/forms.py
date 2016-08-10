@@ -1,12 +1,10 @@
-from django.forms import ModelForm
+from django import forms
 from models import *
 
-class ProblemForm(ModelForm):
+class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
-        fields = '__all__'
+        exclude = ('categories',)
 
-class EditProblemForm(ModelForm):
-    class Meta:
-	model = Problem
-	fields = '__all__'
+class CategoriesForm(forms.Form):
+    categories = forms.CharField(max_length=1000)

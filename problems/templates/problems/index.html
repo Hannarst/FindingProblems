@@ -5,7 +5,7 @@
    <div class="panel-heading clearfix">
        <div class="">
          <h3 class="panel-title" style="padding-top:8px;">
-         Results <span class="badge">LOLOLOLOL</span>
+         Results <span class="badge">{{problems.count}}</span>
          </h3>
        </div>
        <div class="pull-left" style="padding-top:5px">
@@ -52,8 +52,8 @@
        <tr class='clickable-row' style="cursor: pointer;">
          <td>{{problem.title}}</td>
          <td>
-           {% for category in problem.category_set.all %}
-            {{category}},
+           {% for category in problem.categories.all %}
+            {{category.name}},
           {% empty %}
             Uncategorised
           {% endfor %}

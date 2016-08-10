@@ -5,6 +5,12 @@ from models import *
 from forms import *
 from django.contrib import messages
 
+def AddCategory(categories, problem):
+    for cat in categories.split(','):
+        category, c = Category.objects.get_or_create(name=cat.strip().lower())
+        problem.categories.add(category)
+        problem.save()
+
 class Index(View):
      def get(self, request):
         problems = Problem.objects.all()
@@ -15,23 +21,27 @@ class Index(View):
 
 class AddProblem(View):
     def get(self, request):
-        form = ProblemForm()
+        problem_form = ProblemForm()
+        categories_form = CategoriesForm()
         context = {
-            'form': form,
+            'problem_form': problem_form,
+            'categories_form': categories_form,
         }
         return render(request, 'problems/add_problem.html', context)
 
     def post(self, request):
-        form = ProblemForm(request.POST)
-        if form.is_valid():
-            post = form.save()
+        problem_form = ProblemForm(request.POST)
+        categories_form = CategoriesForm(request.POST)
+        if problem_form.is_valid() and categories_form.is_valid():
+            problem = problem_form.save()
+            AddCategory(request.POST.get('categories'), problem)
             messages.success(request, 'Problem Added')
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
 
 class EditProblem(UpdateView):
-    form_class = EditProblemForm
+    form_class = ProblemForm
     model = Problem
     fields = '__all__'
     template_name = 'problems/edit_form.html'
@@ -50,14 +60,14 @@ class EditProblem(UpdateView):
 class ForkProblem(View):
     def get(self, request, problem_id):
 	problem = Problem.objects.get(id=problem_id)
-	form = EditProblemForm(instance=problem)
+	form = ProblemForm(instance=problem)
 	context = {
 	    'form': form,
 	}
 	return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
-	form = EditProblemForm(request.POST)
+	form = ProblemForm(request.POST)
 	if form.is_valid():
 	    forked_problem = form.save(commit=False)
 	    forked_problem.pk = None
