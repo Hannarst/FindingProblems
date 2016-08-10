@@ -6,7 +6,11 @@ from django.contrib import messages
 
 class Index(View):
      def get(self, request):
-        return render(request, 'problems/index.html')
+        problems = Problem.objects.all()
+        context = {
+            'problems': problems,
+        }
+        return render(request, 'problems/index.html', context)
 
 class AddProblem(View):
     def get(self, request):
