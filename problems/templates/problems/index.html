@@ -12,22 +12,30 @@
          <a href="{% url 'add_problem' %}" class="btn btn-success btn-sm">Add Problem</a>
        </div>
        <div class="pull-right">
-         <form role="search" method="get" action="/tbl" class="form-inline">
+         <form role="search" method="get" class="form-inline">
            <div class="form-group">
-             <label for="category" class="sr-only">Category:</label>
-             <input type="text" id="category" name="category" class="input-sm form-control" value="" placeholder="Category">
+             <label for="id_category" class="sr-only">Category:</label>
+             <input type="text" id="id_categories" value="{{searched_categories}}" name="categories" class="input-sm form-control" placeholder="Categories">
            </div>
            <div class="form-group">
-             <label for="difficulty" class="sr-only">Difficulty:</label>
-             <input type="text" id="difficulty" name="difficulty" class="input-sm form-control" value="" placeholder="Difficulty">
+             <label for="id_difficulty" class="sr-only">Difficulty:</label>
+             <select id="id_difficulty" name="difficulty" class="input-sm form-control">
+               <option value="">Difficulty:</option>
+                 {% for val, choice in difficulties %}
+                   {% if val == searched_difficulty %}
+                     <option value="{{val}}" selected="selected">{{choice}}</option>
+                   {% else %}
+                   <option value="{{val}}">{{choice}}</option>
+                   {% endif %}
+                 {% endfor %}
+             </select>
            </div>
            <div class="form-group">
-             <label for="visibility" class="sr-only">Visibility:</label>
-             <select id="visibility" name="visibility" class="input-sm form-control">
+             <label for="id_visibility" class="sr-only">Visibility:</label>
+             <select id="id_visibility" name="visibility" class="input-sm form-control">
                <option value="">Visibility:</option>
-               <option value="">Public Only</option>
-               <option value="">Private Only</option>
-               <option value="">Both</option>
+               <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
+               <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
              </select>
            </div>
 
@@ -70,8 +78,6 @@
        {% endfor %}
      </tbody>
    </table>
-   <div class="panel-footer clearfix">
-   </div>
  </div>
 
 {% endblock %}

@@ -13,9 +13,28 @@ def AddCategory(categories, problem):
 
 class Index(View):
      def get(self, request):
-        problems = Problem.objects.all()
+        problems = Problem.objects
+        categories = request.GET.get('categories')
+        difficulty = request.GET.get('difficulty')
+        privacy = request.GET.get('privacy')
+        if categories:
+            problems = problems.filter(
+                categories__name__in=[x.lower().strip() for x in categories.split(',')]).distinct()
+        else:
+            categories = ""
+        if difficulty:
+            difficulty = int(difficulty)
+            problems = problems.filter(difficulty=difficulty)
+        if privacy == "private":
+            problems = problems.filter(private=true)
+        elif privacy == "public":
+            problems = problems.filter(private=false)
         context = {
-            'problems': problems,
+            'problems': problems.all(),
+            'difficulties': Problem.DIFFICULTIES,
+            'searched_categories': categories,
+            'searched_difficulty': difficulty,
+            'searched_privacy': privacy,
         }
         return render(request, 'problems/index.html', context)
 
