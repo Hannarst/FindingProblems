@@ -8,6 +8,11 @@
          Results <span class="badge">{{problems.count}}</span>
          </h3>
        </div>
+       {% if challenge %}
+             <div for="id_challenge" class="sr-only">Editing challenge: {{challenge.title}}</div>
+        {% endif %}
+           <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
+
        <div class="pull-left" style="padding-top:5px">
          <a href="{% url 'add_problem' %}" class="btn btn-success btn-sm">Add Problem</a>
        </div>
@@ -53,6 +58,9 @@
          <th>Categories</th>
          <th>Difficulty</th>
          <th>Visibility</th>
+         {% if challenge %}
+         <th>Add/Remove from challenge</th>
+         {% endif %}
        </tr>
      </thead>
      <tbody>
@@ -68,6 +76,15 @@
          </td>
          <td>{{problem.difficulty}}</td>
          <td>{{problem.private}}</td>
+         {% if challenge %}
+         <td>
+           {% if not problem in challenge.problems %}
+           <button class="btn btn-sm">Add to challenge</button>
+           {% else %}
+           <button class="btn btn-sm">Already in challenge</button>
+           {% endif %}
+         </td>
+         {% endif %}
        </tr>
        {% empty %}
        <tr>

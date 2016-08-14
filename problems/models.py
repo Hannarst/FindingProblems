@@ -16,5 +16,5 @@ class Problem(models.Model):
 
 class Challenge(models.Model):
     datetime = models.DateTimeField()
-    name = models.TextField(max_length=200)
+    name = models.CharField(max_length=200)
     problems = models.ManyToManyField(Problem)
