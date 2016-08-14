@@ -38,60 +38,77 @@ class Index(View):
         }
         return render(request, 'problems/index.html', context)
 
+class ViewProblem(View):
+    def get(self, request, problem_id):
+        context = {
+            'problem': Problem.objects.get(pk=problem_id),
+        }
+        return render(request, 'problems/view_problem.html', context)
+
 class AddProblem(View):
     def get(self, request):
         problem_form = ProblemForm()
         categories_form = CategoriesForm()
         context = {
-            'problem_form': problem_form,
-            'categories_form': categories_form,
+            'form': problem_form,
         }
         return render(request, 'problems/add_problem.html', context)
 
     def post(self, request):
         problem_form = ProblemForm(request.POST)
-        categories_form = CategoriesForm(request.POST)
-        if problem_form.is_valid() and categories_form.is_valid():
+        categories = request.POST.get('categories')
+        if problem_form.is_valid() and categories:
             problem = problem_form.save()
-            AddCategory(request.POST.get('categories'), problem)
+            AddCategory(categories, problem)
             messages.success(request, 'Problem Added')
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
 
 class EditProblem(UpdateView):
-    form_class = ProblemForm
-    model = Problem
-    fields = '__all__'
-    template_name = 'problems/edit_form.html'
+    def get(self, request, problem_id):
+    	problem = Problem.objects.get(id=problem_id)
+        categories = ",".join([cat.name for cat in problem.categories.all()])
+    	form = ProblemForm(instance=problem)
+    	context = {
+    	    'form': form,
+            'categories': categories,
+    	}
+    	return render(request, 'problems/edit_problem.html', context)
 
-    def get(self, request, **kwargs):
-	self.object = Problem.objects.get(id=self.kwargs['id'])
-	form_class = self.get_form_class()
-	form = self.get_form(form_class)
-	context = self.get_context_data(object=self.object, form=form)
-	return self.render_to_response(context)
+    def post(self, request, problem_id):
+    	form = ProblemForm(request.POST)
+        categories = request.POST.get('categories')
+    	if form.is_valid() and categories:
+    	    problem = form.save(commit=False)
+    	    problem.save()
+            AddCategory(categories, problem)
+    	    messages.success(request, 'Problem Edited')
+    	else:
+    	    messages.error(request, 'Invalid Form')
+    	return redirect('index')
 
-    def get_object(self, queryset=None):
-	obj = Problem.objects.get(id=self.kwargs['id'])
-	return obj
 
 class ForkProblem(View):
     def get(self, request, problem_id):
-	problem = Problem.objects.get(id=problem_id)
-	form = ProblemForm(instance=problem)
-	context = {
-	    'form': form,
-	}
+    	problem = Problem.objects.get(id=problem_id)
+        categories = ",".join([cat.name for cat in problem.categories.all()])
+    	form = ProblemForm(instance=problem)
+    	context = {
+    	    'form': form,
+            'categories': categories,
+    	}
 	return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
-	form = ProblemForm(request.POST)
-	if form.is_valid():
-	    forked_problem = form.save(commit=False)
-	    forked_problem.pk = None
-	    forked_problem.save()
-	    messages.success(request, 'Problem Forked')
-	else:
-	    messages.error(request, 'Invalid Form')
-	return redirect('index')
+    	form = ProblemForm(request.POST)
+        categories = request.POST.get('categories')
+    	if form.is_valid() and categories:
+    	    forked_problem = form.save(commit=False)
+    	    forked_problem.pk = None
+    	    forked_problem.save()
+            AddCategory(categories, forked_problem)
+    	    messages.success(request, 'Problem Forked')
+    	else:
+    	    messages.error(request, 'Invalid Form')
+    	return redirect('index')

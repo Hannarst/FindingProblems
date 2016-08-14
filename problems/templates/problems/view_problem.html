@@ -1,0 +1,61 @@
+{% extends "problems/base.html" %} {% load bootstrap3 %} {% block content %}
+
+<div style="margin: 10;">
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix" style="position:relative">
+            <h2 style="margin-left:30px;"> {{problem.title}}</h2>
+
+            <div style="position:relative">
+                <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
+                <div style="margin-left:30px;"> Time limit: {{problem.execution_time_limit}}ms </div>
+            </div>
+            <div class="pull-right">
+              <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+               Edit
+               <i class="fa fa-pencil" aria-hidden="true"></i>
+             </a>
+             <a href="{% url 'fork_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+              Fork
+              <i class="fa fa-code-fork" aria-hidden="true"></i>
+            </a>
+            </div>
+        </div>
+        <div class="panel-body">
+            {{problem.content}}
+        </div>
+        <div class="panel-footer" style="overflow:auto">
+            <div style="float:left;">
+                <span> Tagged: </span> {% for category in categories %}
+                <a class="category btn btn-xs btn-info" href="{% url 'index' %}?categories=category.name">{{ category }}</a> {% endfor %}
+            </div>
+            <div class="pull-right">
+                {% if user == problem.created_by or user.is_superuser %}
+                <form class="pull-right" method="post" class="form-inline" action="{% url 'delete_problem' problem.id %}">
+                    {% csrf_token %}
+                    <button type="submit" style="margin:2px;" onclick="return confirm('Are you sure?')" class="btn btn-xs btn-default btn-danger">
+                        Delete
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                </form>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <div id="solution" class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4> Solution </h4>
+            </div>
+            <div class="panel-body">
+                {{problem.solution}}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -2,8 +2,11 @@
 {% load bootstrap3 %}
 {% block content %}
 <form method="POST" class="post-form">{% csrf_token %}
-    {% bootstrap_form problem_form %}
-    {% bootstrap_form categories_form %}
-    <button type="submit" class="save btn btn-success">Save</button>
+  {% bootstrap_form form %}
+    <div class="form-group">
+        <label class="control-label" for="id_categories">Categories</label>
+        <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" title="" type="text" required="">
+    </div>
+    <button type="submit" class="save btn btn-default">Save</button>
 </form>
 {% endblock %}
