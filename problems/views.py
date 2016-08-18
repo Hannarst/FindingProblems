@@ -181,3 +181,10 @@ class AddChallenge(View):
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
+
+class AddToChallenge(View):
+    def post(self, request, challenge_id, problem_id):
+        challenge = Challenge.objects.get(pk=challenge_id)
+        challenge.problems.add(Problem.objects.get(pk=problem_id))
+        challenge.save()
+        return redirect('index')
