@@ -9,7 +9,7 @@
          </h3>
        </div>
        {% if challenge %}
-             <div for="id_challenge" class="sr-only">Editing challenge: {{challenge.title}}</div>
+             <div>Editing challenge: {{challenge.name}} ({{ challenge.datetime|date:"d M Y, P" }})</div>
         {% endif %}
            <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
 

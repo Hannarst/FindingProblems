@@ -155,6 +155,7 @@ class EditChallenge(View):
 
 class ViewChallenge(View):
     def get(self, request, challenge_id):
+        request.session['challenge_id'] = challenge_id
         context = {
             'challenge': Challenge.objects.get(pk=challenge_id),
         }
@@ -175,8 +176,8 @@ class AddChallenge(View):
     def post(self, request):
         form = ChallengeForm(request.POST)
         if form.is_valid():
-            problem = form.save()
-            request.session['challenge_id'] = problem.id
+            challenge = form.save()
+            request.session['challenge_id'] = challenge.id
             messages.success(request, 'Challenge Created')
         else:
             messages.error(request, 'Invalid Form')
