@@ -1,0 +1,7 @@
+{% if not problem in challenge.problems.all %}
+<form method="post" action="{% url 'add_to_challenge' challenge.id problem.id %}">{% csrf_token %}
+<button type="submit" class="btn btn-xs btn-success">Add to challenge</button>
+</form>
+{% else %}
+<button type="submit" class="btn btn-xs disabled">Already in challenge</button>
+{% endif %}

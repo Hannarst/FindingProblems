@@ -78,13 +78,7 @@
          <td>{{problem.private}}</td>
          {% if challenge %}
          <td>
-             {% if not problem in challenge.problems.all %}
-             <form method="post" action="{% url 'add_to_challenge' challenge.id problem.id %}">{% csrf_token %}
-             <button type="submit" class="btn btn-sm btn-success">Add to challenge</button>
-             </form>
-             {% else %}
-             <button type="submit" class="btn btn-sm disabled">Already in challenge</button>
-             {% endif %}
+           {% include 'problems/edit_challenge_form.html' %}
 
          </td>
          {% endif %}
