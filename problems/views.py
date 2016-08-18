@@ -140,7 +140,7 @@ class EditChallenge(View):
     	context = {
     	    'form': form,
     	}
-    	return render(request, 'problems/edit_challenge.html', context)
+    	return render(request, 'problems/view_challenge.html', context)
 
     def post(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
