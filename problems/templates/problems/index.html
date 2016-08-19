@@ -51,47 +51,7 @@
        </div>
    </div>
 
-   <table class="panel-body table table-striped table-bordered">
-     <thead>
-       <tr>
-         <th>Name</th>
-         <th>Categories</th>
-         <th>Difficulty</th>
-         <th>Private</th>
-         {% if challenge %}
-         <th>Add/Remove from challenge</th>
-         {% endif %}
-       </tr>
-     </thead>
-     <tbody>
-       {% for problem in problems %}
-       <tr class='clickable-row' data-href="{% url 'view_problem' problem.id %}" style="cursor: pointer;">
-         <td>{{problem.title}}</td>
-         <td>
-           {% for category in problem.categories.all %}
-            {{category.name}},
-          {% empty %}
-            Uncategorised
-          {% endfor %}
-         </td>
-         <td>{{problem.get_difficulty_display}}</td>
-         <td>{{problem.private}}</td>
-         {% if challenge %}
-         <td>
-           {% include 'problems/edit_challenge_form.html' %}
-
-         </td>
-         {% endif %}
-       </tr>
-       {% empty %}
-       <tr>
-         <td colspan=5>
-           "lol, loser"
-         </td>
-       </tr>
-       {% endfor %}
-     </tbody>
-   </table>
+{% include 'problems/problem_table.html' %}
  </div>
 
 {% endblock %}
