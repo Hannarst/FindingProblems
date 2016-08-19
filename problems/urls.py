@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^challenges/?$', views.ChallengeIndex.as_view(), name="challenge_index"),
     url(r'^challenges/(?P<challenge_id>[0-9]+)/?$', views.ViewChallenge.as_view(), name="view_challenge"),
     url(r'^challenges/(?P<challenge_id>[0-9]+)/add/(?P<problem_id>[0-9]+)/?$', views.AddToChallenge.as_view(), name="add_to_challenge"),
+    url(r'^challenges/(?P<challenge_id>[0-9]+)/remove/(?P<problem_id>[0-9]+)/?$', views.RemoveFromChallenge.as_view(), name="remove_from_challenge"),
+
 ]

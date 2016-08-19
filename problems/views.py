@@ -189,3 +189,10 @@ class AddToChallenge(View):
         challenge.problems.add(Problem.objects.get(pk=problem_id))
         challenge.save()
         return redirect('index')
+
+class RemoveFromChallenge(View):
+    def post(self, request, challenge_id, problem_id):
+        challenge = Challenge.objects.get(pk=challenge_id)
+        challenge.problems.remove(Problem.objects.get(pk=problem_id))
+        challenge.save()
+        return redirect('index')
