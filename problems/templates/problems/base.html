@@ -14,6 +14,7 @@
   });
   </script>
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+  {% bootstrap_javascript jquery=1 %}
 
 </head>
 
@@ -29,7 +30,7 @@
         <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
       </ul>
   </nav>
-
+  {% bootstrap_messages %}
   <div class="content container">
     {% block content %}
     {% endblock %}
