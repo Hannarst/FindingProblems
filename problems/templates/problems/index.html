@@ -57,7 +57,7 @@
          <th>Name</th>
          <th>Categories</th>
          <th>Difficulty</th>
-         <th>Visibility</th>
+         <th>Private</th>
          {% if challenge %}
          <th>Add/Remove from challenge</th>
          {% endif %}
@@ -74,7 +74,7 @@
             Uncategorised
           {% endfor %}
          </td>
-         <td>{{problem.difficulty}}</td>
+         <td>{{problem.get_difficulty_display}}</td>
          <td>{{problem.private}}</td>
          {% if challenge %}
          <td>
