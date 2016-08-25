@@ -22,7 +22,7 @@
        {% for challenge in challenges %}
        <tr class='clickable-row' data-href="{% url 'view_challenge' challenge.id %}" style="cursor: pointer;">
          <td>{{challenge.name}}</td>
-         <td>{{challenge.datetime}}</td>
+         <td>{{challenge.date}} at {{challenge.time}}</td>
        </tr>
        {% empty %}
        <tr>

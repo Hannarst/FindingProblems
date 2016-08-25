@@ -15,8 +15,9 @@
     <tr class='clickable-row' data-href="{% url 'view_problem' problem.id %}" style="cursor: pointer;">
       <td>{{problem.title}}</td>
       <td>
-        {% for category in problem.categories.all %}
-         {{category.name}},
+        {% for category in problem.categories.all|slice:":5" %}
+      <a class="tag btn btn-xs btn-info" href="?categories={{category.name}}"> {{ category.name }} </a>
+
        {% empty %}
          Uncategorised
        {% endfor %}

@@ -15,6 +15,7 @@ class Problem(models.Model):
     categories = models.ManyToManyField(Category)
 
 class Challenge(models.Model):
-    datetime = models.DateTimeField()
+    date = models.DateField()
+    time = models.TimeField()
     name = models.CharField(max_length=200)
     problems = models.ManyToManyField(Problem)

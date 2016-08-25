@@ -9,7 +9,7 @@
          </h3>
        </div>
        {% if challenge %}
-             <div>Editing challenge: {{challenge.name}} ({{ challenge.datetime|date:"d M Y, P" }})</div>
+             <div>Editing challenge: {{challenge.name}} ({{challenge.date}} at {{challenge.time}})</div>
         {% endif %}
            <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
 
@@ -19,8 +19,8 @@
        <div class="pull-right">
          <form role="search" method="get" class="form-inline">
            <div class="form-group">
-             <label for="id_category" class="sr-only">Category:</label>
-             <input type="text" id="id_categories" value="{{searched_categories}}" name="categories" class="input-sm form-control" placeholder="Categories">
+             <label for="id_categories" class="sr-only">Category:</label>
+             <input type="hidden" id="id_categories" value="{{searched_categories}}" name="categories" class="input-sm form-control" placeholder="Categories">
            </div>
            <div class="form-group">
              <label for="id_difficulty" class="sr-only">Difficulty:</label>

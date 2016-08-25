@@ -5,16 +5,34 @@
 <html>
 <head>
   <link data-require="bootstrap-css@3.3.6" data-semver="3.3.6" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" />
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script>
-    jQuery(document).ready(function($) {
-      $(".clickable-row").click(function() {
-          window.document.location = $(this).data("href");
-      });
-  });
-  </script>
-  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
   {% bootstrap_javascript jquery=1 %}
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+  <script src="{% static 'problems/tag-it.js' %}" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
+  <link href="{% static 'problems/jquery.tagit.css' %}" rel="stylesheet" type="text/css">
+  {% autoescape off %}
+  <script type="text/javascript">
+      $(document).ready(function() {
+          $("#id_categories").tagit({
+            {% if suggested_tags %}
+              availableTags: {{suggested_tags}},
+            {% endif %}
+            singleField: false,
+            placeholderText: "Categories"
+          });
+          $("ul.tagit").addClass("list-unstyled form-control input-sm");
+          $("ul.tagit").css("margin-bottom", "0px")
+          $("li.tagit-new").css("padding", "0px");
+          $("#id_date").datepicker();
+          $(".clickable-row").click(function() {
+            window.document.location = $(this).data("href");
+          });
+      });
+  </script>
+  {% endautoescape %}
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+
 
 </head>
 
