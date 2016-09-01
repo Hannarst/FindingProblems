@@ -1,3 +1,4 @@
+.idea*
 *.pyc
 FindingProblems/settings_secret.py
 problems/migrations/*
