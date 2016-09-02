@@ -1,0 +1,11 @@
+{% extends "problems/base.html" %} {% load bootstrap3 %} {% block content %} {% bootstrap_messages %}
+<div class="alert alert-info" role="alert">
+    <strong>
+        Success!
+    </strong>
+    <p>
+        You've successfully created an account with the email address <strong>{{form.email}}</strong>.
+        Please retrieve your activation code from this account before attempting your first login.
+    </p>
+</div>
+<a class="btn btn-default" href="{% url login %}">Okay</a>

@@ -3,8 +3,7 @@ import random
 import datetime
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.views.generic import View, UpdateView
+from django.views.generic import View
 from models import *
 from forms import *
 from django.contrib import messages
@@ -15,23 +14,29 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+
 class CreateAccount(View):
     def get(self, request):
         account_form = CreateAccountForm()
         context = {
-            'account_form': account_form
+            'form': account_form
         }
 
         return render(request, 'problems/create_account.html', context)
 
     def post(self, request):
         account_form = CreateAccountForm(request.POST or None)
+        context = {
+            'email': request.POST['email'],
+            'created': False,
+            'form': account_form
+        }
         if account_form.is_valid():
             self.create_account(request.POST)
-            return HttpResponseRedirect('/accounts/new/')
+            context['created'] = True
+            return render(request, 'problems/new_account.html', context)
         messages.error(request, 'Account not created.')
-        #need to come up with a better url...
-        return HttpResponseRedirect('/accounts/not/')
+        return render(request, 'problems/create_account.html', context)
 
     def create_date(self):
         today = datetime.date.today()
@@ -87,9 +92,9 @@ class Index(View):
             difficulty = int(difficulty)
             problems = problems.filter(difficulty=difficulty)
         if privacy == "private":
-            problems = problems.filter(private=true)
+            problems = problems.filter(private=True)
         elif privacy == "public":
-            problems = problems.filter(private=false)
+            problems = problems.filter(private=False)
         context = {
             'problems': problems.all(),
             'difficulties': Problem.DIFFICULTIES,
@@ -99,6 +104,7 @@ class Index(View):
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)
+
 
 class ViewProblem(View):
     def get(self, request, problem_id):
@@ -111,6 +117,7 @@ class ViewProblem(View):
             'challenge': challenge,
         }
         return render(request, 'problems/view_problem.html', context)
+
 
 class AddProblem(View):
     def get(self, request):
@@ -131,6 +138,7 @@ class AddProblem(View):
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
+
 
 class EditProblem(View):
     def get(self, request, problem_id):
@@ -181,6 +189,7 @@ class ForkProblem(View):
     	    messages.error(request, 'Invalid Form')
     	return redirect('index')
 
+
 class ChallengeIndex(View):
      def get(self, request):
         context = {
@@ -221,6 +230,7 @@ class ViewChallenge(View):
         # remove problems
         pass
 
+
 class AddChallenge(View):
     def get(self, request):
         form = ChallengeForm()
@@ -239,12 +249,14 @@ class AddChallenge(View):
             messages.error(request, 'Invalid Form')
         return redirect('index')
 
+
 class AddToChallenge(View):
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))
         challenge.save()
         return redirect('index')
+
 
 class RemoveFromChallenge(View):
     def post(self, request, challenge_id, problem_id):

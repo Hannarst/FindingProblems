@@ -45,8 +45,30 @@
       <ul class="nav navbar-nav">
         <li><a href="#">Home</a></li>
         <li><a href="{% url 'index' %}">Browse Problems</a></li>
-        <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
+          {% if request.user.is_authenticated and requestion.user.is_active %}
+            <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
+          {% endif %}
       </ul>
+      {% if request.user.is_authenticated and request.user.is_active %}
+        <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"role="button"
+                    aria-haspop="true" aria-expanded="false"><span class="fa fa-bars"></span> {{ request.user.email }}</a>
+                <ul class="dropdown-menu">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'reset_password' %}"><span class="fa fa-key fa-fw"></span> Reset Password</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'change_password' %}"><span class="fa fa-key fa-fw"></span> Change Password</a></li>
+                    <li role="presentation" class="divider"></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'logout' %}"><span class="fa fa-sign-out fa-fw"></span> Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+      {% else %}
+      <ul class="nav navbar-nav navbar-right">
+          <li>
+              <a href="{% url create_account %}" class="btn btn-default">Create Account</a>
+          </li>
+      </ul>
+    {% endif %}
   </nav>
   {% bootstrap_messages %}
   <div class="content container">
