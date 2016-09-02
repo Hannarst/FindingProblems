@@ -1,5 +1,9 @@
+from _md5 import md5
+import random
+import datetime
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.views.generic import View, UpdateView
 from models import *
 from forms import *
@@ -11,6 +15,59 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+class CreateAccount(View):
+    def get(self, request):
+        account_form = CreateAccountForm()
+        context = {
+            'account_form': account_form
+        }
+
+        return render(request, 'problems/create_account.html', context)
+
+    def post(self, request):
+        account_form = CreateAccountForm(request.POST or None)
+        if account_form.is_valid():
+            self.create_account(request.POST)
+            return HttpResponseRedirect('/accounts/new/')
+        messages.error(request, 'Account not created.')
+        #need to come up with a better url...
+        return HttpResponseRedirect('/accounts/not/')
+
+    def create_date(self):
+        today = datetime.date.today()
+        deadline = today + datetime.timedelta(days=7)
+        return deadline
+
+    def create_activation_code(self):
+        random_float = random.random()
+        _hash = md5(str(random_float)).hexdigest()
+        activation_code = _hash[:200]
+        return activation_code
+
+    def create_user(self, post_info):
+        email = post_info['email']
+        pwd = post_info['password_one']
+        user = User()
+        user.email = email
+        user.set_password(pwd)
+        user.is_active = False
+        user.save()
+        return user
+
+    def create_account(self, post_info):
+        #setup user stuff
+        user = self.create_user(post_info)
+        #setup activation stuff
+        activation_code = self.create_activation_code()
+        activation_deadline = self.create_date()
+        #create account
+        account = Account()
+        account.user = user
+        account.activation_code = activation_code
+        account.activation_deadline = activation_deadline
+        account.save()
+
+
 class Index(View):
      def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
@@ -20,8 +77,7 @@ class Index(View):
         difficulty = request.GET.get('difficulty')
         privacy = request.GET.get('privacy')
         if challenge_id:
-            challenge = get_object_or_404(
-                Challenge, pk=challenge_id)
+            challenge = get_object_or_404(Challenge, pk=challenge_id)
         if categories:
             problems = problems.filter(
                 categories__name__in=[x.lower().strip() for x in categories.split(',')]).distinct()

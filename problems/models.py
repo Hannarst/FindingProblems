@@ -1,5 +1,11 @@
 from __future__ import unicode_literals
 from django.db import models
+from django.contrib.auth.models import User
+
+class Account(models.Model):
+    user = models.ForeignKey(User)
+    activation_code = models.CharField(max_length=200)
+    activation_deadline = models.DateField()
 
 class Category(models.Model):
     name = models.TextField(max_length=200)
