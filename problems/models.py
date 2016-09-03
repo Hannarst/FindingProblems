@@ -1,11 +1,29 @@
 from __future__ import unicode_literals
+from _md5 import md5
+import random
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
 class Account(models.Model):
     user = models.ForeignKey(User)
-    activation_code = models.CharField(max_length=200)
+    activation_code = models.CharField(max_length=20)
     activation_deadline = models.DateField()
+
+    def new_deadline(self):
+        today = datetime.date.today()
+        deadline = today + datetime.timedelta(days=7)
+        return deadline
+
+    def new_activation_code(self):
+        random_float = random.random()
+        _hash = md5(str(random_float)).hexdigest()
+        activation_code = _hash[:20]
+        return activation_code
+
+    def reset_activation_code(self):
+        self.activation_code = self.new_activation_code()
+        self.activation_deadline = self.new_activation_deadline()
 
 class Category(models.Model):
     name = models.TextField(max_length=200)

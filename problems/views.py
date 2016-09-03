@@ -2,6 +2,7 @@ from _md5 import md5
 import random
 import datetime
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from models import *
@@ -13,6 +14,39 @@ def add_category(categories, problem):
         category, c = Category.objects.get_or_create(name=cat.strip().lower())
         problem.categories.add(category)
         problem.save()
+
+class ActivateAccount(View):
+    def get(self, request):
+        activate_account_form = ActivateAccountForm()
+        context = {
+            'form': activate_account_form
+        }
+        return render(request, 'problems/activate_account.html', context)
+
+    def post(self, request):
+        user = request.user
+        activation_code = request.POST['activation_code']
+        account = get_object_or_404(Account, user=user)
+        today = datetime.date.today()
+        context = {
+            'deadline_valid': False,
+            'code_valid': False
+        }
+
+        #check that the account can still be activated using this code
+        if today <= account.activation_deadline:
+           context['deadline_valid'] = True
+           if activation_code == account.activation_code:
+               account.user.is_active = True
+               account.user.save()
+               account.save()
+               return HttpResponseRedirect('problems/')
+           else:
+               return render(request, 'problems/activate_account.html', context)
+        #else, reset the activation code and don't allow
+        else:
+            account.reset_activation_code()
+            return render(request, 'problems/activate_account.html', context)
 
 
 class CreateAccount(View):
@@ -46,7 +80,7 @@ class CreateAccount(View):
     def create_activation_code(self):
         random_float = random.random()
         _hash = md5(str(random_float)).hexdigest()
-        activation_code = _hash[:200]
+        activation_code = _hash[:20]
         return activation_code
 
     def create_user(self, post_info):

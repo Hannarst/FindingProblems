@@ -11,6 +11,10 @@ class LoginForm(AuthenticationForm):
                                widget=forms.PasswordInput())
 
 
+class ActivateAccountForm(forms.Form):
+    activation_code = forms.CharField(label="Activation Code:", max_length=20)
+
+
 class CreateAccountForm(forms.Form):
     email = models.EmailField()
     password_one = forms.CharField(label="Password:", max_length=30,
@@ -32,10 +36,12 @@ class CreateAccountForm(forms.Form):
             del form_data["email"]
         return form_data
 
+
 class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
         exclude = ('categories',)
+
 
 class CategoriesForm(forms.Form):
     categories = forms.CharField(max_length=1000)

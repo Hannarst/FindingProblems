@@ -26,6 +26,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#user auth things
+LOGIN_REDIRECT_URL = '/problems/'
+LOGIN_URL = '/problems/accounts/login/'
 
 # Application definition
 
