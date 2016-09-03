@@ -2,6 +2,7 @@ from _md5 import md5
 import random
 import datetime
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
@@ -105,6 +106,13 @@ class CreateAccount(View):
         account.activation_code = activation_code
         account.activation_deadline = activation_deadline
         account.save()
+        send_mail(
+            'Activation code for FindingProblems.com',
+            'Please use the following code to activate your account when you first log into the website: '+str(account.activation_code),
+            'findingproblemstest@gmail.com',
+            [account.user.email],
+            fail_silently=False,
+            )
 
 
 class Index(View):

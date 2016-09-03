@@ -30,6 +30,15 @@ ALLOWED_HOSTS = []
 LOGIN_REDIRECT_URL = '/problems/'
 LOGIN_URL = '/problems/accounts/login/'
 
+#setup email things
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'findingproblemstest@gmail.com'
+EMAIL_HOST_PASSWORD = 'FPpassword'
+DEFAULT_EMAIL_FROM = EMAIL_HOST_USER
+EMAIL_USE_TLS = True
+
 # Application definition
 
 INSTALLED_APPS = [

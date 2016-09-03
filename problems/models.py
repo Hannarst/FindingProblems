@@ -4,6 +4,7 @@ import random
 import datetime
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 
 class Account(models.Model):
     user = models.ForeignKey(User)
@@ -24,9 +25,19 @@ class Account(models.Model):
     def reset_activation_code(self):
         self.activation_code = self.new_activation_code()
         self.activation_deadline = self.new_activation_deadline()
+        self.save()
+        send_mail(
+            'Activation code for FindingProblems.com',
+            'Please use the following code to activate your account when you first log into the website: '+str(self.activation_code),
+            'findingproblemstest@gmail.com',
+            [self.user.email],
+            fail_silently=False,
+        )
+
 
 class Category(models.Model):
     name = models.TextField(max_length=200)
+
 
 class Problem(models.Model):
     DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
@@ -37,6 +48,7 @@ class Problem(models.Model):
     solution = models.TextField()
     private = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
+
 
 class Challenge(models.Model):
     date = models.DateField()
