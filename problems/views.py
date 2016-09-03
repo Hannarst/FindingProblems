@@ -224,6 +224,7 @@ class ForkProblem(View):
     	if form.is_valid() and categories:
     	    forked_problem = form.save(commit=False)
             forked_problem.pk = None
+            forked_problem.forked_from = orignal_problem.title
     	    forked_problem.save()
             add_category(categories, forked_problem)
     	    messages.success(request, 'Problem Forked')
