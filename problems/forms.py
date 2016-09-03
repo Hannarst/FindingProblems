@@ -40,7 +40,7 @@ class CreateAccountForm(forms.Form):
 class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
-        exclude = ('categories',)
+        exclude = ('categories', 'forked_from',)
 
 
 class CategoriesForm(forms.Form):

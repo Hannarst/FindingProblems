@@ -48,6 +48,7 @@ class Problem(models.Model):
     solution = models.TextField()
     private = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
+    forked_form = models.CharField(default="Original")
 
 
 class Challenge(models.Model):

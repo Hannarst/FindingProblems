@@ -4,6 +4,7 @@
       <th>Name</th>
       <th>Categories</th>
       <th>Difficulty</th>
+      <th>Forked from</th>
       <th>Private</th>
       {% if challenge %}
       <th>Add/Remove from challenge</th>
@@ -23,6 +24,7 @@
        {% endfor %}
       </td>
       <td>{{problem.get_difficulty_display}}</td>
+      <td>{{problem.forked_from}}</td>
       <td>{{problem.private}}</td>
       {% if challenge %}
       <td>
