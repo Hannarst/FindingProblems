@@ -30,7 +30,7 @@ class Account(models.Model):
             'Activation code for FindingProblems.com',
             'Please use the following code to activate your account when you first log into the website: '+str(self.activation_code),
             'findingproblemstest@gmail.com',
-            [self.user.email],
+            [self.user.username],
             fail_silently=False,
         )
 
@@ -48,7 +48,7 @@ class Problem(models.Model):
     solution = models.TextField()
     private = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
-    forked_form = models.CharField(default="Original")
+    forked_from = models.CharField(default="Original")
 
 
 class Challenge(models.Model):

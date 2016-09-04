@@ -85,10 +85,10 @@ class CreateAccount(View):
         return activation_code
 
     def create_user(self, post_info):
-        email = post_info['email']
+        username = post_info['email']
         pwd = post_info['password_one']
         user = User()
-        user.email = email
+        user.username = username
         user.set_password(pwd)
         user.is_active = False
         user.save()
@@ -110,7 +110,7 @@ class CreateAccount(View):
             'Activation code for FindingProblems.com',
             'Please use the following code to activate your account when you first log into the website: '+str(account.activation_code),
             'findingproblemstest@gmail.com',
-            [account.user.email],
+            [account.user.username],
             fail_silently=False,
             )
 
@@ -220,11 +220,12 @@ class ForkProblem(View):
 
     def post(self, request, problem_id):
     	form = ProblemForm(request.POST)
+        original_problem = Problem.objects.get(id=problem_id)
         categories = request.POST.get('categories')
     	if form.is_valid() and categories:
     	    forked_problem = form.save(commit=False)
             forked_problem.pk = None
-            forked_problem.forked_from = orignal_problem.title
+            forked_problem.forked_from = original_problem.title
     	    forked_problem.save()
             add_category(categories, forked_problem)
     	    messages.success(request, 'Problem Forked')
