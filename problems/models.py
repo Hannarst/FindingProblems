@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from _md5 import md5
+from hashlib import md5
 import random
 import datetime
 from django.db import models
@@ -48,7 +48,7 @@ class Problem(models.Model):
     solution = models.TextField()
     private = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
-    forked_from = models.CharField(default="Original")
+    forked_from = models.CharField(max_length=200,default="Original")
 
 
 class Challenge(models.Model):

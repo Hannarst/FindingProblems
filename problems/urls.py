@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from . import views
 
-from FindingProblems.problems.forms import LoginForm
+from forms import LoginForm
 
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name='index'),

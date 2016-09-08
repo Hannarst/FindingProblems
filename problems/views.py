@@ -1,4 +1,4 @@
-from _md5 import md5
+from hashlib import md5
 import random
 import datetime
 from django.contrib.auth.models import User
