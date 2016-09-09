@@ -16,7 +16,7 @@ class ActivateAccountForm(forms.Form):
 
 
 class CreateAccountForm(forms.Form):
-    email = models.EmailField()
+    email = forms.EmailField()
     password_one = forms.CharField(label="Password:", max_length=30,
                                widget=forms.PasswordInput())
     password_two = forms.CharField(label="Re-enter password:", max_length=30,
