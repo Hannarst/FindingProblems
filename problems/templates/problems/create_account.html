@@ -2,8 +2,7 @@
 {% load bootstrap3 %}
 {% block content %}
 {% bootstrap_messages %}
-<form method="POST">
-    {% csrf_token %}
+<form method="POST" class="post-form">{% csrf_token %}
     {% bootstrap_form form %}
     {% if form.errors %}
         {% for field in form %}

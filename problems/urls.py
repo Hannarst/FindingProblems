@@ -6,7 +6,6 @@ from . import views
 from FindingProblems.settings import DEFAULT_EMAIL_FROM
 from problems.forms import LoginForm
 
-
 urlpatterns = [
     url(r'^$',
         views.Index.as_view(),
