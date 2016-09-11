@@ -16,6 +16,20 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+class Login(View):
+    def get(self, request):
+        login_form = LoginForm()
+        context = {
+            'form': login_form
+        }
+        return render(request, 'problems/login.html', context)
+
+    def post(self, request):
+        email = request.POST('username')
+        pwd = request.POST('password')
+
+        user = get_object_or_404(User, username=email)
+
 class ActivateAccount(View):
     def get(self, request):
         activate_account_form = ActivateAccountForm()
