@@ -10,6 +10,7 @@ class Account(models.Model):
     user = models.ForeignKey(User)
     activation_code = models.CharField(max_length=20)
     activation_deadline = models.DateField()
+    activated = models.BooleanField(default=False)
 
     def new_deadline(self):
         today = datetime.date.today()

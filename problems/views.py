@@ -38,8 +38,7 @@ class ActivateAccount(View):
         if today <= account.activation_deadline:
             context['deadline_valid'] = True
             if activation_code == account.activation_code:
-                account.user.is_active = True
-                account.user.save()
+                account.activated = True
                 account.save()
                 return HttpResponseRedirect('problems/')
             else:
@@ -90,7 +89,6 @@ class CreateAccount(View):
         user = User()
         user.username = username
         user.set_password(pwd)
-        user.is_active = False
         user.save()
         return user
 
