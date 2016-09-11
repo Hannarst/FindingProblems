@@ -14,12 +14,12 @@ urlpatterns = [
     url(r'^accounts/activate/?$', views.ActivateAccount.as_view(), name="activate"),
     url(r'^accounts/login/?$', auth_views.login, {'template_name': 'problems/login.html', 'authentication_form': LoginForm}, name="login"),
     url(r'^accounts/logout/?$', auth_views.logout_then_login, name="logout"),
-    url(r'^accounts/password/reset/?$', auth_views.password_reset, name="password_reset"),
-    url(r'^accounts/password/reset/done/?$', auth_views.password_reset_done, name="password_done"),
+    url(r'^accounts/password/reset/?$', auth_views.password_reset,  {'template_name': 'problems/password_reset.html'}, name="password_reset"),
+    url(r'^accounts/password/reset/done/?$', auth_views.password_reset_done, {'template_name': 'problems/password_reset_done.html'}, name="password_reset_done"),
     url(r'^accounts/password/reset/confirm/?$', auth_views.password_reset_confirm, name="password_reset_confirm"),
     url(r'^accounts/password/reset/success/?$', auth_views.password_reset_complete, name="password_reset_success"),
-    url(r'^accounts/password/change/?$', auth_views.password_change, name="password_change"),
-    url(r'^accounts/password/change/done/?$', auth_views.password_change_done, name="password_change_done"),
+    url(r'^accounts/password/change/?$', auth_views.password_change, {'template_name': 'problems/password_change.html'}, name="password_change"),
+    url(r'^accounts/password/change/done/?$', auth_views.password_change_done, {'template_name': 'problems/password_change_done.html'}, name="password_change_done"),
     url(r'^challenges/?$', views.ChallengeIndex.as_view(), name="challenge_index"),
     url(r'^challenges/add/?$', views.AddChallenge.as_view(), name="add_challenge"),
     url(r'^challenges/(?P<challenge_id>[0-9]+)/?$', views.ViewChallenge.as_view(), name="view_challenge"),
@@ -27,3 +27,5 @@ urlpatterns = [
     url(r'^challenges/(?P<challenge_id>[0-9]+)/remove/(?P<problem_id>[0-9]+)/?$', views.RemoveFromChallenge.as_view(), name="remove_from_challenge"),
 
 ]
+#
+#
