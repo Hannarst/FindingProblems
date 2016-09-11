@@ -16,6 +16,11 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+class Home(View):
+    def get(self, request):
+        return render(request, 'problems/home.html')
+
+
 class ActivateAccount(View):
     def get(self, request):
         account = get_object_or_404(Account, user=request.user)
