@@ -16,27 +16,17 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
-class Login(View):
-    def get(self, request):
-        login_form = LoginForm()
-        context = {
-            'form': login_form
-        }
-        return render(request, 'problems/login.html', context)
-
-    def post(self, request):
-        email = request.POST('username')
-        pwd = request.POST('password')
-
-        user = get_object_or_404(User, username=email)
-
 class ActivateAccount(View):
     def get(self, request):
-        activate_account_form = ActivateAccountForm()
-        context = {
-            'form': activate_account_form
-        }
-        return render(request, 'problems/activate_account.html', context)
+        account = get_object_or_404(Account, user=request.user)
+        if account.activated:
+            return redirect('/problems/')
+        else:
+            activate_account_form = ActivateAccountForm()
+            context = {
+                'form': activate_account_form
+            }
+            return render(request, 'problems/activate_account.html', context)
 
     def post(self, request):
         user = request.user
@@ -54,7 +44,7 @@ class ActivateAccount(View):
             if activation_code == account.activation_code:
                 account.activated = True
                 account.save()
-                return HttpResponseRedirect('problems/')
+                return redirect('/problems/')
             else:
                 return render(request, 'problems/activate_account.html', context)
         #else, reset the activation code and don't allow

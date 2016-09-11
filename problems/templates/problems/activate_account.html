@@ -1,5 +1,6 @@
 {% extends "problems/base.html" %} {% load bootstrap3 %} {% block content %} {% bootstrap_messages %}
-<form>
+<form method="POST">
+    {% csrf_token %}
     {% bootstrap_form form %}
     {% if form.errors %}
     {% for field in form %}
@@ -15,4 +16,6 @@
     </div>
     {% endfor %}
     {% endif %}
+    <button type="submit" class="save btn btn-default">Okay</button>
 </form>
+{% endblock %}
