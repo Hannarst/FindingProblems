@@ -1,8 +1,8 @@
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from . import views
+from problems.forms import LoginForm
 
-from FindingProblems.problems.forms import LoginForm
 
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name='index'),
@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^view/(?P<problem_id>[0-9]+)/?$', views.ViewProblem.as_view(), name="view_problem"),
     url(r'^accounts/create_account/?$', views.CreateAccount.as_view(), name="create_account"),
     url(r'^accounts/activate/?$', views.ActivateAccount.as_view(), name="activate"),
-    url(r'^accounts/login/?$', auth_views.login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name="login"),
+    url(r'^accounts/login/?$', auth_views.login, {'template_name': 'problems/login.html', 'authentication_form': LoginForm}, name="login"),
     url(r'^accounts/logout/?$', auth_views.logout_then_login, name="logout"),
     url(r'^accounts/password/reset/?$', auth_views.password_reset, name="password_reset"),
     url(r'^accounts/password/reset/done/?$', auth_views.password_reset_done, name="password_done"),

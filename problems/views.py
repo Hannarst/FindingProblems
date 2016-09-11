@@ -1,4 +1,4 @@
-from _md5 import md5
+from hashlib import md5
 import random
 import datetime
 from django.contrib.auth.models import User
@@ -6,8 +6,8 @@ from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
-from models import *
-from forms import *
+from .models import *
+from .forms import *
 from django.contrib import messages
 
 def add_category(categories, problem):
@@ -36,14 +36,14 @@ class ActivateAccount(View):
 
         #check that the account can still be activated using this code
         if today <= account.activation_deadline:
-           context['deadline_valid'] = True
-           if activation_code == account.activation_code:
-               account.user.is_active = True
-               account.user.save()
-               account.save()
-               return HttpResponseRedirect('problems/')
-           else:
-               return render(request, 'problems/activate_account.html', context)
+            context['deadline_valid'] = True
+            if activation_code == account.activation_code:
+                account.user.is_active = True
+                account.user.save()
+                account.save()
+                return HttpResponseRedirect('problems/')
+            else:
+                return render(request, 'problems/activate_account.html', context)
         #else, reset the activation code and don't allow
         else:
             account.reset_activation_code()
@@ -79,8 +79,8 @@ class CreateAccount(View):
         return deadline
 
     def create_activation_code(self):
-        random_float = random.random()
-        _hash = md5(str(random_float)).hexdigest()
+        random_string = str(random.random()).encode('utf-8')
+        _hash = md5(random_string).hexdigest()
         activation_code = _hash[:20]
         return activation_code
 
@@ -116,7 +116,7 @@ class CreateAccount(View):
 
 
 class Index(View):
-     def get(self, request):
+    def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
         challenge = ""
         problems = Problem.objects
@@ -184,58 +184,58 @@ class AddProblem(View):
 
 class EditProblem(View):
     def get(self, request, problem_id):
-    	problem = Problem.objects.get(id=problem_id)
+        problem = Problem.objects.get(id=problem_id)
         categories = ",".join([cat.name for cat in problem.categories.all()])
-    	form = ProblemForm(instance=problem)
-    	context = {
-    	    'form': form,
+        form = ProblemForm(instance=problem)
+        context = {
+            'form': form,
             'categories': categories,
-    	}
-    	return render(request, 'problems/edit_problem.html', context)
+        }
+        return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-    	form = ProblemForm(request.POST, instance=problem)
+        form = ProblemForm(request.POST, instance=problem)
         categories = request.POST.get('categories')
-    	if form.is_valid() and categories:
-    	    problem = form.save(commit=False)
-    	    problem.save()
+        if form.is_valid() and categories:
+            problem = form.save(commit=False)
+            problem.save()
             add_category(categories, problem)
-    	    messages.success(request, 'Problem Edited')
-    	else:
-    	    messages.error(request, 'Invalid Form')
-    	return redirect('index')
+            messages.success(request, 'Problem Edited')
+        else:
+            messages.error(request, 'Invalid Form')
+        return redirect('index')
 
 
 class ForkProblem(View):
     def get(self, request, problem_id):
-    	problem = Problem.objects.get(id=problem_id)
+        problem = Problem.objects.get(id=problem_id)
         categories = ",".join([cat.name for cat in problem.categories.all()])
-    	form = ProblemForm(instance=problem)
-    	context = {
-    	    'form': form,
+        form = ProblemForm(instance=problem)
+        context = {
+            'form': form,
             'categories': categories,
-    	}
-	return render(request, 'problems/edit_problem.html', context)
+        }
+        return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
-    	form = ProblemForm(request.POST)
+        form = ProblemForm(request.POST)
         original_problem = Problem.objects.get(id=problem_id)
         categories = request.POST.get('categories')
-    	if form.is_valid() and categories:
-    	    forked_problem = form.save(commit=False)
+        if form.is_valid() and categories:
+            forked_problem = form.save(commit=False)
             forked_problem.pk = None
             forked_problem.forked_from = original_problem.title
-    	    forked_problem.save()
+            forked_problem.save()
             add_category(categories, forked_problem)
-    	    messages.success(request, 'Problem Forked')
-    	else:
-    	    messages.error(request, 'Invalid Form')
-    	return redirect('index')
+            messages.success(request, 'Problem Forked')
+        else:
+            messages.error(request, 'Invalid Form')
+        return redirect('index')
 
 
 class ChallengeIndex(View):
-     def get(self, request):
+    def get(self, request):
         context = {
             'challenges': Challenge.objects.all(),
         }
@@ -244,22 +244,22 @@ class ChallengeIndex(View):
 
 class EditChallenge(View):
     def get(self, request, challenge_id):
-    	challenge = Challenge.objects.get(id=challenge_id)
+        challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
-    	context = {
-    	    'form': form,
-    	}
-    	return render(request, 'problems/view_challenge.html', context)
+        context = {
+            'form': form,
+        }
+        return render(request, 'problems/view_challenge.html', context)
 
     def post(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
-    	form = ChallengeForm(request.POST, instance=challenge)
+        form = ChallengeForm(request.POST, instance=challenge)
         if form.is_valid():
-    	    challenge = form.save()
+            challenge = form.save()
             messages.success(request, 'Challenge Edited')
-    	else:
-    	    messages.error(request, 'Invalid Form')
-    	return redirect('challenge_index')
+        else:
+            messages.error(request, 'Invalid Form')
+        return redirect('challenge_index')
 
 
 class ViewChallenge(View):

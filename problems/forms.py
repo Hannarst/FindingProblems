@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.db import models
-from models import *
+from .models import *
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label="Username", max_length=30,
@@ -16,7 +16,8 @@ class ActivateAccountForm(forms.Form):
 
 
 class CreateAccountForm(forms.Form):
-    email = models.EmailField()
+    email = forms.EmailField(label="UCT Computer Science Department staff email address:", max_length=300,
+                              widget=forms.EmailInput())
     password_one = forms.CharField(label="Password:", max_length=30,
                                widget=forms.PasswordInput())
     password_two = forms.CharField(label="Re-enter password:", max_length=30,
@@ -31,7 +32,7 @@ class CreateAccountForm(forms.Form):
             del form_data['password_one']
             del form_data['password_two']
         #email must be that of a uct cs department member
-        if form_data['email'].split('@')[1]!="cs.uct.ac.za":
+        if form_data['email'].split('@')[1]!="gmail.com":
             self._errors["email"] = ["Email is not a valid UCT Computer Science department staff email address."]
             del form_data["email"]
         return form_data

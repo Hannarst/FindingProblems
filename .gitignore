@@ -3,3 +3,4 @@
 FindingProblems/settings_secret.py
 problems/migrations/*
 *.sqlite3
+bootstrap3/
