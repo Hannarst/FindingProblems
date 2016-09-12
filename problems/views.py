@@ -97,6 +97,7 @@ class CreateAccount(View):
         pwd = post_info['password_one']
         user = User()
         user.username = username
+        user.email = username
         user.set_password(pwd)
         user.save()
         return user

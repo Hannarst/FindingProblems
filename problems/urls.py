@@ -52,15 +52,19 @@ urlpatterns = [
             'template_name': 'problems/password_reset_done.html'
         },
         name="password_reset_done"),
-    url(r'^accounts/password/reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/?$',
+    url(r'^accounts/password/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/?$',
         auth_views.password_reset_confirm,
         {
-            'post_reset_redirect': '/problems/accounts/password/done/'
+            'template_name': 'problems/password_reset_confirm.html',
+            'post_reset_redirect': '/problems/accounts/password/complete/'
         },
         name="password_reset_confirm"),
-    url(r'^accounts/password/reset/done/?$',
+    url(r'^accounts/password/complete/?$',
         auth_views.password_reset_complete,
-        name="password_reset_done"),
+        {
+            'template_name': 'problems/password_reset_complete.html'
+        },
+        name="password_reset_complete"),
     url(r'^accounts/password/change/?$',
         auth_views.password_change,
         {
