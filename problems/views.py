@@ -20,6 +20,9 @@ class Home(View):
     def get(self, request):
         return render(request, 'problems/home.html')
 
+class Guide(View):
+    def get (self, request):
+        return render(request, 'problems/guide.html')
 
 class ActivateAccount(View):
     def get(self, request):
