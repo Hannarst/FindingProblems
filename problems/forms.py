@@ -38,10 +38,22 @@ class CreateAccountForm(forms.Form):
         return form_data
 
 
+class SolutionForm(forms.ModelForm):
+    class Meta:
+        model = Solution
+        fields = ('description', 'links', 'example_code', 'language')
+
+
+class ContentForm(forms.ModelForm):
+    class Meta:
+        model = Content
+        fields = ('description', 'example_input', 'example_output', 'examples')
+
+
 class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
-        exclude = ('categories', 'forked_from',)
+        exclude = ('content', 'solution', 'categories', 'forked_from',)
 
 
 class CategoriesForm(forms.Form):
