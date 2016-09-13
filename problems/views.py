@@ -9,6 +9,8 @@ from django.views.generic import View
 from .models import *
 from .forms import *
 from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 def add_category(categories, problem):
     for cat in categories.split(','):
@@ -186,6 +188,7 @@ class ViewProblem(View):
 
 
 class AddProblem(View):
+    @method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -218,6 +221,7 @@ class AddProblem(View):
 
 
 class EditProblem(View):
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(pk=problem.content.id)
@@ -259,6 +263,7 @@ class EditProblem(View):
 
 
 class ForkProblem(View):
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(pk=problem.content.id)
@@ -304,6 +309,7 @@ class ForkProblem(View):
 
 
 class ChallengeIndex(View):
+    @method_decorator(login_required)
     def get(self, request):
         context = {
             'challenges': Challenge.objects.all(),
@@ -312,6 +318,7 @@ class ChallengeIndex(View):
 
 
 class EditChallenge(View):
+    @method_decorator(login_required)
     def get(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
@@ -332,6 +339,7 @@ class EditChallenge(View):
 
 
 class ViewChallenge(View):
+    @method_decorator(login_required)
     def get(self, request, challenge_id):
         request.session['challenge_id'] = challenge_id
         context = {
@@ -345,6 +353,7 @@ class ViewChallenge(View):
 
 
 class AddChallenge(View):
+    @method_decorator(login_required)
     def get(self, request):
         form = ChallengeForm()
         context = {
@@ -364,6 +373,7 @@ class AddChallenge(View):
 
 
 class AddToChallenge(View):
+    @method_decorator(login_required)
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))
