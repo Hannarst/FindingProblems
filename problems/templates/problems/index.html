@@ -10,11 +10,13 @@
        {% if challenge %}
              <div>Editing challenge: {{challenge.name}} ({{challenge.date}} at {{challenge.time}})</div>
         {% endif %}
-           <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
 
+       {% if user.is_authenticated %}
+       <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
        <div class="pull-left" style="padding-top:5px">
-         <a href="{% url 'add_problem' %}" class="btn btn-success btn-sm">Add Problem</a>
+           <a href="{% url 'add_problem' %}" class="btn btn-success btn-sm">Add Problem</a>
        </div>
+       {% endif %}
        <div class="pull-right">
          <form role="search" method="get" class="form-inline">
            <div class="form-group">

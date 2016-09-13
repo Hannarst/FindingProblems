@@ -150,7 +150,7 @@ class Index(View):
             problems = problems.filter(private=False)
         context = {
             'problems': problems.all(),
-            'difficulties': Problem.DIFFICULTIES,
+            'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
             'searched_categories': categories,
             'searched_difficulty': difficulty,
             'searched_privacy': privacy,

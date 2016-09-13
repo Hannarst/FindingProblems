@@ -9,17 +9,19 @@
                 <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
                 <div style="margin-left:30px;"> Complexity: {{solution.get_complexity_display}}</div>
             </div>
+            {% if user.is_authenticated %}
             <div class="pull-right">
-              <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
-               Edit
-               <i class="fa fa-pencil" aria-hidden="true"></i>
-             </a>
-             <a href="{% url 'fork_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
-              Fork
-              <i class="fa fa-code-fork" aria-hidden="true"></i>
-            </a>
-              {% include 'problems/edit_challenge_form.html' %}
+                <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+                    Edit
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </a>
+                <a href="{% url 'fork_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+                    Fork
+                    <i class="fa fa-code-fork" aria-hidden="true"></i>
+                </a>
+                {% include 'problems/edit_challenge_form.html' %}
             </div>
+            {% endif %}
         </div>
         <div class="panel-body">
             <h3>Problem description:</h3>
