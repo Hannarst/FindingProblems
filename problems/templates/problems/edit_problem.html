@@ -1,12 +1,21 @@
 {% extends 'problems/base.html' %}
 {% load bootstrap3 %}
 {% block content %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3>Edit problem</h3>
+  </div>
+</div>
 <form method="POST" class="post-form">{% csrf_token %}
-  {% bootstrap_form form %}
-    <div class="form-group">
-        <label class="control-label" for="id_categories">Categories</label>
-        <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" value="{{categories}}" title="" type="text" required="">
-    </div>
-    <button type="submit" class="save btn btn-default">Save</button>
+  <div class="panel-body">
+    {% bootstrap_form form %}
+      <div class="form-group">
+          <label class="control-label" for="id_categories">Categories</label>
+          <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" value="{{categories}}" title="" type="text" required="">
+      </div>
+  </div>
+  <div class="panel-footer">
+    <button type="submit" class="save btn btn-success">Save</button>
+  </div>
 </form>
 {% endblock %}

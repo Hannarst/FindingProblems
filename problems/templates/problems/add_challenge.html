@@ -1,8 +1,19 @@
 {% extends 'problems/base.html' %}
 {% load bootstrap3 %}
 {% block content %}
-<form method="POST" class="post-form">{% csrf_token %}
-  {% bootstrap_form form %}
-    <button type="submit" class="save btn btn-default">Save</button>
-</form>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3>Add a challenge</h3>
+  </div>
+  <form method="POST" class="post-form">{% csrf_token %}
+    <div class="panel-body">
+      {% bootstrap_form form %}
+    </div>
+    <div class="panel-footer">
+      <button type="submit" class="save btn btn-success">Save</button>
+    </div>
+  </form>
+
+</div>
+
 {% endblock %}

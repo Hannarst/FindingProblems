@@ -1,18 +1,34 @@
 {% extends 'problems/base.html' %}
 {% block content %}
-<h1>User Manual</h1>
-<h4><a href="#add-problem">Add a problem</a></h4>
-<p>
-  Fill out and submit <a href="{% url 'add_problem' %}">this form</a> in order to add a problem.
-  You may use markdown in the content and the solution fields.
-  The execution time limit is the maximum length of time a solution can run to be considered a successful solution to this problem.
-  This is done to exclude brute force solutions if necessary.
-  The problems you add are private by default and can only be seen by logged in users (CS staff), but uncheck this box if you want students to be able to practice this question on their own time.
-  Categorise this problem as you see fit.
-</p>
-<h4><a href="#edit-vs-fork">Editing vs forking a problem</a></h4>
-<p>
-  Editing (<i class="fa fa-pencil" aria-hidden="true"></i>) a problem rewrites the problem, while forking (<i class="fa fa-code-fork" aria-hidden="true"></i>) a problem allows you to create a new problem from the modification.
-  The original stays the same. You can later see which problem a particular problem has been forked off in the Forked From field.
-</p>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h1>User Manual</h1>
+  </div>
+  <div class="panel-body">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4><a href="#add-problem">Add a problem</a></h4>
+      </div>
+      <div class="panel-body">
+          Fill out and submit <a href="{% url 'add_problem' %}">this form</a> in order to add a problem.
+          You may use markdown in the content and the solution fields.
+          The execution time limit is the maximum length of time a solution can run to be considered a successful solution to this problem.
+          This is done to exclude brute force solutions if necessary.
+          The problems you add are private by default and can only be seen by logged in users (CS staff), but uncheck this box if you want students to be able to practice this question on their own time.
+          Categorise this problem as you see fit.
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4><a href="#edit-vs-fork">Editing vs forking a problem</a></h4>
+      </div>
+      <div class="panel-body">
+        Editing (<i class="fa fa-pencil" aria-hidden="true"></i>) a problem rewrites the problem, while forking (<i class="fa fa-code-fork" aria-hidden="true"></i>) a problem allows you to create a new problem from the modification.
+        The original stays the same. You can later see which problem a particular problem has been forked off in the Forked From field.
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}

@@ -5,7 +5,7 @@
 <html>
 <head>
   <title>Finding Problems</title>
-  <link rel="icon" href="http://www.psdgraphics.com/wp-content/uploads/2010/10/trophy.jpg">
+  <link rel="icon" href="http://www.sasru.co.za/portals/0/Images/trophy.png">
   <link data-require="bootstrap-css@3.3.6" data-semver="3.3.6" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" />
   {% bootstrap_javascript jquery=1 %}
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
@@ -47,9 +47,10 @@
       <ul class="nav navbar-nav">
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'index' %}">Browse Problems</a></li>
-          {% if request.user.is_authenticated and requestion.user.is_active %}
+          {% if request.user.is_authenticated and request.user.is_active %}
             <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
           {% endif %}
+          <li><a href="{% url 'guide' %}">User Guide</a></li>
       </ul>
       {% if request.user.is_authenticated and request.user.is_active %}
         <ul class="nav navbar-nav navbar-right">
