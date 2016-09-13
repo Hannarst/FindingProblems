@@ -43,55 +43,36 @@ class Category(models.Model):
 
 
 class Content(models.Model):
-    description = models.TextField()
-    example_input = models.TextField()
-    example_output = models.TextField()
-    examples = models.TextField()
+    problem_description = models.TextField()
+    example_input = models.TextField(default="No example input provided.")
+    example_output = models.TextField(default="No example output provided.")
+    examples = models.TextField(default="No example(s) provided.")
 
-    def clean(self):
-        super(Content, self).clean()
-        if self.description is None:
-            raise ValidationError("Please provide a description of the problem.")
-        else:
-            if self.example_input is None:
-                pass
-            if self.example_output is None:
-                pass
-            if self.examples is None:
-                pass
 
 class Solution(models.Model):
-    description = models.TextField()
-    links = models.TextField()
-    example_code = models.TextField()
-    language = models.CharField(max_length=200, default=None)
+    RUNTIMES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
+    solution_description = models.TextField()
+    complexity = models.IntegerField(default=0, choices=RUNTIMES)
+    links = models.TextField(default="No links.")
+    example_code = models.TextField(default="No example solution code.")
+    language = models.CharField(max_length=200, default="No example solution code.")
 
     def clean(self):
-        super(Solution, self).clean()
-
-        if self.description is None:
-            if self.links and self.example_code is None:
-                raise ValidationError("Please provide at least one of the following: a description of the solution, links to explanations of the solution or a coded sample solution.")
-        if self.links is None:
-            if self.description and self.example_code is None:
-                raise ValidationError("Please provide at least one of the following: a description of the solution, links to explanations of the solution or a coded sample solution.")
         if self.example_code is None:
-            if self.links and self.description is None:
-                raise ValidationError("Please provide at least one of the following: a description of the solution, links to explanations of the solution or a coded sample solution.")
             if self.language:
                 raise ValidationError("Please provide a coded example in this language.")
         if self.language is None:
             if self.example_code:
                 raise ValidationError("Please provide the language in which the example solution has been coded.")
+        if self.complexity is None:
+            raise ValidationError("Please provide the complexity of the optimal solution to this problem.")
 
 
 class Problem(models.Model):
     DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
-    RUNTIMES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
     title = models.CharField(max_length=200)
     content = models.ForeignKey(Content)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
-    complexity = models.IntegerField(default=0, choices=RUNTIMES)
     solution = models.ForeignKey(Solution)
     private = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)

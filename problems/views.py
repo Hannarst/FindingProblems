@@ -165,9 +165,22 @@ class ViewProblem(View):
         challenge = ""
         if challenge_id:
             challenge = get_object_or_404(Challenge, pk=challenge_id)
+
+        problem = Problem.objects.get(pk=problem_id)
+        content = Content.objects.get(pk=problem.content.id)
+        solution = Solution.objects.get(pk=problem.solution.id)
+        category_objects = problem.categories.all()
+        categories = []
+
+        for category in category_objects:
+            categories.append(category.name)
+
         context = {
-            'problem': Problem.objects.get(pk=problem_id),
+            'problem': problem,
+            'content': content,
+            'solution': solution,
             'challenge': challenge,
+            'categories': categories,
         }
         return render(request, 'problems/view_problem.html', context)
 
@@ -175,17 +188,28 @@ class ViewProblem(View):
 class AddProblem(View):
     def get(self, request):
         problem_form = ProblemForm()
-        categories_form = CategoriesForm()
+        content_form = ContentForm()
+        solution_form = SolutionForm()
         context = {
-            'form': problem_form,
+            'problem_form': problem_form,
+            'content_form': content_form,
+            'solution_form': solution_form
         }
         return render(request, 'problems/add_problem.html', context)
 
     def post(self, request):
         problem_form = ProblemForm(request.POST)
+        content_form = ContentForm(request.POST)
+        solution_form = SolutionForm(request.POST)
         categories = request.POST.get('categories')
-        if problem_form.is_valid() and categories:
-            problem = problem_form.save()
+
+        if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
+            content = content_form.save()
+            solution = solution_form.save()
+            problem = problem_form.save(commit=False)
+            problem.content = content
+            problem.solution = solution
+            problem.save()
             add_category(categories, problem)
             messages.success(request, 'Problem Added')
         else:
@@ -196,20 +220,36 @@ class AddProblem(View):
 class EditProblem(View):
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
+        content = Content.objects.get(pk=problem.content.id)
+        solution = Solution.objects.get(pk=problem.solution.id)
         categories = ",".join([cat.name for cat in problem.categories.all()])
-        form = ProblemForm(instance=problem)
+
+        problem_form = ProblemForm(instance=problem)
+        content_form = ContentForm(instance=content)
+        solution_form = SolutionForm(instance=solution)
+
         context = {
-            'form': form,
+            'problem_form': problem_form,
+            'content_form': content_form,
+            'solution_form': solution_form,
             'categories': categories,
         }
         return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-        form = ProblemForm(request.POST, instance=problem)
+        content = Content.objects.get(pk=problem.content.id)
+        solution = Solution.objects.get(pk=problem.solution.id)
+        problem_form = ProblemForm(request.POST, instance=problem)
+        content_form = ContentForm(request.POST, instance=content)
+        solution_form = SolutionForm(request.POST, instance=solution)
         categories = request.POST.get('categories')
-        if form.is_valid() and categories:
-            problem = form.save(commit=False)
+        if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
+            problem = problem_form.save(commit=False)
+            content = content_form.save()
+            problem.content = content
+            solution = solution_form.save()
+            problem.solution = solution
             problem.save()
             add_category(categories, problem)
             messages.success(request, 'Problem Edited')
@@ -221,22 +261,40 @@ class EditProblem(View):
 class ForkProblem(View):
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
+        content = Content.objects.get(pk=problem.content.id)
+        solution = Solution.objects.get(pk=problem.solution.id)
         categories = ",".join([cat.name for cat in problem.categories.all()])
-        form = ProblemForm(instance=problem)
+
+        problem_form = ProblemForm(instance=problem)
+        content_form = ContentForm(instance=content)
+        solution_form = SolutionForm(instance=solution)
+
         context = {
-            'form': form,
+            'problem_form': problem_form,
+            'content_form': content_form,
+            'solution_form': solution_form,
             'categories': categories,
         }
         return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
-        form = ProblemForm(request.POST)
         original_problem = Problem.objects.get(id=problem_id)
+        problem_form = ProblemForm(request.POST)
+        content_form = ContentForm(request.POST)
+        solution_form = SolutionForm(request.POST)
         categories = request.POST.get('categories')
-        if form.is_valid() and categories:
-            forked_problem = form.save(commit=False)
+        if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
+            forked_problem = problem_form.save(commit=False)
             forked_problem.pk = None
             forked_problem.forked_from = original_problem.title
+            forked_content = content_form.save(commit=False)
+            forked_content.pk = None
+            forked_content.save()
+            forked_problem.content = forked_content
+            forked_solution = solution_form.save(commit=False)
+            forked_solution.pk = None
+            forked_solution.save()
+            forked_problem.solution = forked_solution
             forked_problem.save()
             add_category(categories, forked_problem)
             messages.success(request, 'Problem Forked')

@@ -7,7 +7,9 @@
   </div>
   <form method="POST" class="post-form">{% csrf_token %}
     <div class="panel-body">
-        {% bootstrap_form form %}
+        {% bootstrap_form problem_form %}
+        {% bootstrap_form content_form %}
+        {% bootstrap_form solution_form %}
           <div class="form-group">
               <label class="control-label" for="id_categories">Categories</label>
               <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" title="" type="text" required="">

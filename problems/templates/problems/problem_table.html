@@ -24,7 +24,13 @@
        {% endfor %}
       </td>
       <td>{{problem.get_difficulty_display}}</td>
-      <td>{{problem.forked_from}}</td>
+      <td>
+        {% if problem.forked_from == "Original" %}
+          {{ "" }}
+        {% else %}
+          {{problem.forked_from}}
+        {% endif %}
+      </td>
       <td>{{problem.private}}</td>
       {% if challenge %}
       <td>

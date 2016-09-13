@@ -41,13 +41,13 @@ class CreateAccountForm(forms.Form):
 class SolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
-        fields = ('description', 'links', 'example_code', 'language')
+        fields = ('solution_description', 'links', 'example_code', 'language', 'complexity',)
 
 
 class ContentForm(forms.ModelForm):
     class Meta:
         model = Content
-        fields = ('description', 'example_input', 'example_output', 'examples')
+        fields = ('problem_description', 'example_input', 'example_output', 'examples')
 
 
 class ProblemForm(forms.ModelForm):

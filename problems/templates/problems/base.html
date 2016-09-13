@@ -45,12 +45,12 @@
         <a class="navbar-brand" href="#">Finding Problems</a>
       </div>
       <ul class="nav navbar-nav">
-        <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="{% url 'index' %}">Browse Problems</a></li>
-          {% if request.user.is_authenticated and request.user.is_active %}
-            <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
-          {% endif %}
+          <li><a href="{% url 'home' %}">Home</a></li>
           <li><a href="{% url 'guide' %}">User Guide</a></li>
+          <li><a href="{% url 'index' %}">Browse Problems</a></li>
+          {% if request.user.is_authenticated and request.user.is_active %}
+          <li><a href="{% url 'challenge_index' %}">Browse Competitions</a></li>
+          {% endif %}
       </ul>
       {% if request.user.is_authenticated and request.user.is_active %}
         <ul class="nav navbar-nav navbar-right">
