@@ -108,6 +108,6 @@ class Solution(models.Model):
 
 class Challenge(models.Model):
     date = models.DateField()
-    time = models.TimeField()
+    time = models.TimeField(default=datetime.time(0))
     name = models.CharField(max_length=200)
     problems = models.ManyToManyField(Problem)

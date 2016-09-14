@@ -5,7 +5,9 @@
       <th>Categories</th>
       <th>Difficulty</th>
       <th>Forked from</th>
+      {% if user.is_authenticated %}
       <th>Private</th>
+      {% endif %}
       {% if challenge %}
       <th>Add/Remove from challenge</th>
       {% endif %}
@@ -31,12 +33,13 @@
           {{problem.forked_from}}
         {% endif %}
       </td>
-      <td>{{problem.private}}</td>
+      {% if user.is_authenticated %}
+        <td>{{problem.private}}</td>
+      {% endif %}
       {% if challenge %}
-      <td>
-        {% include 'problems/edit_challenge_form.html' %}
-
-      </td>
+        <td>
+          {% include 'problems/edit_challenge_form.html' %}
+        </td>
       {% endif %}
     </tr>
     {% empty %}
