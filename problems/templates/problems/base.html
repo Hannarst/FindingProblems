@@ -74,6 +74,11 @@
       </ul>
     {% endif %}
   </nav>
+  {% if challenge %}
+      <div class="alert alert-info">
+        <strong>Editing Challenge:</strong> {{challenge.name}} ({{challenge.date}} at {{challenge.time}}) <a class="pull-right" href="{% url 'view_challenge' challenge.id %}">Review Challenge</a>
+      </div>
+   {% endif %}
   {% bootstrap_messages %}
   <div class="content container">
     {% block content %}
