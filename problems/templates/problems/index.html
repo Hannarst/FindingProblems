@@ -26,7 +26,7 @@
            <div class="form-group">
              <label for="id_difficulty" class="sr-only">Difficulty:</label>
              <select id="id_difficulty" name="difficulty" class="input-sm form-control">
-               <option value="">Difficulty:</option>
+               <option value="">Difficulty</option>
                  {% for val, choice in difficulties %}
                    {% if val == searched_difficulty %}
                      <option value="{{val}}" selected="selected">{{choice}}</option>
@@ -39,7 +39,7 @@
            <div class="form-group">
              <label for="id_visibility" class="sr-only">Visibility:</label>
              <select id="id_visibility" name="visibility" class="input-sm form-control">
-               <option value="">Visibility:</option>
+               <option value="">Visibility</option>
                <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
                <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
              </select>

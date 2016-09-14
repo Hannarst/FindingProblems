@@ -138,7 +138,7 @@ class Index(View):
         problems = Problem.objects
         categories = request.GET.get('categories')
         difficulty = request.GET.get('difficulty')
-        privacy = request.GET.get('privacy')
+        privacy = request.GET.get('visibility')
         if challenge_id:
             challenge = get_object_or_404(Challenge, pk=challenge_id)
         if categories:
