@@ -37,14 +37,16 @@
                  {% endfor %}
              </select>
            </div>
-           <div class="form-group">
-             <label for="id_visibility" class="sr-only">Visibility:</label>
-             <select id="id_visibility" name="visibility" class="input-sm form-control">
-               <option value="">Visibility</option>
-               <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
-               <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
-             </select>
-           </div>
+             {% if user.is_authenticated %}
+                 <div class="form-group">
+                     <label for="id_visibility" class="sr-only">Visibility:</label>
+                     <select id="id_visibility" name="visibility" class="input-sm form-control">
+                         <option value="">Visibility</option>
+                         <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
+                         <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
+                     </select>
+                 </div>
+             {% endif %}
 
            <div class="form-group">
              <button class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-search"></i></button>

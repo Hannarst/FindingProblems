@@ -138,7 +138,7 @@ class Index(View):
         problems = Problem.objects
         categories = request.GET.get('categories')
         difficulty = request.GET.get('difficulty')
-        privacy = request.GET.get('visibility')
+        privacy = request.GET.get('privacy')
         if challenge_id:
             challenge = get_object_or_404(Challenge, pk=challenge_id)
         if categories:
@@ -153,9 +153,14 @@ class Index(View):
             problems = problems.filter(private=True)
         elif privacy == "public":
             problems = problems.filter(private=False)
+
+        if request.user.is_authenticated():
+            problems = problems.all()
+        else:
+            problems = problems.exclude(private=True)
         context = {
             'suggested_tags': SUGGESTED_TAGS,
-            'problems': problems.all(),
+            'problems': problems,
             'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
             'searched_categories': categories,
             'searched_difficulty': difficulty,
@@ -192,7 +197,7 @@ class ViewProblem(View):
 
 
 class AddProblem(View):
-    #@method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -227,7 +232,7 @@ class AddProblem(View):
 
 
 class EditProblem(View):
-    #@method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -271,7 +276,7 @@ class EditProblem(View):
 
 
 class ForkProblem(View):
-    #@method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
