@@ -25,18 +25,18 @@
         </div>
         <div class="panel-body">
             <h3>Problem description:</h3>
-            {{content.problem_description}}
+            {{content.problem_description_html|safe}}
             {% if content.example_input != "No example input provided." %}
                 <h4>Example input:</h4>
-                {{content.example_input}}
+                {{content.example_input_html|safe}}
             {% endif %}
             {% if content.example_output != "No example output provided." %}
                 <h4>Example output:</h4>
-                {{content.example_output}}
+                {{content.example_output_html|safe}}
             {% endif %}
             {% if content.examples != "No example(s) provided." %}
                 <h4>Examples</h4>
-                {{content.examples}}
+                {{content.examples_html|safe}}
             {% endif %}
         </div>
         <div class="panel-footer" style="overflow:auto">
@@ -66,18 +66,18 @@
             </div>
             <div class="panel-body">
                 <h4>Solution description:</h4>
-                {{solution.solution_description}}
+                {{solution.solution_description_html|safe}}
                 {% if solution.links != "No links." %}
                     <h4>Link(s) to external sources:</h4>
-                    {{solution.links}}
+                    {{solution.links_html|safe}}
                 {% endif %}
                 {% if solution.example_code != "No example solution code." %}
                     <h4>Example code:</h4>
-                    {{solution.example_code}}
+                    {{solution.example_code_html|safe}}
                 {% endif %}
                 {% if solution.language != "No example solution code." %}
                     <h4>Language(s):</h4>
-                    {{solution.language}}
+                    {{solution.language_html|safe}}
                 {% endif %}
             </div>
         </div>

@@ -2,11 +2,16 @@ from __future__ import unicode_literals
 from hashlib import md5
 import random
 import datetime
+import markdown2
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+
+def get_html(content):
+    return markdown2.markdown(content, extras=["fenced-code-blocks"])
+
 
 class Account(models.Model):
     user = models.ForeignKey(User)
@@ -42,19 +47,47 @@ class Category(models.Model):
     name = models.TextField(max_length=200)
 
 
+class Problem(models.Model):
+    DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
+    title = models.CharField(max_length=200)
+    difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
+    private = models.BooleanField(default=True)
+    categories = models.ManyToManyField(Category)
+    forked_from = models.CharField(max_length=200,default="Original")
+
+    class Meta:
+        unique_together = ['title']
+
+
 class Content(models.Model):
+    problem = models.ForeignKey(Problem)
     problem_description = models.TextField()
+    problem_description_html = models.TextField()
     example_input = models.TextField(default="No example input provided.")
+    example_input_html = models.TextField()
     example_output = models.TextField(default="No example output provided.")
+    example_output_html = models.TextField()
     examples = models.TextField(default="No example(s) provided.")
+    examples_html = models.TextField()
+
+    def save(self, *args, **kwargs):
+        self.problem_description_html = get_html(self.problem_description)
+        self.example_input_html = get_html(self.example_input)
+        self.example_output_html = get_html(self.example_output)
+        self.examples_html = get_html(self.examples)
+        super(Content, self).save(*args, **kwargs)
 
 
 class Solution(models.Model):
     RUNTIMES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
+    problem = models.ForeignKey(Problem)
     solution_description = models.TextField()
+    solution_description_html = models.TextField()
     complexity = models.IntegerField(default=0, choices=RUNTIMES)
     links = models.TextField(default="No links.")
+    links_html = models.TextField()
     example_code = models.TextField(default="No example solution code.")
+    example_code_html = models.TextField()
     language = models.CharField(max_length=200, default="No example solution code.")
 
     def clean(self):
@@ -67,20 +100,11 @@ class Solution(models.Model):
         if self.complexity is None:
             raise ValidationError("Please provide the complexity of the optimal solution to this problem.")
 
-
-class Problem(models.Model):
-    DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
-    title = models.CharField(max_length=200)
-    content = models.ForeignKey(Content)
-    difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
-    solution = models.ForeignKey(Solution)
-    private = models.BooleanField(default=True)
-    categories = models.ManyToManyField(Category)
-    forked_from = models.CharField(max_length=200,default="Original")
-
-    class Meta:
-        unique_together = ['title']
-
+    def save(self, *args, **kwargs):
+        self.solution_description_html = get_html(self.solution_description)
+        self.links_html = get_html(self.links)
+        self.example_code_html = get_html(self.example_code)
+        super(Solution, self).save(*args, **kwargs)
 
 class Challenge(models.Model):
     date = models.DateField()
