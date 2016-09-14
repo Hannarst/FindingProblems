@@ -12,6 +12,9 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
+def SUGGESTED_TAGS():
+    return [str(tag.name) for tag in Category.objects.all()]
+
 def add_category(categories, problem):
     for cat in categories.split(','):
         category, c = Category.objects.get_or_create(name=cat.strip().lower())
@@ -151,6 +154,7 @@ class Index(View):
         elif privacy == "public":
             problems = problems.filter(private=False)
         context = {
+            'suggested_tags': SUGGESTED_TAGS,
             'problems': problems.all(),
             'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
             'searched_categories': categories,
@@ -194,6 +198,7 @@ class AddProblem(View):
         content_form = ContentForm()
         solution_form = SolutionForm()
         context = {
+            'suggested_tags': SUGGESTED_TAGS,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form
@@ -233,6 +238,7 @@ class EditProblem(View):
         solution_form = SolutionForm(instance=solution)
 
         context = {
+            'suggested_tags': SUGGESTED_TAGS,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
@@ -275,10 +281,12 @@ class ForkProblem(View):
         solution_form = SolutionForm(instance=solution)
 
         context = {
+            'suggested_tags': SUGGESTED_TAGS,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
             'categories': categories,
+            'fork': True,
         }
         return render(request, 'problems/edit_problem.html', context)
 

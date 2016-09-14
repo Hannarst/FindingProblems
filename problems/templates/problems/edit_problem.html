@@ -3,9 +3,12 @@
 {% block content %}
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3>Edit problem</h3>
+    {% if fork %}
+      <h3>Fork problem</h3>
+    {% else %}
+      <h3>Edit problem</h3>
+    {% endif %}
   </div>
-</div>
 <form method="POST" class="post-form">{% csrf_token %}
   <div class="panel-body">
     {% bootstrap_form problem_form %}
@@ -20,4 +23,5 @@
     <button type="submit" class="save btn btn-success">Save</button>
   </div>
 </form>
+</div>
 {% endblock %}
