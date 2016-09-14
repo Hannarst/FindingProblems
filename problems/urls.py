@@ -92,4 +92,8 @@ urlpatterns = [
     url(r'^challenges/(?P<challenge_id>[0-9]+)/remove/(?P<problem_id>[0-9]+)/?$',
         views.RemoveFromChallenge.as_view(),
         name="remove_from_challenge"),
+    url(r'^challenges/quit/?$',
+        views.QuitEditingChallenge.as_view(),
+        name="quit_editing_challenge"),
+
 ]

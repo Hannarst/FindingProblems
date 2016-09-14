@@ -358,7 +358,7 @@ class ViewChallenge(View):
     def get(self, request, challenge_id):
         request.session['challenge_id'] = challenge_id
         context = {
-            'challenge': Challenge.objects.get(pk=challenge_id),
+            'challenge2': Challenge.objects.get(pk=challenge_id),
         }
         return render(request, 'problems/view_challenge.html', context)
 
@@ -366,6 +366,14 @@ class ViewChallenge(View):
         # remove problems
         pass
 
+class QuitEditingChallenge(View):
+    def get(self, request):
+        request.session['challenge_id'] = None
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+    def post(self, request):
+        request.session['challenge_id'] = None
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 class AddChallenge(View):
     @method_decorator(login_required)

@@ -76,7 +76,11 @@
   </nav>
   {% if challenge %}
       <div class="alert alert-info">
-        <strong>Editing Challenge:</strong> {{challenge.name}} ({{challenge.date}} at {{challenge.time}}) <a class="pull-right" href="{% url 'view_challenge' challenge.id %}">Review Challenge</a>
+        <strong>Editing Challenge:</strong> {{challenge.name}} ({{challenge.date}} at {{challenge.time}})
+        <span class="pull-right" >
+          <a class="btn btn-xs btn-primary" href="{% url 'view_challenge' challenge.id %}">Review Challenge</a>
+          <a class="btn btn-xs btn-danger" href="{% url 'quit_editing_challenge'%}">Quit</a>
+        </span>
       </div>
    {% endif %}
   {% bootstrap_messages %}
