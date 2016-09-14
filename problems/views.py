@@ -173,8 +173,8 @@ class ViewProblem(View):
             challenge = get_object_or_404(Challenge, pk=challenge_id)
 
         problem = Problem.objects.get(pk=problem_id)
-        content = Content.objects.get(pk=problem.content.id)
-        solution = Solution.objects.get(pk=problem.solution.id)
+        content = Content.objects.get(problem=problem)
+        solution = Solution.objects.get(problem=problem)
         category_objects = problem.categories.all()
         categories = []
 
@@ -192,7 +192,7 @@ class ViewProblem(View):
 
 
 class AddProblem(View):
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -212,13 +212,14 @@ class AddProblem(View):
         categories = request.POST.get('categories')
 
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
-            content = content_form.save()
-            solution = solution_form.save()
-            problem = problem_form.save(commit=False)
-            problem.content = content
-            problem.solution = solution
-            problem.save()
+            problem = problem_form.save()
             add_category(categories, problem)
+            content = content_form.save(commit=False)
+            content.problem = problem
+            content.save()
+            solution = solution_form.save(commit=False)
+            solution.problem = problem
+            solution.save()
             messages.success(request, 'Problem Added')
         else:
             messages.error(request, 'Invalid Form')
@@ -226,11 +227,11 @@ class AddProblem(View):
 
 
 class EditProblem(View):
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-        content = Content.objects.get(pk=problem.content.id)
-        solution = Solution.objects.get(pk=problem.solution.id)
+        content = Content.objects.get(problem=problem)
+        solution = Solution.objects.get(problem=problem)
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
@@ -248,20 +249,21 @@ class EditProblem(View):
 
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-        content = Content.objects.get(pk=problem.content.id)
-        solution = Solution.objects.get(pk=problem.solution.id)
+        content = Content.objects.get(problem=problem)
+        solution = Solution.objects.get(problem=problem)
         problem_form = ProblemForm(request.POST, instance=problem)
         content_form = ContentForm(request.POST, instance=content)
         solution_form = SolutionForm(request.POST, instance=solution)
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
-            problem = problem_form.save(commit=False)
-            content = content_form.save()
-            problem.content = content
-            solution = solution_form.save()
-            problem.solution = solution
-            problem.save()
+            problem = problem_form.save()
             add_category(categories, problem)
+            content = content_form.save(commit=False)
+            content.problem = problem
+            content.save()
+            solution = solution_form.save(commit=False)
+            solution.problem = problem
+            solution.save()
             messages.success(request, 'Problem Edited')
         else:
             messages.error(request, 'Invalid Form')
@@ -269,11 +271,11 @@ class EditProblem(View):
 
 
 class ForkProblem(View):
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-        content = Content.objects.get(pk=problem.content.id)
-        solution = Solution.objects.get(pk=problem.solution.id)
+        content = Content.objects.get(problem=problem)
+        solution = Solution.objects.get(problem=problem)
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
@@ -300,16 +302,16 @@ class ForkProblem(View):
             forked_problem = problem_form.save(commit=False)
             forked_problem.pk = None
             forked_problem.forked_from = original_problem.title
-            forked_content = content_form.save(commit=False)
-            forked_content.pk = None
-            forked_content.save()
-            forked_problem.content = forked_content
-            forked_solution = solution_form.save(commit=False)
-            forked_solution.pk = None
-            forked_solution.save()
-            forked_problem.solution = forked_solution
             forked_problem.save()
             add_category(categories, forked_problem)
+            forked_content = content_form.save(commit=False)
+            forked_content.pk = None
+            forked_content.problem = forked_problem
+            forked_content.save()
+            forked_solution = solution_form.save(commit=False)
+            forked_solution.pk = None
+            forked_solution.problem = forked_problem
+            forked_solution.save()
             messages.success(request, 'Problem Forked')
         else:
             messages.error(request, 'Invalid Form')
