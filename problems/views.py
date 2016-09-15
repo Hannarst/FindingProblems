@@ -1,6 +1,7 @@
 from hashlib import md5
 import random
 import datetime
+import reportlab
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
@@ -21,13 +22,16 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+
 class Home(View):
     def get(self, request):
         return render(request, 'problems/home.html')
 
+
 class Guide(View):
     def get (self, request):
         return render(request, 'problems/guide.html')
+
 
 class ActivateAccount(View):
     def get(self, request):
@@ -194,6 +198,30 @@ class ViewProblem(View):
             'categories': categories,
         }
         return render(request, 'problems/view_problem.html', context)
+
+
+class Pause(View):
+    def get(self, request):
+        context = {
+
+        }
+        return render(request, 'problems/pause.html', context)
+
+
+class Upload(View):
+    def get(self, request):
+        context = {
+
+        }
+        return render(request, 'problems/upload.html', context)
+
+    def post(self, request):
+        #parse file
+        context = {
+
+        }
+        messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
+        return render(request, 'problems/add_problem.html', context)
 
 
 class AddProblem(View):
@@ -366,6 +394,7 @@ class ViewChallenge(View):
         # remove problems
         pass
 
+
 class QuitEditingChallenge(View):
     def get(self, request):
         request.session['challenge_id'] = None
@@ -374,6 +403,7 @@ class QuitEditingChallenge(View):
     def post(self, request):
         request.session['challenge_id'] = None
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
 
 class AddChallenge(View):
     @method_decorator(login_required)

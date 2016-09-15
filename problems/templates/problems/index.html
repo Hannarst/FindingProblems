@@ -13,8 +13,29 @@
        <span style="float:left;padding:5px">
          <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">Create challenge</a>
        </span>
-       <span class="pull-left"  style="float:left;padding:5px">
-           <a href="{% url 'add_problem' %}" class="btn btn-success btn-sm">Add Problem</a>
+
+           <span class="pull-left"  style="float:left;padding:5px">
+               <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#manualOrUpload">
+                    Add Problem
+               </button>
+               <div class="modal fade" align="center" id="manualOrUpload" role="dialogue">
+                   <div class="modal-dialogue modal-sm">
+                       <div class="modal-content">
+                           <div class="modal-header">
+                               <h4>Manual or Upload?</h4>
+                           </div>
+                           <div class="modal-body">
+                               <p>
+                                   Would you like to upload a PDF or create a problem manually?
+                               </p>
+                           </div>
+                           <div class="modal-footer">
+                               <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload PDF</a>
+                               <a href="{% url 'add_problem' %}" class="btn btn-default btn-sm">Manual</a>
+                           </div>
+                       </div>
+                   </div>
+               </div>
        </span>
        {% endif %}
      </div>
