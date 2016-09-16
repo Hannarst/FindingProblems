@@ -11,9 +11,18 @@
           {% bootstrap_form content_form %}
           {% bootstrap_form solution_form %}
           <div class="form-group">
-              <label class="control-label" for="id_categories">Categories</label>
-              <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" value="{{categories}}" title="" type="text" required="">
+              <label class="control-label" for="id_complexity">Complexity</label>
+              <input class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" type="text" required="">
           </div>
+          <div class="form-group">
+              <label class="control-label" for="id_languages">Languages</label>
+              <input class="form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" title="" type="text" required="">
+          </div>
+          <div class="form-group">
+              <label class="control-label" for="id_categories">Categories</label>
+              <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" title="" type="text" required="">
+          </div>
+      </div>
       </div>
       <div class="panel-footer">
           <button type="submit" class="save btn btn-success">Save</button>

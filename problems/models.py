@@ -81,21 +81,13 @@ class Solution(models.Model):
     problem = models.ForeignKey(Problem)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
-    complexity = models.ForeignKey(Category)
+    complexity = models.ForeignKey(Category, related_name="complexity")
     time_limit = models.FloatField(default=0)
     links = models.TextField(default="No links.")
     links_html = models.TextField()
     example_code = models.TextField(default="No example solution code.")
     example_code_html = models.TextField()
-    language = models.CharField(max_length=200, default="No example solution code.")
-
-    def clean(self):
-        if self.example_code is None:
-            if self.language:
-                raise ValidationError("Please provide a coded example in this language.")
-        if self.language is None:
-            if self.example_code:
-                raise ValidationError("Please provide the language in which the example solution has been coded.")
+    language = models.ManyToManyField(Category, related_name="language")
 
     def save(self, *args, **kwargs):
         self.solution_description_html = get_html(self.solution_description)

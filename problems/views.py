@@ -39,6 +39,21 @@ def add_complexity(complexity, solution):
     solution.complexity = complex
     solution.save()
 
+def SUGGESTED_LANGUAGES():
+    return [str(lang.name) for lang in Category.objects.filter(type="language")]
+
+def add_language(langs, solution):
+    for lang in langs.split(','):
+        language, l = Category.objects.get_or_create(name=lang.strip().lower())
+        solution.language.add(language)
+        solution.save()
+
+def remove_languages(solution):
+    languages = solution.language.all()
+    for l in languages:
+        solution.language.remove(l)
+        solution.save()
+
 class Home(View):
     def get(self, request):
         return render(request, 'problems/home.html')
@@ -162,9 +177,13 @@ class Index(View):
         if challenge_id:
             challenge = get_object_or_404(Challenge, pk=challenge_id)
         if categories:
-            solutions = Solution.objects.filter(
+            solutions_complexity = Solution.objects.filter(
                 complexity__name__in=[x.lower().strip() for x in categories.split(',')],
             ).distinct()
+            solutions_language = Solution.objects.filter(
+                language__name__in=[x.lower().strip() for x in categories.split(',')],
+            ).distinct()
+            solutions = solutions_complexity|solutions_language
             problems = problems.filter(
                 categories__name__in=[x.lower().strip() for x in categories.split(',')],
             ).distinct()
@@ -200,7 +219,7 @@ class Index(View):
                         pass
                     else:
                         problems.append(p)
-        suggested_tags = SUGGESTED_TAGS()+SUGGESTED_COMPLEXITY()
+        suggested_tags = SUGGESTED_TAGS()+SUGGESTED_COMPLEXITY()+SUGGESTED_LANGUAGES()
         context = {
             'suggested_tags': suggested_tags,
             'problems': problems,
@@ -466,9 +485,9 @@ class AddProblem(View):
         problem_form = ProblemForm()
         content_form = ContentForm()
         solution_form = SolutionForm()
+        suggested_tags = SUGGESTED_COMPLEXITY()+SUGGESTED_TAGS()+SUGGESTED_LANGUAGES()
         context = {
-            'suggested_tags': SUGGESTED_TAGS,
-            'suggested_complexity': SUGGESTED_COMPLEXITY,
+            'suggested_tags': suggested_tags,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form
@@ -480,6 +499,7 @@ class AddProblem(View):
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
         complexity = request.POST.get('complexity')
+        languages = request.POST.get('languages')
         categories = request.POST.get('categories')
 
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
@@ -492,6 +512,8 @@ class AddProblem(View):
             solution.problem = problem
             if complexity:
                 add_complexity(complexity, solution)
+            if languages:
+                add_language(languages, solution)
             solution.save()
             messages.success(request, 'Problem Added')
         else:
@@ -506,19 +528,22 @@ class EditProblem(View):
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
         complexity = solution.complexity
+        languages = ','.join([lang.name for lang in solution.language.all()])
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
         content_form = ContentForm(instance=content)
         solution_form = SolutionForm(instance=solution)
 
+        suggested_tags = SUGGESTED_COMPLEXITY()+SUGGESTED_TAGS()+SUGGESTED_LANGUAGES()
         context = {
-            'suggested_tags': SUGGESTED_TAGS,
+            'suggested_tags': suggested_tags,
             'suggested_complexity': SUGGESTED_COMPLEXITY,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
             'complexity': complexity.name,
+            'languages': languages,
             'categories': categories,
         }
         return render(request, 'problems/edit_problem.html', context)
@@ -531,6 +556,8 @@ class EditProblem(View):
         content_form = ContentForm(request.POST, instance=content)
         solution_form = SolutionForm(request.POST, instance=solution)
         complexity = request.POST.get('complexity')
+        languages = request.POST.get('languages')
+        print(languages)
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
             problem = problem_form.save()
@@ -540,7 +567,11 @@ class EditProblem(View):
             content.save()
             solution = solution_form.save(commit=False)
             solution.problem = problem
-            add_complexity(complexity, solution)
+            if complexity:
+                add_complexity(complexity, solution)
+            if languages:
+                remove_languages(solution)
+                add_language(languages, solution)
             solution.save()
             messages.success(request, 'Problem Edited')
         else:
@@ -555,19 +586,21 @@ class ForkProblem(View):
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
         complexity = solution.complexity
+        languages = ','.join([lang.name for lang in solution.language.all()])
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
         content_form = ContentForm(instance=content)
         solution_form = SolutionForm(instance=solution)
 
+        suggested_tags = SUGGESTED_COMPLEXITY()+SUGGESTED_TAGS()+SUGGESTED_LANGUAGES()
         context = {
-            'suggested_tags': SUGGESTED_TAGS,
-            'suggested_complexity': SUGGESTED_COMPLEXITY,
+            'suggested_tags': suggested_tags,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
             'complexity': complexity.name,
+            'languages': languages,
             'categories': categories,
             'fork': True,
         }
@@ -579,6 +612,7 @@ class ForkProblem(View):
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
         complexity = request.POST.get('complexity')
+        languages = request.POST.get('languages')
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
             forked_problem = problem_form.save(commit=False)
@@ -593,7 +627,11 @@ class ForkProblem(View):
             forked_solution = solution_form.save(commit=False)
             forked_solution.pk = None
             forked_solution.problem = forked_problem
-            add_complexity(complexity, forked_solution)
+            if languages:
+                add_complexity(complexity, forked_solution)
+                add_language(languages, forked_solution)
+            else:
+                add_complexity(complexity, forked_solution)
             forked_solution.save()
             messages.success(request, 'Problem Forked')
         else:

@@ -49,7 +49,7 @@ constant = Category.objects.get_or_create(name='o(1)', type="complexity")
 class SolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
-        fields = ('solution_description', 'links', 'example_code', 'language',)
+        fields = ('solution_description', 'links', 'example_code',)
 
 
 class ContentForm(forms.ModelForm):

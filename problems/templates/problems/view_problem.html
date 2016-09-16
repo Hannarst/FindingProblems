@@ -1,129 +1,125 @@
 {% extends "problems/base.html" %} {% load bootstrap3 %} {% block content %}
 
-<div style="margin: 10;">
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix" style="position:relative">
-            <h2 style="margin-left:30px;"> {{problem.title}}</h2>
-
-            <div style="position:relative">
-                <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
-                <div style="margin-left:30px;"> Complexity: {{solution.complexity.name}}</div>
-            </div>
-            {% if user.is_authenticated %}
-            <div class="pull-right">
-                <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
-                    Edit
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </a>
-                <a href="{% url 'fork_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
-                    Fork
-                    <i class="fa fa-code-fork" aria-hidden="true"></i>
-                </a>
-                {% include 'problems/edit_challenge_form.html' %}
-            </div>
-            {% endif %}
-        </div>
-        <div class="panel-body">
-            <div class="panel panel-default">
-                <div class="panel-heading clearfix" style="...">
-                    <h3>Problem description:</h3>
-                </div>
-                <div class="panel-body">
-                    {{content.problem_description_html|safe}}
-                </div>
-            </div>
-            {% if content.example_input != "No example input provided." %}
-                <div class="panel panel-default">
-                    <div class="panel-heading clearfix" style="...">
-                        <h4>Example input:</h4>
-                    </div>
-                    <div class="panel-body">
-                        {{content.example_input_html|safe}}
-                    </div>
-                </div>
-            {% endif %}
-            {% if content.example_output != "No example output provided." %}
-                <div class="panel panel-default">
-                    <div class="panel-heading clearfix" style="...">
-                        <h4>Example output:</h4>
-                    </div>
-                    <div class="panel-body">
-                        {{content.example_output_html|safe}}
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        <div class="panel-footer" style="overflow:auto">
-            <div style="float:left;">
-                <span> Tagged: </span> {% for category in categories %}
-                <a class="category btn btn-xs btn-info" href="{% url 'index' %}?categories=category.name">{{ category }}</a> {% endfor %}
-            </div>
-            <div class="pull-right">
-                {% if user == problem.created_by or user.is_superuser %}
-                <form class="pull-right" method="post" class="form-inline" action="{% url 'delete_problem' problem.id %}">
-                    {% csrf_token %}
-                    <button type="submit" style="margin:2px;" onclick="return confirm('Are you sure?')" class="btn btn-xs btn-default btn-danger">
-                        Delete
-                        <i class="fa fa-trash-o" aria-hidden="true"></i>
-                    </button>
-                </form>
-                {% endif %}
-
-            </div>
-        </div>
-    </div>
-
-    <div id="solution" class="panel-group">
+    <div style="margin: 10;">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3> Solution </h3>
+            <div class="panel-heading clearfix" style="position:relative">
+                <h2 style="margin-left:30px;"> {{problem.title}}</h2>
+
+                <div style="position:relative">
+                    <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
+                    <div style="margin-left:30px;"> Complexity: {{solution.complexity.name}}</div>
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="pull-right">
+                        <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+                            Edit
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+                        <a href="{% url 'fork_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
+                            Fork
+                            <i class="fa fa-code-fork" aria-hidden="true"></i>
+                        </a>
+                        {% include 'problems/edit_challenge_form.html' %}
+                    </div>
+                {% endif %}
             </div>
             <div class="panel-body">
                 <div class="panel panel-default">
                     <div class="panel-heading clearfix" style="...">
-                        <h4>Solution description:</h4>
+                        <h3>Problem description:</h3>
                     </div>
-                        <div class="panel-body">
-                        {{solution.solution_description_html|safe}}
-                            </div>
+                    <div class="panel-body">
+                        {{content.problem_description_html|safe}}
+                    </div>
                 </div>
-                {% if solution.links != "No links." %}
+                {% if content.example_input != "No example input provided." %}
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix" style="...">
-                            <h4>Link(s) to external sources:</h4>
+                            <h4>Example input:</h4>
                         </div>
-                            <div class="panel-body">
-                            {{solution.links_html|safe}}
-                            </div>
+                        <div class="panel-body">
+                            {{content.example_input_html|safe}}
                         </div>
                     </div>
                 {% endif %}
+                {% if content.example_output != "No example output provided." %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading clearfix" style="...">
+                            <h4>Example output:</h4>
+                        </div>
+                        <div class="panel-body">
+                            {{content.example_output_html|safe}}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="panel-footer" style="overflow:auto">
+                <div style="float:left;">
+                    <span> Tagged: </span> {% for category in categories %}
+                    <a class="category btn btn-xs btn-info" href="{% url 'index' %}?categories=category.name">{{ category }}</a> {% endfor %}
+                </div>
+                <div class="pull-right">
+                    {% if user == problem.created_by or user.is_superuser %}
+                        <form class="pull-right" method="post" class="form-inline" action="{% url 'delete_problem' problem.id %}">
+                            {% csrf_token %}
+                            <button type="submit" style="margin:2px;" onclick="return confirm('Are you sure?')" class="btn btn-xs btn-default btn-danger">
+                                Delete
+                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div id="solution" class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3> Solution </h3>
+                </div>
+                <div class="panel-body">
+                    {% if solution.solution_description != 'No solution description has been provided.' %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading clearfix" style="...">
+                            <h4>Solution description:</h4>
+                        </div>
+                        <div class="panel-body">
+                            {{solution.solution_description_html|safe}}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if solution.links != "No links." %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading clearfix" style="...">
+                                <h4>Link(s) to external sources:</h4>
+                            </div>
+                            <div class="panel-body">
+                                {{solution.links_html|safe}}
+                            </div>
+                        </div>
+                        </div>
+                    {% endif %}
                 {% if solution.example_code != "No example solution code." %}
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix" style="...">
                             <h4>Example code:</h4>
                         </div>
-                            <div class="panel-body">
+                        <div class="panel-body">
                             {{solution.example_code_html|safe}}
-                                </div>
-                    </div>
-                {% endif %}
-                {% if solution.language != "No example solution code." %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading clearfix" style="...">
-                            <h4>Language(s):</h4>
                         </div>
-                            <div class="panel-body">
-                            {{solution.language}}
+                        <div class="panel-footer" style="overflow:auto">
+                            <div style="float:left;">
+                                <span> Languages: </span>
+                                {% for language in solution.language.all %}
+                                    <a class="language btn btn-xs btn-info" href="{% url 'index' %}?langauges=language.name">{{ language.name }}</a>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
-
-</div>
-
-</div>
 
 {% endblock %}
