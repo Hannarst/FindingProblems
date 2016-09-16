@@ -61,7 +61,7 @@ class ContentForm(forms.ModelForm):
 class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
-        exclude = ('content', 'solution', 'categories', 'forked_from',)
+        exclude = ('created_by', 'content', 'solution', 'categories', 'forked_from',)
 
 
 class CategoriesForm(forms.Form):

@@ -243,10 +243,15 @@ class ViewProblem(View):
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
         category_objects = problem.categories.all()
+        language_objects = solution.language.all()
         categories = []
+        languages = []
 
         for category in category_objects:
             categories.append(category.name)
+
+        for language in language_objects:
+            languages.append(language.name)
 
         context = {
             'problem': problem,
@@ -254,11 +259,14 @@ class ViewProblem(View):
             'solution': solution,
             'challenge': challenge,
             'categories': categories,
+            'languages': languages,
         }
         return render(request, 'problems/view_problem.html', context)
 
 
 class Upload(View):
+
+    @method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
         context = {
@@ -503,7 +511,9 @@ class AddProblem(View):
         categories = request.POST.get('categories')
 
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
-            problem = problem_form.save()
+            problem = problem_form.save(commit=False)
+            problem.created_by = request.user
+            problem.save()
             add_category(categories, problem)
             content = content_form.save(commit=False)
             content.problem = problem
@@ -636,6 +646,16 @@ class ForkProblem(View):
             messages.success(request, 'Problem Forked')
         else:
             messages.error(request, 'Invalid Form')
+        return redirect('index')
+
+
+class DeleteProblem(View):
+    @method_decorator(login_required)
+    def post(self, request, problem_id):
+        problem = Problem.objects.get(id=problem_id)
+        Content.objects.get(problem=problem).delete()
+        Solution.objects.get(problem=problem).delete()
+        Problem.objects.get(id=problem_id).delete()
         return redirect('index')
 
 

@@ -46,10 +46,12 @@ class Account(models.Model):
 class Category(models.Model):
     name = models.TextField(max_length=200)
     type = models.CharField(max_length=200, default="tag")
+    #private = models.BooleanField(default=False)
 
 
 class Problem(models.Model):
     DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
+    created_by = models.ForeignKey(User)
     title = models.CharField(max_length=200)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
     private = models.BooleanField(default=True)
@@ -94,6 +96,9 @@ class Solution(models.Model):
         self.links_html = get_html(self.links)
         self.example_code_html = get_html(self.example_code)
         super(Solution, self).save(*args, **kwargs)
+
+    def all_defaults(self):
+        return self.solution_description=="No solution description has been provided." and self.links=="No links." and self.example_code=="No example solution code."
 
 
 class Challenge(models.Model):
