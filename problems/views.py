@@ -343,8 +343,6 @@ class Upload(View):
                         actual_lines.append(paragraph)
                         self.consume(lines_on_page, temp_line-line)
 
-        print(list_of_lines)
-        print(actual_lines)
         pdf_file.close()
         return actual_lines
 
