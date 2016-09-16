@@ -236,12 +236,13 @@ class Upload(View):
                 title = problem_pdf_content[0]
                 problem_description = ""
                 start_next_section = 1
-                for line in range(1, len(problem_pdf_content)):
-                    if problem_pdf_content[line].lower() in HEADINGS:
-                        start_next_section = line
-                        break
-                    else:
-                        problem_description += problem_pdf_content[line]+'\n'
+                if problem_pdf_content[start_next_section] not in HEADINGS:
+                    for line in range(1, len(problem_pdf_content)):
+                        if problem_pdf_content[line].lower() in HEADINGS:
+                            start_next_section = line
+                            break
+                        else:
+                            problem_description += problem_pdf_content[line]+'\n'
                 sample_input = ""
                 if problem_pdf_content[start_next_section].lower() == 'sample input':
                     start = start_next_section+1
@@ -271,16 +272,17 @@ class Upload(View):
                             categories += problem_pdf_content[line]+'\n'
 
                 problem = Problem()
-                problem.title = title+" 1"
+                problem.title = title +" 1"
                 problem.save()
                 add_category(categories, problem)
-                print(problem.categories)
                 problem_form = ProblemForm(instance=problem)
                 content = Content()
                 content.problem_description = problem_description
                 content.problem = problem
-                content.example_input = sample_input
-                content.example_output = sample_output
+                if sample_input != "":
+                    content.example_input = sample_input
+                if sample_output != "":
+                    content.example_output = sample_output
                 content.save()
                 content_form = ContentForm(instance=content)
                 solution_form = SolutionForm()
@@ -303,30 +305,42 @@ class Upload(View):
             next(islice(iterator, num, num), None)
 
     def getPDFContent(self, file_name):
-        content = ""
         pdf_file = open(file_name, 'rb')
         reader = PdfFileReader(pdf_file)
         actual_lines = []
         pages = reader.getNumPages()
         for page in range(pages):
             current_page = reader.getPage(page).extractText()
-            lines = current_page.split('\n')
-            lines_on_page = iter(range(len(lines)))
-            for line_num in lines_on_page:
-                if line_num == len(lines)-1 :
-                    break
+            list_of_lines = current_page.split('\n')
+            out_of_range = len(list_of_lines)
+            max_index = out_of_range-1
+            lines_on_page = iter(range(out_of_range))
+            for line in lines_on_page:
+                section = list_of_lines[line]
+                next_section = list_of_lines[line+1]
+                #end of file, just append the line
+                if line == max_index:
+                    actual_lines.append(section)
+                #otherwise
                 else:
-                    current_line = lines[line_num]
-                    temp_line_num = line_num
-                    line = ""
-                    while current_line!=' ' and temp_line_num != len(lines)-1:
-                        line+=lines[temp_line_num]
-                        temp_line_num+=1
-                        current_line = lines[temp_line_num]
-                    self.consume(lines_on_page, temp_line_num-line_num)
-                    line_num += temp_line_num
-                    actual_lines.append(line)
-            content += reader.getPage(page).extractText()+'\n'
+                    #if the next line is just a blank line, append both and continue from the line after the blank one
+                    if list_of_lines[line+1] == ' ':
+                        actual_lines.append(section)
+                        actual_lines.append(next_section)
+                        self.consume(lines_on_page, 2)
+                    else:
+                        temp_line = line
+                        paragraph = ""
+                        if section != ' ':
+                            paragraph += section+next_section
+                            temp_line+1
+                            section = list_of_lines[temp_line]
+                            next_section = list_of_lines[temp_line+1]
+                        actual_lines.append(paragraph)
+                        self.consume(lines_on_page, temp_line-line)
+
+        print(list_of_lines)
+        print(actual_lines)
         return actual_lines
 
 
