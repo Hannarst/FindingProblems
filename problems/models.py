@@ -67,14 +67,11 @@ class Content(models.Model):
     example_input_html = models.TextField()
     example_output = models.TextField(default="No example output provided.")
     example_output_html = models.TextField()
-    examples = models.TextField(default="No example(s) provided.")
-    examples_html = models.TextField()
 
     def save(self, *args, **kwargs):
         self.problem_description_html = get_html(self.problem_description)
         self.example_input_html = get_html(self.example_input)
         self.example_output_html = get_html(self.example_output)
-        self.examples_html = get_html(self.examples)
         super(Content, self).save(*args, **kwargs)
 
 

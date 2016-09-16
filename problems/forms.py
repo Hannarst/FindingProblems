@@ -47,7 +47,7 @@ class SolutionForm(forms.ModelForm):
 class ContentForm(forms.ModelForm):
     class Meta:
         model = Content
-        fields = ('problem_description', 'example_input', 'example_output', 'examples')
+        fields = ('problem_description', 'example_input', 'example_output',)
 
 
 class ProblemForm(forms.ModelForm):
@@ -64,3 +64,16 @@ class ChallengeForm(forms.ModelForm):
     class Meta:
         model = Challenge
         exclude = ('problems',)
+
+
+class PDFForm(forms.Form):
+    problem = forms.FileField()
+    solution = forms.FileField()
+
+    def clean(self):
+        form_data = self.cleaned_data
+        if form_data['problem'] == None:
+            pass
+        if form_data['solution'] == None:
+            pass
+        return form_data

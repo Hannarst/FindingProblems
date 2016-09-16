@@ -1,9 +1,17 @@
 from hashlib import md5
+
+from io import StringIO
+
+import collections
+from itertools import islice
+
+from PyPDF2 import PdfFileReader
 import random
 import datetime
 import reportlab
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
@@ -208,20 +216,118 @@ class Pause(View):
         return render(request, 'problems/pause.html', context)
 
 
+
+
 class Upload(View):
     def get(self, request):
+        pdf_form = PDFForm()
         context = {
-
+            'pdf_form': pdf_form,
         }
         return render(request, 'problems/upload.html', context)
 
     def post(self, request):
-        #parse file
-        context = {
+        pdf_form = PDFForm(request.POST, request.FILES)
+        if pdf_form.is_valid():
+            if request.FILES['problem']:
+                HEADINGS = ['sample input', 'sample output', 'categories']
+                file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
+                problem_pdf_content = self.getPDFContent(file_name)
+                title = problem_pdf_content[0]
+                problem_description = ""
+                start_next_section = 1
+                for line in range(1, len(problem_pdf_content)):
+                    if problem_pdf_content[line].lower() in HEADINGS:
+                        start_next_section = line
+                        break
+                    else:
+                        problem_description += problem_pdf_content[line]+'\n'
+                sample_input = ""
+                if problem_pdf_content[start_next_section].lower() == 'sample input':
+                    start = start_next_section+1
+                    for line in range(start, len(problem_pdf_content)):
+                        if problem_pdf_content[line].lower() in HEADINGS:
+                            start_next_section = line
+                            break
+                        else:
+                            sample_input += problem_pdf_content[line]+'\n'
+                sample_output = ""
+                if problem_pdf_content[start_next_section].lower() == 'sample output':
+                    start = start_next_section+1
+                    for line in range(start, len(problem_pdf_content)):
+                        if problem_pdf_content[line].lower() in HEADINGS:
+                            start_next_section = line
+                            break
+                        else:
+                            sample_output += problem_pdf_content[line]+'\n'
+                categories = ""
+                if problem_pdf_content[start_next_section].lower() == 'categories':
+                    start = start_next_section+1
+                    for line in range(start, len(problem_pdf_content)):
+                        if problem_pdf_content[line].lower() in HEADINGS:
+                            start_next_section = line
+                            break
+                        else:
+                            categories += problem_pdf_content[line]+'\n'
 
+                problem = Problem()
+                problem.title = title+" 1"
+                problem.save()
+                add_category(categories, problem)
+                print(problem.categories)
+                problem_form = ProblemForm(instance=problem)
+                content = Content()
+                content.problem_description = problem_description
+                content.problem = problem
+                content.example_input = sample_input
+                content.example_output = sample_output
+                content.save()
+                content_form = ContentForm(instance=content)
+                solution_form = SolutionForm()
+        context = {
+            'problem_form': problem_form,
+            'content_form': content_form,
+            'solution_form': solution_form,
+            'categories': ",".join([cat.name for cat in problem.categories.all()]),
         }
         messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
-        return render(request, 'problems/add_problem.html', context)
+        return render(request, 'problems/edit_problem.html', context)
+
+    def get_file_name(self, file):
+        return file.split('<In MemoryUploadedFile: ')
+
+    def consume(self, iterator, num):
+        if num is None:
+            collections.deque(iterator, maxlen=0)
+        else:
+            next(islice(iterator, num, num), None)
+
+    def getPDFContent(self, file_name):
+        content = ""
+        pdf_file = open(file_name, 'rb')
+        reader = PdfFileReader(pdf_file)
+        actual_lines = []
+        pages = reader.getNumPages()
+        for page in range(pages):
+            current_page = reader.getPage(page).extractText()
+            lines = current_page.split('\n')
+            lines_on_page = iter(range(len(lines)))
+            for line_num in lines_on_page:
+                if line_num == len(lines)-1 :
+                    break
+                else:
+                    current_line = lines[line_num]
+                    temp_line_num = line_num
+                    line = ""
+                    while current_line!=' ' and temp_line_num != len(lines)-1:
+                        line+=lines[temp_line_num]
+                        temp_line_num+=1
+                        current_line = lines[temp_line_num]
+                    self.consume(lines_on_page, temp_line_num-line_num)
+                    line_num += temp_line_num
+                    actual_lines.append(line)
+            content += reader.getPage(page).extractText()+'\n'
+        return actual_lines
 
 
 class AddProblem(View):
@@ -257,6 +363,7 @@ class AddProblem(View):
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
+
 
 
 class EditProblem(View):
