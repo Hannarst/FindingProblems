@@ -5,7 +5,7 @@
   <div class="panel-heading">
     <h3>Add a problem</h3>
   </div>
-  <form action="{% url 'add_problem' %}" method="POST" class="post-form">{% csrf_token %}
+  <form action="{% url 'edit_problem' problem.id %}" method="POST" class="post-form">{% csrf_token %}
       <div class="panel-body">
           {% bootstrap_form problem_form %}
           {% bootstrap_form content_form %}

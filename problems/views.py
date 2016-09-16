@@ -272,9 +272,10 @@ class Upload(View):
                             categories += problem_pdf_content[line]+'\n'
 
                 problem = Problem()
-                problem.title = title+" 2"
+                problem.title = title+" 5"
                 problem.save()
-                add_category(categories, problem)
+                if categories != "":
+                    add_category(categories, problem)
                 problem_form = ProblemForm(instance=problem)
                 content = Content()
                 content.problem_description = problem_description
@@ -285,8 +286,12 @@ class Upload(View):
                     content.example_output = sample_output
                 content.save()
                 content_form = ContentForm(instance=content)
-                solution_form = SolutionForm()
+                solution = Solution()
+                solution.problem = problem
+                solution.save()
+                solution_form = SolutionForm(instance=solution)
         context = {
+            'problem': problem,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,

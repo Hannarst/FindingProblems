@@ -78,7 +78,7 @@ class Content(models.Model):
 class Solution(models.Model):
     RUNTIMES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
     problem = models.ForeignKey(Problem)
-    solution_description = models.TextField()
+    solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
     complexity = models.IntegerField(default=0, choices=RUNTIMES)
     links = models.TextField(default="No links.")
@@ -102,6 +102,7 @@ class Solution(models.Model):
         self.links_html = get_html(self.links)
         self.example_code_html = get_html(self.example_code)
         super(Solution, self).save(*args, **kwargs)
+
 
 class Challenge(models.Model):
     date = models.DateField()
