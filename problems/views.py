@@ -272,7 +272,7 @@ class Upload(View):
                             categories += problem_pdf_content[line]+'\n'
 
                 problem = Problem()
-                problem.title = title +" 1"
+                problem.title = title+" 2"
                 problem.save()
                 add_category(categories, problem)
                 problem_form = ProblemForm(instance=problem)
@@ -293,7 +293,7 @@ class Upload(View):
             'categories': ",".join([cat.name for cat in problem.categories.all()]),
         }
         messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
-        return render(request, 'problems/edit_problem.html', context)
+        return render(request, 'problems/add_problem_from_pdf.html', context)
 
     def get_file_name(self, file):
         return file.split('<In MemoryUploadedFile: ')
@@ -317,30 +317,30 @@ class Upload(View):
             lines_on_page = iter(range(out_of_range))
             for line in lines_on_page:
                 section = list_of_lines[line]
-                next_section = list_of_lines[line+1]
                 #end of file, just append the line
                 if line == max_index:
                     actual_lines.append(section)
                 #otherwise
                 else:
+                    next_section = list_of_lines[line+1]
                     #if the next line is just a blank line, append both and continue from the line after the blank one
                     if list_of_lines[line+1] == ' ':
                         actual_lines.append(section)
                         actual_lines.append(next_section)
-                        self.consume(lines_on_page, 2)
+                        self.consume(lines_on_page, 1)
                     else:
                         temp_line = line
                         paragraph = ""
-                        if section != ' ':
-                            paragraph += section+next_section
-                            temp_line+1
+                        while section != ' ':
+                            paragraph+=section
+                            temp_line += 1
                             section = list_of_lines[temp_line]
-                            next_section = list_of_lines[temp_line+1]
                         actual_lines.append(paragraph)
                         self.consume(lines_on_page, temp_line-line)
 
         print(list_of_lines)
         print(actual_lines)
+        pdf_file.close()
         return actual_lines
 
 
