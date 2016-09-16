@@ -76,11 +76,12 @@ class Content(models.Model):
 
 
 class Solution(models.Model):
-    RUNTIMES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
+    COMPLEXITIES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
     problem = models.ForeignKey(Problem)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
-    complexity = models.IntegerField(default=0, choices=RUNTIMES)
+    complexity = models.IntegerField(default=0, choices=COMPLEXITIES)
+    time_limit = models.FloatField(default=0)
     links = models.TextField(default="No links.")
     links_html = models.TextField()
     example_code = models.TextField(default="No example solution code.")

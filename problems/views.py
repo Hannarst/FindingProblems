@@ -216,8 +216,6 @@ class Pause(View):
         return render(request, 'problems/pause.html', context)
 
 
-
-
 class Upload(View):
     def get(self, request):
         pdf_form = PDFForm()
@@ -235,21 +233,98 @@ class Upload(View):
                 problem_form = parsed_problem_pdf[1]
                 content_form = parsed_problem_pdf[2]
 
-                solution = Solution()
-                solution.problem = problem
-                solution.save()
-                solution_form = SolutionForm(instance=solution)
-        context = {
-            'problem': problem,
-            'problem_form': problem_form,
-            'content_form': content_form,
-            'solution_form': solution_form,
-            'categories': ",".join([cat.name for cat in problem.categories.all()]),
-        }
-        messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
-        return render(request, 'problems/add_problem_from_pdf.html', context)
+            if request.FILES['solution']:
+                parsed_solution_pdf = self.parse_solution_pdf(pdf_form, problem)
+                solution_form = parsed_solution_pdf[0]
 
-    def parse_problem_pdf(self, pdf_form, ):
+            context = {
+                'problem': problem,
+                'problem_form': problem_form,
+                'content_form': content_form,
+                'solution_form': solution_form,
+                'categories': ",".join([cat.name for cat in problem.categories.all()]),
+            }
+            messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
+            return render(request, 'problems/add_problem_from_pdf.html', context)
+        else:
+            messages.info(request, "Error when uploading file. Please try again.")
+            return redirect('index')
+
+    def parse_solution_pdf(self, pdf_form, problem):
+        HEADINGS = ['complexity', 'links', 'example code', 'language']
+        file_name = self.get_file_name(str(pdf_form.cleaned_data['solution']))[0]
+        solution_pdf_content = self.getPDFContent(file_name)
+        solution_description = ""
+        start_next_section = 1
+        if solution_pdf_content[start_next_section] not in HEADINGS:
+            for line in range(1, len(solution_pdf_content)):
+                if solution_pdf_content[line].lower() in HEADINGS:
+                    start_next_section = line
+                    break
+                else:
+                    solution_description += solution_pdf_content[line]+'\n'
+        complexity = ""
+        links = ""
+        example_code = ""
+        language = ""
+
+        max_index = len(solution_pdf_content)-1
+        not_end_of_file = True
+        while not_end_of_file:
+            if solution_pdf_content[start_next_section].lower() == 'complexity':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        complexity += solution_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'links':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        links += solution_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'example code':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        example_code += solution_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'language':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        language += solution_pdf_content[line]+'\n'
+                        start_next_section += 1
+            start_next_section += 1
+            if start_next_section >= max_index:
+                not_end_of_file = False
+
+        solution = Solution()
+        solution.problem = problem
+        if solution_description != "":
+            solution.solution_description = solution_description
+        #if complexity != "":
+        #    solution.complexity = complexity
+        if links != "":
+            solution.links = links
+        if example_code != "":
+            solution.example_code = example_code
+        if language != "":
+            solution.language = language
+        solution.save()
+        solution_form = SolutionForm(instance=solution)
+
+        return [solution_form]
+
+    def parse_problem_pdf(self, pdf_form):
         HEADINGS = ['sample input', 'sample output', 'categories']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
         problem_pdf_content = self.getPDFContent(file_name)
@@ -298,7 +373,7 @@ class Upload(View):
                 not_end_of_file = False
 
         problem = Problem()
-        problem.title = title
+        problem.title = title +" unique mothafucka. I said unique!"
         problem.save()
         if categories != "":
             add_category(categories, problem)
