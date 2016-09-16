@@ -46,7 +46,6 @@ class Account(models.Model):
 class Category(models.Model):
     name = models.TextField(max_length=200)
     type = models.CharField(max_length=200, default="tag")
-    #private = models.BooleanField(default=False)
 
 
 class Problem(models.Model):
@@ -54,7 +53,7 @@ class Problem(models.Model):
     created_by = models.ForeignKey(User)
     title = models.CharField(max_length=200)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
-    private = models.BooleanField(default=True)
+    problem_privacy = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
     forked_from = models.CharField(max_length=200,default="Original")
 
@@ -81,6 +80,7 @@ class Content(models.Model):
 class Solution(models.Model):
     COMPLEXITIES = Category.objects.filter(name="")
     problem = models.ForeignKey(Problem)
+    solution_privacy = models.BooleanField(default=True)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
     complexity = models.ForeignKey(Category, related_name="complexity")

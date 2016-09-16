@@ -193,9 +193,9 @@ class Index(View):
             difficulty = int(difficulty)
             problems = problems.filter(difficulty=difficulty)
         if privacy == "private":
-            problems = problems.filter(private=True)
+            problems = problems.filter(problem_privacy=True)
         elif privacy == "public":
-            problems = problems.filter(private=False)
+            problems = problems.filter(problem_privacy=False)
 
         if request.user.is_authenticated():
             temp_problems = problems.all()
@@ -207,7 +207,7 @@ class Index(View):
                 for solution in solutions:
                     problems.append(Problem.objects.get(pk=solution.problem.pk))
         else:
-            temp_problems = problems.exclude(private=True)
+            temp_problems = problems.exclude(problem_privacy=True)
             problems = []
             for problem in temp_problems:
                 problems.append(problem)
@@ -215,7 +215,7 @@ class Index(View):
                 solutions = solutions.all()
                 for solution in solutions:
                     p = Problem.objects.get(pk=solution.problem.pk)
-                    if p.private:
+                    if p.problem_privacy:
                         pass
                     else:
                         problems.append(p)
@@ -567,10 +567,10 @@ class EditProblem(View):
         solution_form = SolutionForm(request.POST, instance=solution)
         complexity = request.POST.get('complexity')
         languages = request.POST.get('languages')
-        print(languages)
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
             problem = problem_form.save()
+            print(problem.problem_privacy)
             add_category(categories, problem)
             content = content_form.save(commit=False)
             content.problem = problem
