@@ -230,68 +230,11 @@ class Upload(View):
         pdf_form = PDFForm(request.POST, request.FILES)
         if pdf_form.is_valid():
             if request.FILES['problem']:
-                HEADINGS = ['sample input', 'sample output', 'categories']
-                file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
-                problem_pdf_content = self.getPDFContent(file_name)
-                title = problem_pdf_content[0]
-                problem_description = ""
-                start_next_section = 1
-                if problem_pdf_content[start_next_section] not in HEADINGS:
-                    for line in range(1, len(problem_pdf_content)):
-                        if problem_pdf_content[line].lower() in HEADINGS:
-                            start_next_section = line
-                            break
-                        else:
-                            problem_description += problem_pdf_content[line]+'\n'
-                sample_input = ""
-                sample_output = ""
-                categories = ""
-                max_index = len(problem_pdf_content)-1
-                not_end_of_file = True
-                while not_end_of_file:
-                    if problem_pdf_content[start_next_section].lower() == 'sample input':
-                        start = start_next_section+1
-                        for line in range(start, len(problem_pdf_content)):
-                            if problem_pdf_content[line].lower() in HEADINGS:
-                                break
-                            else:
-                                sample_input += problem_pdf_content[line]+'\n'
-                                start_next_section += 1
-                    elif problem_pdf_content[start_next_section].lower() == 'sample output':
-                        start = start_next_section+1
-                        for line in range(start, len(problem_pdf_content)):
-                            if problem_pdf_content[line].lower() in HEADINGS:
-                                break
-                            else:
-                                sample_output += problem_pdf_content[line]+'\n'
-                                start_next_section += 1
-                    elif problem_pdf_content[start_next_section].lower() == 'categories':
-                        start = start_next_section+1
-                        for line in range(start, len(problem_pdf_content)):
-                            if problem_pdf_content[line].lower() in HEADINGS:
-                                break
-                            else:
-                                categories += problem_pdf_content[line]+'\n'
-                                start_next_section += 1
-                    start_next_section += 1
-                    if start_next_section >= max_index:
-                        not_end_of_file = False
+                parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
+                problem = parsed_problem_pdf[0]
+                problem_form = parsed_problem_pdf[1]
+                content_form = parsed_problem_pdf[2]
 
-                problem = Problem()
-                problem.title = title+" 5"
-                problem.save()
-                if categories != "":
-                    add_category(categories, problem)
-                problem_form = ProblemForm(instance=problem)
-                content = Content()
-                content.problem_description = problem_description
-                content.problem = problem
-                if sample_input != "":
-                    content.example_input = sample_input
-                if sample_output != "":
-                    content.example_output = sample_output
-                content.save()
-                content_form = ContentForm(instance=content)
                 solution = Solution()
                 solution.problem = problem
                 solution.save()
@@ -305,6 +248,72 @@ class Upload(View):
         }
         messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
         return render(request, 'problems/add_problem_from_pdf.html', context)
+
+    def parse_problem_pdf(self, pdf_form, ):
+        HEADINGS = ['sample input', 'sample output', 'categories']
+        file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
+        problem_pdf_content = self.getPDFContent(file_name)
+        title = problem_pdf_content[0]
+        problem_description = ""
+        start_next_section = 1
+        if problem_pdf_content[start_next_section] not in HEADINGS:
+            for line in range(1, len(problem_pdf_content)):
+                if problem_pdf_content[line].lower() in HEADINGS:
+                    start_next_section = line
+                    break
+                else:
+                    problem_description += problem_pdf_content[line]+'\n'
+        sample_input = ""
+        sample_output = ""
+        categories = ""
+        max_index = len(problem_pdf_content)-1
+        not_end_of_file = True
+        while not_end_of_file:
+            if problem_pdf_content[start_next_section].lower() == 'sample input':
+                start = start_next_section+1
+                for line in range(start, len(problem_pdf_content)):
+                    if problem_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        sample_input += problem_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif problem_pdf_content[start_next_section].lower() == 'sample output':
+                start = start_next_section+1
+                for line in range(start, len(problem_pdf_content)):
+                    if problem_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        sample_output += problem_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif problem_pdf_content[start_next_section].lower() == 'categories':
+                start = start_next_section+1
+                for line in range(start, len(problem_pdf_content)):
+                    if problem_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        categories += problem_pdf_content[line]+'\n'
+                        start_next_section += 1
+            start_next_section += 1
+            if start_next_section >= max_index:
+                not_end_of_file = False
+
+        problem = Problem()
+        problem.title = title
+        problem.save()
+        if categories != "":
+            add_category(categories, problem)
+        problem_form = ProblemForm(instance=problem)
+        content = Content()
+        content.problem_description = problem_description
+        content.problem = problem
+        if sample_input != "":
+            content.example_input = sample_input
+        if sample_output != "":
+            content.example_output = sample_output
+        content.save()
+        content_form = ContentForm(instance=content)
+
+        return [problem, problem_form, content_form]
 
     def get_file_name(self, file):
         return file.split('<In MemoryUploadedFile: ')
@@ -386,7 +395,6 @@ class AddProblem(View):
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
-
 
 
 class EditProblem(View):
