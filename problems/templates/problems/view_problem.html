@@ -7,7 +7,7 @@
 
             <div style="position:relative">
                 <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
-                <div style="margin-left:30px;"> Complexity: {{solution.get_complexity_display}}</div>
+                <div style="margin-left:30px;"> Complexity: {{solution.complexity.name}}</div>
             </div>
             {% if user.is_authenticated %}
             <div class="pull-right">
@@ -49,16 +49,6 @@
                     </div>
                     <div class="panel-body">
                         {{content.example_output_html|safe}}
-                    </div>
-                </div>
-            {% endif %}
-            {% if content.examples != "No example(s) provided." %}
-                <div class="panel panel-default">
-                    <div class="panel-heading clearfix" style="...">
-                        <h4>Examples</h4>
-                    </div>
-                    <div class="panel-body">
-                        {{content.examples_html|safe}}
                     </div>
                 </div>
             {% endif %}

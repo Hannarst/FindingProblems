@@ -45,6 +45,7 @@ class Account(models.Model):
 
 class Category(models.Model):
     name = models.TextField(max_length=200)
+    type = models.CharField(max_length=200, default="tag")
 
 
 class Problem(models.Model):
@@ -76,11 +77,11 @@ class Content(models.Model):
 
 
 class Solution(models.Model):
-    COMPLEXITIES = zip(range(7), ['O(n!)', 'O(2^n)', 'O(n^2)', 'O(nlogn)', 'O(n)', 'O(logn)', 'O(1)'])
+    COMPLEXITIES = Category.objects.filter(name="")
     problem = models.ForeignKey(Problem)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
-    complexity = models.IntegerField(default=0, choices=COMPLEXITIES)
+    complexity = models.ForeignKey(Category)
     time_limit = models.FloatField(default=0)
     links = models.TextField(default="No links.")
     links_html = models.TextField()
@@ -95,8 +96,6 @@ class Solution(models.Model):
         if self.language is None:
             if self.example_code:
                 raise ValidationError("Please provide the language in which the example solution has been coded.")
-        if self.complexity is None:
-            raise ValidationError("Please provide the complexity of the optimal solution to this problem.")
 
     def save(self, *args, **kwargs):
         self.solution_description_html = get_html(self.solution_description)

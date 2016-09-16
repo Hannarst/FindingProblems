@@ -38,10 +38,18 @@ class CreateAccountForm(forms.Form):
         return form_data
 
 
+factorial = Category(name="O(n!)", type="complexity").save()
+exponential = Category(name="O(2^n)", type="complexity").save()
+squared = Category(name='O(n^2)', type="complexity").save()
+n_log_n = Category(name='O(nlogn)', type="complexity").save()
+n = Category(name='O(n)', type="complexity").save()
+log_n = Category(name='O(logn)', type="complexity").save()
+constant = Category(name='O(1)', type="complexity").save()
+
 class SolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
-        fields = ('solution_description', 'links', 'example_code', 'language', 'complexity',)
+        fields = ('solution_description', 'links', 'example_code', 'language',)
 
 
 class ContentForm(forms.ModelForm):

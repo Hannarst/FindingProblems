@@ -15,6 +15,10 @@
     {% bootstrap_form content_form %}
     {% bootstrap_form solution_form %}
       <div class="form-group">
+          <label class="control-label" for="id_complexity">Complexity</label>
+          <input class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" value="{{complexity}}" title="" type="text" required="">
+      </div>
+      <div class="form-group">
           <label class="control-label" for="id_categories">Categories</label>
           <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" value="{{categories}}" title="" type="text" required="">
       </div>
