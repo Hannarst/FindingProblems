@@ -21,8 +21,9 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
+
 def SUGGESTED_TAGS():
-    return [str(tag.name) for tag in Category.objects.all()]
+    return [str(tag.name) for tag in Category.objects.filter(type="tag")]
 
 def add_category(categories, problem):
     for cat in categories.split(','):
@@ -30,6 +31,13 @@ def add_category(categories, problem):
         problem.categories.add(category)
         problem.save()
 
+def SUGGESTED_COMPLEXITY():
+    return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
+
+def add_complexity(complexity, solution):
+    complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
+    solution.complexity = complex
+    solution.save()
 
 class Home(View):
     def get(self, request):
@@ -154,8 +162,12 @@ class Index(View):
         if challenge_id:
             challenge = get_object_or_404(Challenge, pk=challenge_id)
         if categories:
+            solutions = Solution.objects.filter(
+                complexity__name__in=[x.lower().strip() for x in categories.split(',')],
+            ).distinct()
             problems = problems.filter(
-                categories__name__in=[x.lower().strip() for x in categories.split(',')]).distinct()
+                categories__name__in=[x.lower().strip() for x in categories.split(',')],
+            ).distinct()
         else:
             categories = ""
         if difficulty:
@@ -167,11 +179,30 @@ class Index(View):
             problems = problems.filter(private=False)
 
         if request.user.is_authenticated():
-            problems = problems.all()
+            temp_problems = problems.all()
+            problems = []
+            for problem in temp_problems:
+                problems.append(problem)
+            if categories:
+                solutions = solutions.all()
+                for solution in solutions:
+                    problems.append(Problem.objects.get(pk=solution.problem.pk))
         else:
-            problems = problems.exclude(private=True)
+            temp_problems = problems.exclude(private=True)
+            problems = []
+            for problem in temp_problems:
+                problems.append(problem)
+            if categories:
+                solutions = solutions.all()
+                for solution in solutions:
+                    p = Problem.objects.get(pk=solution.problem.pk)
+                    if p.private:
+                        pass
+                    else:
+                        problems.append(p)
+        suggested_tags = SUGGESTED_TAGS()+SUGGESTED_COMPLEXITY()
         context = {
-            'suggested_tags': SUGGESTED_TAGS,
+            'suggested_tags': suggested_tags,
             'problems': problems,
             'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
             'searched_categories': categories,
@@ -206,14 +237,6 @@ class ViewProblem(View):
             'categories': categories,
         }
         return render(request, 'problems/view_problem.html', context)
-
-
-class Pause(View):
-    def get(self, request):
-        context = {
-
-        }
-        return render(request, 'problems/pause.html', context)
 
 
 class Upload(View):
@@ -311,8 +334,8 @@ class Upload(View):
         solution.problem = problem
         if solution_description != "":
             solution.solution_description = solution_description
-        #if complexity != "":
-        #    solution.complexity = complexity
+        if complexity != "":
+            add_complexity(complexity, solution)
         if links != "":
             solution.links = links
         if example_code != "":
@@ -445,6 +468,7 @@ class AddProblem(View):
         solution_form = SolutionForm()
         context = {
             'suggested_tags': SUGGESTED_TAGS,
+            'suggested_complexity': SUGGESTED_COMPLEXITY,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form
@@ -455,6 +479,7 @@ class AddProblem(View):
         problem_form = ProblemForm(request.POST)
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
+        complexity = request.POST.get('complexity')
         categories = request.POST.get('categories')
 
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
@@ -465,6 +490,8 @@ class AddProblem(View):
             content.save()
             solution = solution_form.save(commit=False)
             solution.problem = problem
+            if complexity:
+                add_complexity(complexity, solution)
             solution.save()
             messages.success(request, 'Problem Added')
         else:
@@ -478,6 +505,7 @@ class EditProblem(View):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
+        complexity = solution.complexity
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
@@ -486,9 +514,11 @@ class EditProblem(View):
 
         context = {
             'suggested_tags': SUGGESTED_TAGS,
+            'suggested_complexity': SUGGESTED_COMPLEXITY,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
+            'complexity': complexity.name,
             'categories': categories,
         }
         return render(request, 'problems/edit_problem.html', context)
@@ -500,6 +530,7 @@ class EditProblem(View):
         problem_form = ProblemForm(request.POST, instance=problem)
         content_form = ContentForm(request.POST, instance=content)
         solution_form = SolutionForm(request.POST, instance=solution)
+        complexity = request.POST.get('complexity')
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
             problem = problem_form.save()
@@ -509,6 +540,7 @@ class EditProblem(View):
             content.save()
             solution = solution_form.save(commit=False)
             solution.problem = problem
+            add_complexity(complexity, solution)
             solution.save()
             messages.success(request, 'Problem Edited')
         else:
@@ -522,6 +554,7 @@ class ForkProblem(View):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
+        complexity = solution.complexity
         categories = ",".join([cat.name for cat in problem.categories.all()])
 
         problem_form = ProblemForm(instance=problem)
@@ -530,9 +563,11 @@ class ForkProblem(View):
 
         context = {
             'suggested_tags': SUGGESTED_TAGS,
+            'suggested_complexity': SUGGESTED_COMPLEXITY,
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
+            'complexity': complexity.name,
             'categories': categories,
             'fork': True,
         }
@@ -543,6 +578,7 @@ class ForkProblem(View):
         problem_form = ProblemForm(request.POST)
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
+        complexity = request.POST.get('complexity')
         categories = request.POST.get('categories')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
             forked_problem = problem_form.save(commit=False)
@@ -557,6 +593,7 @@ class ForkProblem(View):
             forked_solution = solution_form.save(commit=False)
             forked_solution.pk = None
             forked_solution.problem = forked_problem
+            add_complexity(complexity, forked_solution)
             forked_solution.save()
             messages.success(request, 'Problem Forked')
         else:

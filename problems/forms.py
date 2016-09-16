@@ -38,13 +38,13 @@ class CreateAccountForm(forms.Form):
         return form_data
 
 
-factorial = Category(name="O(n!)", type="complexity").save()
-exponential = Category(name="O(2^n)", type="complexity").save()
-squared = Category(name='O(n^2)', type="complexity").save()
-n_log_n = Category(name='O(nlogn)', type="complexity").save()
-n = Category(name='O(n)', type="complexity").save()
-log_n = Category(name='O(logn)', type="complexity").save()
-constant = Category(name='O(1)', type="complexity").save()
+factorial = Category.objects.get_or_create(name="o(n!)", type="complexity")
+exponential = Category.objects.get_or_create(name="o(2^n)", type="complexity")
+squared = Category.objects.get_or_create(name='o(n^2)', type="complexity")
+n_log_n = Category.objects.get_or_create(name='o(nlogn)', type="complexity")
+n = Category.objects.get_or_create(name='o(n)', type="complexity")
+log_n = Category.objects.get_or_create(name='o(logn)', type="complexity")
+constant = Category.objects.get_or_create(name='o(1)', type="complexity")
 
 class SolutionForm(forms.ModelForm):
     class Meta:
