@@ -1,9 +1,19 @@
 {% load bootstrap3 %}
 <form method="POST" class="post-form">{% csrf_token %}
     <div class="panel-body">
-        {% bootstrap_form problem_form %}
-        {% bootstrap_form content_form %}
-        {% bootstrap_form solution_form %}
+        <div class="panel-heading">
+            <h4>Problem</h4>
+        </div>
+        <div class="panel-body" name="problem">
+            {% bootstrap_form problem_form %}
+            {% bootstrap_form content_form %}
+        </div>
+        <div class="panel-heading">
+            <h4>Solution</h4>
+        </div>
+        <div class="panel-body" name="solution">
+            {% bootstrap_form solution_form %}
+        </div>
         <div class="form-group">
             <label class="control-label" for="id_complexity">Complexity</label>
             <input class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" type="text" required="" value="{{ complexity }}">
