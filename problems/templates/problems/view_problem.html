@@ -7,7 +7,10 @@
 
                 <div style="position:relative">
                     <div style="margin-left:30px;"> Difficulty: {{problem.get_difficulty_display}} </div>
-                    <div style="margin-left:30px;"> Complexity: {{solution.complexity.name}}</div>
+                    {% if not solution.solution_privacy %}
+                        <div style="margin-left:30px;"> Complexity: {{solution.complexity.name}}</div>
+                        <div style="margin-left:30px;"> Time limit: {{ solution.time_limit }} seconds</div>
+                    {% endif %}
                 </div>
                 {% if user.is_authenticated %}
                     <div class="pull-right">
@@ -79,6 +82,11 @@
                     <h3> Solution </h3>
                 </div>
                 <div class="panel-body">
+                {% if solution.solution_privacy and not user.is_authenticated %}
+                <p>
+                    This solution is not publically available.
+                </p>
+                {% else %}
                     {% if solution.all_defaults %}
                         <p>
                         No solution has been provided.
@@ -86,17 +94,31 @@
                     {% else %}
                         {% if solution.solution_description != 'No solution description has been provided.' %}
                             <div class="panel panel-default">
-                                <div class="panel-heading clearfix" style="...">
+                                <div class="panel-heading clearfix" style="overflow:auto">
                                     <h4>Solution description:</h4>
                                 </div>
                                 <div class="panel-body">
                                     {{solution.solution_description_html|safe}}
                                 </div>
+                            <div class="panel-footer">
+                               <div style="overflow:auto">
+                                   <span> Algorithms: </span>
+                                   {% for algorithm in algorithms %}
+                                       <a class="category btn btn-xs btn-info" href="{% url 'index' %}?algorithm={{algorithm.name}}">{{ algorithm }}</a>
+                                   {% endfor %}
+                               </div>
+                                <div style="overflow:auto">
+                                    <span> Data structures: </span>
+                                    {% for ds in data_structures %}
+                                        <a class="category btn btn-xs btn-info" href="{% url 'index' %}?data_structures={{ds.name}}">{{ ds }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
                             </div>
                         {% endif %}
                         {% if solution.links != "No links." %}
                             <div class="panel panel-default">
-                                <div class="panel-heading clearfix" style="...">
+                                <div class="panel-heading clearfix" style="position:relative">
                                     <h4>Link(s) to external sources:</h4>
                                 </div>
                                 <div class="panel-body">
@@ -105,10 +127,11 @@
                             </div>
                         {% endif %}
                     {% endif %}
+                {% endif %}
                 </div>
                 {% if solution.example_code != "No example solution code." %}
                     <div class="panel panel-default">
-                        <div class="panel-heading clearfix" style="...">
+                        <div class="panel-heading clearfix" style="position:relative">
                             <h4>Example code:</h4>
                         </div>
                         <div class="panel-body">

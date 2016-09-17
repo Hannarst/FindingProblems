@@ -59,7 +59,7 @@ def SUGGESTED_ALGORITHMS():
 def add_algorithms(algorithms, solution):
     for a in algorithms.split(','):
         algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
-        solution.categories.add(algorithm)
+        solution.algorithms.add(algorithm)
         solution.save()
 
 def SUGGESTED_DATA_STRUCTURES():
@@ -68,7 +68,7 @@ def SUGGESTED_DATA_STRUCTURES():
 def add_ds(data_structures, solution):
    for ds in data_structures:
        data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
-       solution.categories.add(data_structure)
+       solution.data_structures.add(data_structure)
        solution.save()
 
 class Home(View):
@@ -187,75 +187,28 @@ class Index(View):
     def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
         challenge = ""
-        problems = Problem.objects
+        problems = Problem.objects.all()
+        solutions = Solution.objects.all()
+
+        #determine whether to return full index or a search results
         paradigms = request.GET.get('paradigms')
         languages = request.GET.get('languages')
         algorithms = request.GET.get('algorithms')
         complexity = request.GET.get('complexity')
         data_structures = request.GET.get('data_structures')
-
-        search_categories = False
-        if paradigms or languages or algorithms or complexity or data_structures:
-            search_categories = True
         difficulty = request.GET.get('difficulty')
-        privacy = request.GET.get('privacy')
+        visibility = request.GET.get('visibility')
 
-        if challenge_id:
-            challenge = get_object_or_404(Challenge, pk=challenge_id)
-
-        if search_categories:
-            solutions_complexity = Solution.objects.filter(
-                complexity__name__in=[x.lower().strip() for x in complexity.split(',')],
-            ).distinct()
-            solutions_language = Solution.objects.filter(
-                language__name__in=[x.lower().strip() for x in languages.split(',')],
-            ).distinct()
-            solutions_algorithms = Solution.objects.filter(
-                algorithms__name__in=[x.lower().strip() for x in algorithms.split(',')]
-            ).distinct()
-            solution_data_structures = Solution.objects.filter(
-                data_structures__name__in=[x.lower().strip() for x in data_structures.split(',')]
-            ).distinct()
-            solutions = solutions_complexity|solutions_language|solution_data_structures|solutions_algorithms
-            problems = problems.filter(
-                categories__name__in=[x.lower().strip() for x in paradigms.split(',')],
-            ).distinct()
-        else:
-            paradigms = ""
-            languages = ""
-            algorithms = ""
-            complexity = ""
-            data_structures = ""
-        if difficulty:
-            difficulty = int(difficulty)
-            problems = problems.filter(difficulty=difficulty)
-        if privacy == "private":
-            problems = problems.filter(problem_privacy=True)
-        elif privacy == "public":
-            problems = problems.filter(problem_privacy=False)
-
+        #a normal index view should be the same as a search where all parameters are empty strings
         if request.user.is_authenticated():
-            temp_problems = problems.all()
-            problems = []
-            for problem in temp_problems:
-                problems.append(problem)
-            if search_categories:
-                solutions = solutions.all()
-                for solution in solutions:
-                    problems.append(Problem.objects.get(pk=solution.problem.pk))
+            problems = self.auth_user_search(problems, solutions, paradigms, languages, complexity, algorithms, languages, difficulty, visibility)
+
+            #only an authenticated user can edit and make challenges, so best have this here
+            if challenge_id:
+                challenge = get_object_or_404(Challenge, pk=challenge_id)
         else:
-            problems = []
-            for problem in problems:
-                if not problem.problem_privacy:
-                    problems.append(problem)
-            if search_categories:
-                solutions = solutions.all()
-                for solution in solutions:
-                    p = Problem.objects.get(pk=solution.problem.pk)
-                    if p.problem_privacy:
-                        pass
-                    else:
-                        problems.append(p)
+            problems = self.normal_search(problems, solutions, paradigms, languages, complexity, languages, difficulty, visibility)
+
         suggested_paradigms = SUGGESTED_PARADIGMS()
         suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
         suggested_complexity = SUGGESTED_COMPLEXITY()
@@ -268,17 +221,107 @@ class Index(View):
             'suggested_algorithms': suggested_algorithms,
             'suggested_languages': suggested_languages,
             'problems': problems,
+            'problem_sets': Challenge.objects.all(),
             'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
-            'searched_paradigms': paradigms,
-            'searched_algorithms': algorithms,
-            'searched_complexity': complexity,
-            'searched_data_structures': data_structures,
-            'searched_languages': languages,
-            'searched_difficulty': difficulty,
-            'searched_privacy': privacy,
+            'searched_paradigms': "" if paradigms==None else paradigms,
+            'searched_algorithms': "" if algorithms==None else algorithms,
+            'searched_complexity': "" if complexity==None else complexity,
+            'searched_data_structures': "" if data_structures==None else data_structures,
+            'searched_languages': "" if languages==None else languages,
+            'searched_difficulty': "" if difficulty==None else difficulty,
+            'searched_visibility': "" if visibility==None else visibility,
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)
+
+    def auth_user_search(self, problems, solutions, paradigms, data_structures, complexity, algorithms, languages, difficulty, visibility):
+        #filter problem objects
+        if paradigms:
+            problems_by_cat = problems.filter(
+                categories__name__in=[p.lower().strip() for p in paradigms.split(',')]
+            ).distinct()
+        else:
+            problems_by_cat = problems
+        if difficulty:
+            problems_by_diff = problems.filter(difficulty=difficulty).distinct()
+        else:
+            problems_by_diff = problems
+        filtered_problems = problems_by_cat|problems_by_diff
+        if visibility == "private":
+            problems_by_vis = problems.filter(problem_privacy=True)
+            filtered_problems = filtered_problems|problems_by_vis
+        elif visibility == "public":
+            problems_by_vis = problems.filter(problem_privacy=False)
+            filtered_problems = filtered_problems|problems_by_vis
+
+        #filter solution objects
+        if languages:
+            solutions_by_lang = solutions.filter(
+                language__name__in=[lang.lower().strip() for lang in languages.split(',')]
+            ).distinct()
+        else:
+            solutions_by_lang = solutions
+        if algorithms:
+            solutions_by_alg = solutions.filter(
+                algorithms__name__in=[alg.lower().strip() for alg in algorithms.split(',')]
+            ).distinct()
+        else:
+            solutions_by_alg = solutions
+        if complexity:
+            solutions_by_c = solutions.filter(
+                complexity__name__in=[c.lower().strip() for c in complexity.split(',')]
+            ).distinct()
+        else:
+            solutions_by_c = solutions
+        if data_structures:
+            solutions_by_ds = solutions.filter(
+                data_structures__name__in=[ds.lower().strip() for ds in data_structures.split(',')]
+            ).distinct()
+        else:
+            solutions_by_ds  = solutions
+        filtered_solutions = solutions_by_lang|solutions_by_alg|solutions_by_c|solutions_by_ds
+
+        _problems = []
+
+        for problem in filtered_problems.all():
+            _problems.append(problem)
+        for solution in filtered_solutions.all():
+            if solution.problem not in _problems:
+                _problems.append(solution.problem)
+        return _problems
+
+    def normal_search(self, problems, solutions, paradigms, data_structures, complexity, algorithms, languages, difficulty):
+        #filter problem objects
+        problems_by_cat = problems.filter(
+            categories__name__in=[p.lower().strip() for p in paradigms.split(',')]
+        ).distinct()
+        problems_by_diff = problems.filter(difficulty=difficulty).distinct()
+        problems_by_vis = problems.filter(problem_privacy=False).distinct()
+        filtered_problems = problems_by_cat|problems_by_diff|problems_by_vis
+
+        #filter solution objects
+        solutions_by_lang = solutions.filter(
+            language__name__in=[lang.lower().strip() for lang in languages.split(',')]
+        ).distinct()
+        solutions_by_alg = solutions.filter(
+            algorithms__name__in=[alg.lower().strip() for alg in algorithms.split(',')]
+        ).distinct()
+        solutions_by_c = solutions.filter(
+            complexity__name__in=[c.lower().strip() for c in complexity.split(',')]
+        ).distinct()
+        solutions_by_ds = solutions.filter(
+            data_structures__name__in=[ds.lower().strip() for ds in data_structures.split(',')]
+        ).distinct()
+        filtered_solutions = solutions_by_lang|solutions_by_alg|solutions_by_c|solutions_by_ds
+
+        _problems = []
+
+        for problem in filtered_problems.all():
+            _problems.append(problem)
+        for solution in filtered_solutions.all():
+            if solution.problem not in _problems and not solution.problem.problem_privacy:
+                _problems.append(solution.problem)
+        return _problems
 
 
 class ViewProblem(View):
@@ -315,7 +358,7 @@ class ViewProblem(View):
 
 class Upload(View):
 
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
         context = {
@@ -537,7 +580,7 @@ class Upload(View):
 
 
 class AddProblem(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -567,7 +610,7 @@ class AddProblem(View):
         languages = request.POST.get('languages')
         paradigms = request.POST.get('paradigms')
         algorithms = request.POST.get('algorithms')
-        data_structures = request.get('data_structures')
+        data_structures = request.POST.get('data_structures')
 
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
             problem = problem_form.save(commit=False)
@@ -596,7 +639,7 @@ class AddProblem(View):
 
 
 class EditProblem(View):
-    #@method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -668,7 +711,7 @@ class EditProblem(View):
 
 
 class ForkProblem(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -740,7 +783,7 @@ class ForkProblem(View):
 
 
 class DeleteProblem(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         Content.objects.get(problem=problem).delete()
@@ -750,7 +793,7 @@ class DeleteProblem(View):
 
 
 class ChallengeIndex(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request):
         context = {
             'challenges': Challenge.objects.all(),
@@ -759,7 +802,7 @@ class ChallengeIndex(View):
 
 
 class EditChallenge(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
@@ -780,7 +823,7 @@ class EditChallenge(View):
 
 
 class ViewChallenge(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request, challenge_id):
         request.session['challenge_id'] = challenge_id
         context = {
@@ -804,7 +847,7 @@ class QuitEditingChallenge(View):
 
 
 class AddChallenge(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def get(self, request):
         form = ChallengeForm()
         context = {
@@ -824,7 +867,7 @@ class AddChallenge(View):
 
 
 class AddToChallenge(View):
-    #@method_decorator(login_required)
+    method_decorator(login_required)
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))

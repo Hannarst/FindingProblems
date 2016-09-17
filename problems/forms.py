@@ -39,9 +39,10 @@ class CreateAccountForm(forms.Form):
 
 
 class SolutionForm(forms.ModelForm):
+    time_limit = forms.FloatField(label="Time limit (s)")
     class Meta:
         model = Solution
-        fields = ('solution_description', 'links', 'example_code', "solution_privacy")
+        fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
 
 
 class ContentForm(forms.ModelForm):
@@ -67,16 +68,8 @@ class ChallengeForm(forms.ModelForm):
 
 
 class PDFForm(forms.Form):
-    problem = forms.FileField()
-    solution = forms.FileField()
-
-    def clean(self):
-        form_data = self.cleaned_data
-        if form_data['problem'] == None:
-            pass
-        if form_data['solution'] == None:
-            pass
-        return form_data
+    problem = forms.FileField(required=False)
+    solution = forms.FileField(required=False)
 
 #default complexities
 Category.objects.get_or_create(name="o(n!)", type="complexity")

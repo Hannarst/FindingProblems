@@ -1,13 +1,13 @@
 {% if not problem in challenge.problems.all %}
   {% if request.session.challenge_id %}
 <form method="post" action="{% url 'add_to_challenge' challenge.id problem.id %}">{% csrf_token %}
-<button type="submit" class="btn btn-xs btn-success">Add to challenge</button>
+<button type="submit" class="btn btn-xs btn-success">Add to problem set</button>
 </form>
 {% endif %}
 {% else %}
 {% if request.session.challenge_id %}
 <form method="post" action="{% url 'remove_from_challenge' challenge.id problem.id %}">{% csrf_token %}
-  <button type="submit" class="btn btn-xs btn-danger">Remove from challenge</button>
+  <button type="submit" class="btn btn-xs btn-danger">Remove from problem set</button>
 </form>
 {% endif %}
 {% endif %}
