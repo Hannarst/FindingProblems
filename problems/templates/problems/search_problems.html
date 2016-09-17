@@ -1,0 +1,32 @@
+<form role="search" method="get" class="form-inline">
+
+{% include 'problems/problem_categorisation.html' %}
+{% include 'problems/solution_categorisation.html' %}
+    <div class="form-group">
+        <label for="id_difficulty" class="sr-only">Difficulty:</label>
+        <select id="id_difficulty" name="difficulty" class="input-sm form-control">
+            <option value="">Difficulty (any)</option>
+            {% for val, choice in difficulties %}
+                {% if val == searched_difficulty %}
+                    <option value="{{val}}" selected="selected">{{choice}}</option>
+                {% else %}
+                    <option value="{{val}}">{{choice}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    {% if user.is_authenticated %}
+        <div class="form-group">
+            <label for="id_visibility" class="sr-only">Visibility:</label>
+            <select id="id_visibility" name="visibility" class="input-sm form-control">
+                <option value="">Visibility (any)</option>
+                <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
+                <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
+            </select>
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        <button class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-search"></i></button>
+    </div>
+</form>

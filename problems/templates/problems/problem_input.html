@@ -8,24 +8,14 @@
             {% bootstrap_form problem_form %}
             {% bootstrap_form content_form %}
         </div>
+        {% include 'problems/problem_categorisation.html' %}
         <div class="panel-heading">
             <h4>Solution</h4>
         </div>
         <div class="panel-body" name="solution">
             {% bootstrap_form solution_form %}
         </div>
-        <div class="form-group">
-            <label class="control-label" for="id_complexity">Complexity</label>
-            <input class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" type="text" required="" value="{{ complexity }}">
-        </div>
-        <div class="form-group">
-            <label class="control-label" for="id_languages">Languages</label>
-            <input class="form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" title="" type="text" required="" value="{{ languages }}">
-        </div>
-        <div class="form-group">
-            <label class="control-label" for="id_categories">Categories</label>
-            <input class="form-control" id="id_categories" maxlength="1000" name="categories" placeholder="Categories" title="" type="text" required="" value="{{ categories }}">
-        </div>
+        {% include 'problems/solution_categorisation.html' %}
     </div>
     <div class="panel-footer">
         <button type="submit" class="save btn btn-success">Save</button>

@@ -16,12 +16,40 @@
   {% autoescape off %}
   <script type="text/javascript">
       $(document).ready(function() {
-          $("#id_categories").tagit({
-            {% if suggested_tags %}
-              availableTags: {{suggested_tags}},
+          $("#id_paradigms").tagit({
+            {% if suggested_paradigms %}
+              availableTags: {{suggested_paradigms}},
             {% endif %}
             singleField: false,
-            placeholderText: "Categories"
+            placeholderText: "Paradigms"
+          });
+          $("#id_algorithms").tagit({
+              {% if suggested_algorithms %}
+                  availableTags: {{suggested_algorithms}},
+              {% endif %}
+              singleField: false,
+              placeholderText: "Algorithms"
+          });
+          $("#id_languages").tagit({
+              {% if suggested_languages %}
+                  availableTags: {{suggested_languages}},
+              {% endif %}
+              singleField: false,
+              placeholderText: "Languages"
+          });
+          $("#id_data_structures").tagit({
+              {% if suggested_data_structures %}
+                  availableTags: {{suggested_data_structures}},
+              {% endif %}
+              singleField: false,
+              placeholderText: "Data Structures"
+          });
+          $("#id_complexity").tagit({
+              {% if suggested_complexity %}
+                  availableTags: {{suggested_complexity}},
+              {% endif %}
+              singleField: false,
+              placeholderText: "Complexity"
           });
           $("ul.tagit").addClass("list-unstyled form-control input-sm");
           $("ul.tagit").css("margin-bottom", "0px")
