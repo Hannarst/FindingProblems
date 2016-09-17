@@ -7,15 +7,15 @@
         <div class="panel-body" name="problem">
             {% bootstrap_form problem_form %}
             {% bootstrap_form content_form %}
+            {% include 'problems/problem_categorisation.html' %}
         </div>
-        {% include 'problems/problem_categorisation.html' %}
         <div class="panel-heading">
             <h4>Solution</h4>
         </div>
         <div class="panel-body" name="solution">
             {% bootstrap_form solution_form %}
+            {% include 'problems/solution_categorisation.html' %}
         </div>
-        {% include 'problems/solution_categorisation.html' %}
     </div>
     <div class="panel-footer">
         <button type="submit" class="save btn btn-success">Save</button>

@@ -6,7 +6,7 @@
         <th>Difficulty</th>
         <th>Forked from</th>
         {% if user.is_authenticated %}
-            <th>Private</th>
+            <th>Visibility</th>
             <th>Last used</th>
         {% endif %}
         {% if challenge %}
@@ -35,7 +35,13 @@
                 {% endif %}
             </td>
             {% if user.is_authenticated %}
-                <td>{{problem.private}}</td>
+                <td>
+                    {% if problem.problem_privacy %}
+                        Private
+                    {% else %}
+                        Public
+                    {% endif %}
+                </td>
                 <td>
                     {% for prob_set in problem_sets %}
                         {% if problem in prob_set %}

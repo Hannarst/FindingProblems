@@ -1,4 +1,8 @@
 <div class="form-group">
     <label class="sr-only" for="id_paradigms">Paradigms</label>
+    {% if searched_paradigms %}
     <input  type="hidden" class="input-sm form-control" id="id_paradigms" maxlength="1000" name="paradigms" placeholder="Paradigms" required=False title="" type="text"  value="{{ searched_paradigms }}">
+    {% else %}
+        <input  type="hidden" class="input-sm form-control" id="id_paradigms" maxlength="1000" name="paradigms" placeholder="Paradigms" required=False title="" type="text"  value="{{ paradigms }}">
+    {% endif %}
 </div>

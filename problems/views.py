@@ -25,9 +25,17 @@ def SUGGESTED_PARADIGMS():
     return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
 
 def add_paradigms(paradigms, problem):
+    if problem.categories:
+        remove_paradigms(problem)
     for p in paradigms.split(','):
         paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
         problem.categories.add(paradigm)
+        problem.save()
+
+def remove_paradigms(problem):
+    paradigms = problem.categories.all()
+    for p in paradigms:
+        problem.categories.remove(p)
         problem.save()
 
 def SUGGESTED_COMPLEXITY():
@@ -42,8 +50,10 @@ def SUGGESTED_LANGUAGES():
     return [str(lang.name) for lang in Category.objects.filter(type="language")]
 
 def add_language(langs, solution):
+    if solution.language:
+        remove_languages(solution)
     for lang in langs.split(','):
-        language, l = Category.objects.get_or_create(name=lang.strip().lower())
+        language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
         solution.language.add(language)
         solution.save()
 
@@ -57,19 +67,35 @@ def SUGGESTED_ALGORITHMS():
     return [str(alg.name) for alg in Category.objects.filter(type="algorithm")]
 
 def add_algorithms(algorithms, solution):
+    if solution.algorithms:
+        remove_algorithms(solution)
     for a in algorithms.split(','):
         algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
         solution.algorithms.add(algorithm)
+        solution.save()
+
+def remove_algorithms(solution):
+    algorithms = solution.algorithms.all()
+    for a in algorithms:
+        solution.algorithms.remove(a)
         solution.save()
 
 def SUGGESTED_DATA_STRUCTURES():
     return [str(ds.name) for ds in Category.objects.filter(type="data-structure")]
 
 def add_ds(data_structures, solution):
-   for ds in data_structures:
-       data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
-       solution.data_structures.add(data_structure)
-       solution.save()
+    if solution.data_structures:
+        remove_ds(solution)
+    for ds in data_structures.split(','):
+        data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
+        solution.data_structures.add(data_structure)
+        solution.save()
+
+def remove_ds(solution):
+    ds = solution.data_structures.all()
+    for d in ds:
+        solution.data_structures.remove(d)
+        solution.save()
 
 class Home(View):
     def get(self, request):
@@ -646,7 +672,9 @@ class EditProblem(View):
         solution = Solution.objects.get(problem=problem)
         complexity = solution.complexity
         languages = ','.join([lang.name for lang in solution.language.all()])
-        categories = ",".join([cat.name for cat in problem.categories.all()])
+        paradigms = ",".join([p.name for p in problem.categories.all()])
+        algorithms = ','.join([alg.name for alg in solution.algorithms.all()])
+        data_structures = ','.join([ds.name for ds in solution.data_structures.all()])
 
         problem_form = ProblemForm(instance=problem)
         content_form = ContentForm(instance=content)
@@ -666,9 +694,11 @@ class EditProblem(View):
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
-            'complexity': complexity.name,
+            'complexity': complexity,
+            'data_structures': data_structures,
+            'paradigms': paradigms,
             'languages': languages,
-            'categories': categories,
+            'algorithms': algorithms,
         }
         return render(request, 'problems/edit_problem.html', context)
 
@@ -683,10 +713,9 @@ class EditProblem(View):
         languages = request.POST.get('languages')
         paradigms = request.POST.get('paradigms')
         algorithms = request.POST.get('algorithms')
-        data_structures = request.get('data_structures')
+        data_structures = request.POST.get('data_structures')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
             problem = problem_form.save()
-            print(problem.problem_privacy)
             if paradigms:
                 add_paradigms(paradigms, problem)
             content = content_form.save(commit=False)
@@ -740,7 +769,7 @@ class ForkProblem(View):
             'problem_form': problem_form,
             'content_form': content_form,
             'solution_form': solution_form,
-            'complexity': complexity.name,
+            'complexity': complexity,
             'languages': languages,
             'paradigms': paradigms,
             'data_structures': data_structures,
@@ -756,13 +785,17 @@ class ForkProblem(View):
         solution_form = SolutionForm(request.POST)
         complexity = request.POST.get('complexity')
         languages = request.POST.get('languages')
-        categories = request.POST.get('categories')
-        if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid() and categories:
+        paradigms = request.POST.get('paradigms')
+        algorithms = request.POST.get('algorithms')
+        data_structures = request.POST.get('data_structures')
+        if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
             forked_problem = problem_form.save(commit=False)
+            forked_problem.created_by = request.user
             forked_problem.pk = None
             forked_problem.forked_from = original_problem.title
             forked_problem.save()
-            add_category(categories, forked_problem)
+            if paradigms:
+                add_paradigms(paradigms, forked_problem)
             forked_content = content_form.save(commit=False)
             forked_content.pk = None
             forked_content.problem = forked_problem
@@ -770,12 +803,15 @@ class ForkProblem(View):
             forked_solution = solution_form.save(commit=False)
             forked_solution.pk = None
             forked_solution.problem = forked_problem
-            if languages:
-                add_complexity(complexity, forked_solution)
-                add_language(languages, forked_solution)
-            else:
-                add_complexity(complexity, forked_solution)
             forked_solution.save()
+            if languages:
+                add_language(languages, forked_solution)
+            if complexity:
+                add_complexity(complexity, forked_solution)
+            if algorithms:
+                add_algorithms(algorithms, forked_solution)
+            if data_structures:
+                add_ds(data_structures, forked_solution)
             messages.success(request, 'Problem Forked')
         else:
             messages.error(request, 'Invalid Form')
