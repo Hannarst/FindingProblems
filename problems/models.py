@@ -44,8 +44,12 @@ class Account(models.Model):
 
 
 class Category(models.Model):
+    type_choices = zip(range(3), ("paradigm", "data-structure", "complexity", "algorithm", "language"))
     name = models.TextField(max_length=200)
-    type = models.CharField(max_length=200, default="tag")
+    type = models.CharField(max_length=200, choices=type_choices, default="paradigm")
+
+    class Meta:
+        unique_together = ['name', 'type']
 
 
 class Problem(models.Model):
@@ -54,7 +58,7 @@ class Problem(models.Model):
     title = models.CharField(max_length=200)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
     problem_privacy = models.BooleanField(default=True)
-    categories = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(Category, null=True)
     forked_from = models.CharField(max_length=200,default="Original")
 
     class Meta:
@@ -83,13 +87,15 @@ class Solution(models.Model):
     solution_privacy = models.BooleanField(default=True)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
-    complexity = models.ForeignKey(Category, related_name="complexity")
+    complexity = models.ForeignKey(Category, null=True, related_name="complexity")
     time_limit = models.FloatField(default=0)
     links = models.TextField(default="No links.")
     links_html = models.TextField()
     example_code = models.TextField(default="No example solution code.")
     example_code_html = models.TextField()
-    language = models.ManyToManyField(Category, related_name="language")
+    language = models.ManyToManyField(Category, null=True, related_name="language")
+    data_structures = models.ManyToManyField(Category, null=True, related_name="data_structures")
+    algorithms = models.ManyToManyField(Category, null=True, related_name="algorithms")
 
     def save(self, *args, **kwargs):
         self.solution_description_html = get_html(self.solution_description)
