@@ -21,6 +21,7 @@ Run the below from the FindingProblems directory:
 ```
 $ pip install Django
 $ pip install django-bootstrap3
+$ pip install markdown2
 $ python manage.py makemigrations
 $ python manage.py migrate
 $ python manage.py runserver
