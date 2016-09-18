@@ -367,7 +367,7 @@ class ViewProblem(View):
 
 class Upload(View):
 
-    #method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
         context = {
@@ -623,7 +623,7 @@ class Upload(View):
 
 
 class AddProblem(View):
-    #method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -682,7 +682,7 @@ class AddProblem(View):
 
 
 class EditProblem(View):
-    #@method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -757,7 +757,7 @@ class EditProblem(View):
 
 
 class ForkProblem(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -836,7 +836,7 @@ class ForkProblem(View):
 
 
 class DeleteProblem(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         Content.objects.get(problem=problem).delete()
@@ -846,7 +846,7 @@ class DeleteProblem(View):
 
 
 class ChallengeIndex(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request):
         context = {
             'challenges': Challenge.objects.all(),
@@ -855,7 +855,7 @@ class ChallengeIndex(View):
 
 
 class EditChallenge(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
@@ -876,7 +876,7 @@ class EditChallenge(View):
 
 
 class ViewChallenge(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request, challenge_id):
         request.session['challenge_id'] = challenge_id
         context = {
@@ -900,7 +900,7 @@ class QuitEditingChallenge(View):
 
 
 class AddChallenge(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def get(self, request):
         form = ChallengeForm()
         context = {
@@ -920,7 +920,7 @@ class AddChallenge(View):
 
 
 class AddToChallenge(View):
-    method_decorator(login_required)
+    @method_decorator(login_required)
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))
