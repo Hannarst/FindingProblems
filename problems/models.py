@@ -125,7 +125,7 @@ class Solution(models.Model):
 
 
 class Challenge(models.Model):
+    name = models.CharField(max_length=200)
     date = models.DateField()
     time = models.TimeField(default=datetime.time(0))
-    name = models.CharField(max_length=200)
     problems = models.ManyToManyField(Problem)
