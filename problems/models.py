@@ -105,6 +105,24 @@ class Solution(models.Model):
     def all_defaults(self):
         return self.solution_description=="No solution description has been provided." and self.links=="No links." and self.example_code=="No example solution code."
 
+    def get_all_categories(self):
+        categories = []
+        problem_categories = self.problem.categories.all()
+        for c in problem_categories:
+            categories.append(c)
+        solution_ds = self.data_structures.all()
+        for d in solution_ds:
+            categories.append(d)
+        solution_alg = self.algorithms.all()
+        for a in solution_alg:
+            categories.append(a)
+        solution_c = self.complexity
+        categories.append(solution_c)
+        solution_lang = self.language.all()
+        for l in solution_lang:
+            categories.append(l)
+        return categories
+
 
 class Challenge(models.Model):
     date = models.DateField()
