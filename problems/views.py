@@ -267,18 +267,18 @@ class Index(View):
                 categories__name__in=[p.lower().strip() for p in paradigms.split(',')]
             ).distinct()
         else:
-            problems_by_cat = problems
+            problems_by_cat = problems.distinct()
         if difficulty:
             problems_by_diff = problems.filter(difficulty=difficulty).distinct()
         else:
-            problems_by_diff = problems
-        filtered_problems = problems_by_cat|problems_by_diff
+            problems_by_diff = problems.distinct()
+        filtered_problems = problems_by_cat & problems_by_diff
         if visibility == "private":
-            problems_by_vis = problems.filter(problem_privacy=True)
-            filtered_problems = filtered_problems|problems_by_vis
+            problems_by_vis = problems.filter(problem_privacy=True).distinct()
+            filtered_problems = filtered_problems & problems_by_vis
         elif visibility == "public":
-            problems_by_vis = problems.filter(problem_privacy=False)
-            filtered_problems = filtered_problems|problems_by_vis
+            problems_by_vis = problems.filter(problem_privacy=False).distinct()
+            filtered_problems = filtered_problems & problems_by_vis
 
         #filter solution objects
         if languages:
@@ -286,68 +286,98 @@ class Index(View):
                 language__name__in=[lang.lower().strip() for lang in languages.split(',')]
             ).distinct()
         else:
-            solutions_by_lang = solutions
+            solutions_by_lang = solutions.distinct()
         if algorithms:
             solutions_by_alg = solutions.filter(
                 algorithms__name__in=[alg.lower().strip() for alg in algorithms.split(',')]
             ).distinct()
         else:
-            solutions_by_alg = solutions
+            solutions_by_alg = solutions.distinct()
         if complexity:
             solutions_by_c = solutions.filter(
                 complexity__name__in=[c.lower().strip() for c in complexity.split(',')]
             ).distinct()
         else:
-            solutions_by_c = solutions
+            solutions_by_c = solutions.distinct()
         if data_structures:
             solutions_by_ds = solutions.filter(
                 data_structures__name__in=[ds.lower().strip() for ds in data_structures.split(',')]
             ).distinct()
         else:
-            solutions_by_ds  = solutions
-        filtered_solutions = solutions_by_lang|solutions_by_alg|solutions_by_c|solutions_by_ds
+            solutions_by_ds  = solutions.distinct()
+        filtered_solutions = (solutions_by_lang & solutions_by_alg & solutions_by_c & solutions_by_ds).values_list('problem')
 
-        _problems = []
+        result = []
 
-        for problem in filtered_problems.all():
-            _problems.append(problem)
-        for solution in filtered_solutions.all():
-            if solution.problem not in _problems:
-                _problems.append(solution.problem)
-        return _problems
+        if filtered_solutions.count()>=filtered_problems.count():
+            for s in filtered_solutions.all():
+                problem = Problem.objects.get(id=s[0])
+                if problem in filtered_problems.all():
+                    result.append(problem)
+        else:
+            for p in filtered_problems.all():
+                problem = Problem.objects.get(id=p[0])
+                if problem in filtered_solutions.all():
+                    result.append(problem)
+
+        return result
 
     def normal_search(self, problems, solutions, paradigms, data_structures, complexity, algorithms, languages, difficulty):
         #filter problem objects
-        problems_by_cat = problems.filter(
-            categories__name__in=[p.lower().strip() for p in paradigms.split(',')]
-        ).distinct()
-        problems_by_diff = problems.filter(difficulty=difficulty).distinct()
+        if paradigms:
+            problems_by_cat = problems.filter(
+                categories__name__in=[p.lower().strip() for p in paradigms.split(',')]
+            ).distinct()
+        else:
+            problems_by_cat = problems.distinct()
+        if difficulty:
+            problems_by_diff = problems.filter(difficulty=difficulty).distinct()
+        else:
+            problems_by_diff = problems.distinct()
         problems_by_vis = problems.filter(problem_privacy=False).distinct()
-        filtered_problems = problems_by_cat|problems_by_diff|problems_by_vis
+        filtered_problems = problems_by_cat&problems_by_diff&problems_by_vis
 
         #filter solution objects
-        solutions_by_lang = solutions.filter(
-            language__name__in=[lang.lower().strip() for lang in languages.split(',')]
-        ).distinct()
-        solutions_by_alg = solutions.filter(
-            algorithms__name__in=[alg.lower().strip() for alg in algorithms.split(',')]
-        ).distinct()
-        solutions_by_c = solutions.filter(
-            complexity__name__in=[c.lower().strip() for c in complexity.split(',')]
-        ).distinct()
-        solutions_by_ds = solutions.filter(
-            data_structures__name__in=[ds.lower().strip() for ds in data_structures.split(',')]
-        ).distinct()
-        filtered_solutions = solutions_by_lang|solutions_by_alg|solutions_by_c|solutions_by_ds
+        if languages:
+            solutions_by_lang = solutions.filter(
+                language__name__in=[lang.lower().strip() for lang in languages.split(',')]
+            ).distinct()
+        else:
+            solutions_by_lang = solutions.distinct()
+        if algorithms:
+            solutions_by_alg = solutions.filter(
+                algorithms__name__in=[alg.lower().strip() for alg in algorithms.split(',')]
+            ).distinct()
+        else:
+            solutions_by_alg = solutions.distinct()
+        if complexity:
+            solutions_by_c = solutions.filter(
+                complexity__name__in=[c.lower().strip() for c in complexity.split(',')]
+            ).distinct()
+        else:
+            solutions_by_c = solutions.distinct()
+        if data_structures:
+            solutions_by_ds = solutions.filter(
+                data_structures__name__in=[ds.lower().strip() for ds in data_structures.split(',')]
+            ).distinct()
+        else:
+            solutions_by_ds  = solutions.distinct()
+        filtered_solutions = (solutions_by_lang&solutions_by_alg&solutions_by_c&solutions_by_ds).values_list('problem')
 
-        _problems = []
+        result = []
 
-        for problem in filtered_problems.all():
-            _problems.append(problem)
-        for solution in filtered_solutions.all():
-            if solution.problem not in _problems and not solution.problem.problem_privacy:
-                _problems.append(solution.problem)
-        return _problems
+        if filtered_solutions.count()>=filtered_problems.count():
+            for s in filtered_solutions.all():
+                problem = Problem.objects.get(id=s[0])
+                if problem in filtered_problems.all():
+                    result.append(problem)
+        else:
+            for p in filtered_problems.all():
+                problem = Problem.objects.get(id=p[0])
+                if problem in filtered_solutions.all():
+                    result.append(problem)
+
+        return result
 
 
 class ViewProblem(View):
@@ -360,24 +390,23 @@ class ViewProblem(View):
         problem = Problem.objects.get(pk=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
-        category_objects = problem.categories.all()
-        language_objects = solution.language.all()
-        categories = []
-        languages = []
-
-        for category in category_objects:
-            categories.append(category.name)
-
-        for language in language_objects:
-            languages.append(language.name)
+        complexity = solution.complexity
+        languages = [lang.name for lang in solution.language.all()]
+        paradigms = [p.name for p in problem.categories.all()]
+        algorithms = [alg.name for alg in solution.algorithms.all()]
+        data_structures = [ds.name for ds in solution.data_structures.all()]
+        print(algorithms)
 
         context = {
             'problem': problem,
             'content': content,
             'solution': solution,
             'challenge': challenge,
-            'categories': categories,
+            'complexity': complexity,
+            'data_structures': data_structures,
+            'paradigms': paradigms,
             'languages': languages,
+            'algorithms': algorithms,
         }
         return render(request, 'problems/view_problem.html', context)
 

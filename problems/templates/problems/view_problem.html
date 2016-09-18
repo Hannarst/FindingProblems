@@ -58,8 +58,8 @@
             </div>
             <div class="panel-footer" style="overflow:auto">
                 <div style="float:left;">
-                    <span> Tagged: </span> {% for category in categories %}
-                    <a class="category btn btn-xs btn-info" href="{% url 'index' %}?categories=category.name">{{ category }}</a> {% endfor %}
+                    <span> Tagged: </span> {% for category in paradigms %}
+                    <a class="category btn btn-xs btn-info" href="{% url 'index' %}?paradigms={{ category }}">{{ category }}</a> {% endfor %}
                 </div>
                 <div class="pull-right">
                     {% if user == problem.created_by or user.is_superuser %}
@@ -104,13 +104,13 @@
                                <div style="overflow:auto">
                                    <span> Algorithms: </span>
                                    {% for algorithm in algorithms %}
-                                       <a class="category btn btn-xs btn-info" href="{% url 'index' %}?algorithm={{algorithm.name}}">{{ algorithm }}</a>
+                                       <a class="category btn btn-xs btn-info" href="{% url 'index' %}?algorithm={{algorithm}}">{{ algorithm }}</a>
                                    {% endfor %}
                                </div>
                                 <div style="overflow:auto">
                                     <span> Data structures: </span>
                                     {% for ds in data_structures %}
-                                        <a class="category btn btn-xs btn-info" href="{% url 'index' %}?data_structures={{ds.name}}">{{ ds }}</a>
+                                        <a class="category btn btn-xs btn-info" href="{% url 'index' %}?data_structures={{ds}}">{{ ds }}</a>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -141,7 +141,7 @@
                             <div style="float:left;">
                                 <span> Languages: </span>
                                 {% for category in languages %}
-                                    <a class="category btn btn-xs btn-info" href="{% url 'index' %}?categories={{category.name}}">{{ category }}</a>
+                                    <a class="category btn btn-xs btn-info" href="{% url 'index' %}?paradigms={{category}}">{{ category }}</a>
                                 {% endfor %}
                             </div>
                         </div>

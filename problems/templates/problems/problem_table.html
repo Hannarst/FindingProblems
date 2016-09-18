@@ -20,7 +20,7 @@
             <td>{{problem.title}}</td>
             <td>
                 {% for category in problem.categories.all|slice:":5" %}
-                    <a class="tag btn btn-xs btn-info" href="?categories={{category.name}}"> {{ category.name }} </a>
+                    <a class="tag btn btn-xs btn-info" href="?paradigms={{category.name}}"> {{ category.name }} </a>
 
                 {% empty %}
                     Uncategorised
