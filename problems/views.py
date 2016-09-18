@@ -367,7 +367,7 @@ class ViewProblem(View):
 
 class Upload(View):
 
-    method_decorator(login_required)
+    #method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
         context = {
@@ -378,22 +378,34 @@ class Upload(View):
     def post(self, request):
         pdf_form = PDFForm(request.POST, request.FILES)
         if pdf_form.is_valid():
-            if request.FILES['problem']:
-                parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
-                problem = parsed_problem_pdf[0]
-                problem_form = parsed_problem_pdf[1]
-                content_form = parsed_problem_pdf[2]
+            if request.FILES:
+                if request.FILES['problem']:
+                    parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
+                    problem = parsed_problem_pdf[0]
+                    problem_form = parsed_problem_pdf[1]
+                    content_form = parsed_problem_pdf[2]
+                else:
+                    problem = Problem(title='Title 10000000000000000000').save()
 
-            if request.FILES['solution']:
-                parsed_solution_pdf = self.parse_solution_pdf(pdf_form, problem)
-                solution_form = parsed_solution_pdf[0]
+                if request.FILES['solution']:
+                    parsed_solution_pdf = self.parse_solution_pdf(pdf_form, problem)
+                    solution_form = parsed_solution_pdf[0]
+                    solution = solution_form.save()
+                else:
+                    solution = Solution(problem=problem).save()
+            else:
+                problem = Problem(title='Title 1000000000000000000000000000').save()
+                solution = Solution(problem=problem).save()
 
             context = {
-                'problem': problem,
                 'problem_form': problem_form,
                 'content_form': content_form,
                 'solution_form': solution_form,
-                'categories': ",".join([cat.name for cat in problem.categories.all()]),
+                'paradigms': ",".join([cat.name for cat in problem.categories.all()]),
+                'languages': ','.join([lang.name for lang in solution.language.all()]),
+                'algorithms': ','.join([alg.name for alg in solution.algorithms.all()]),
+                'data_structures': ','.join([ds.name for ds in solution.data_structures.all()]),
+                'complexity': solution.complexity
             }
             messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
             return render(request, 'problems/add_problem_from_pdf.html', context)
@@ -402,7 +414,7 @@ class Upload(View):
             return redirect('index')
 
     def parse_solution_pdf(self, pdf_form, problem):
-        HEADINGS = ['complexity', 'links', 'example code', 'language']
+        HEADINGS = ['complexity', 'links', 'example code', 'language', 'algorithms', 'data structures']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['solution']))[0]
         solution_pdf_content = self.getPDFContent(file_name)
         solution_description = ""
@@ -418,6 +430,8 @@ class Upload(View):
         links = ""
         example_code = ""
         language = ""
+        data_structures = ""
+        algorithms = ""
 
         max_index = len(solution_pdf_content)-1
         not_end_of_file = True
@@ -452,7 +466,23 @@ class Upload(View):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        language += solution_pdf_content[line]+'\n'
+                        language += solution_pdf_content[line]+','
+                        start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'data_structures':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        data_structures += solution_pdf_content[line]+','
+                        start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'algorithms':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        algorithms += solution_pdf_content[line]+','
                         start_next_section += 1
             start_next_section += 1
             if start_next_section >= max_index:
@@ -462,21 +492,25 @@ class Upload(View):
         solution.problem = problem
         if solution_description != "":
             solution.solution_description = solution_description
-        if complexity != "":
-            add_complexity(complexity, solution)
         if links != "":
             solution.links = links
         if example_code != "":
             solution.example_code = example_code
-        if language != "":
-            solution.language = language
         solution.save()
+        if complexity != "":
+            add_complexity(complexity, solution)
+        if language != "":
+            add_language(language, solution)
+        if algorithms != "":
+            add_algorithms(algorithms, solution)
+        if data_structures != "":
+            add_ds(data_structures, solution)
         solution_form = SolutionForm(instance=solution)
 
-        return [solution_form]
+        return [solution, solution_form]
 
     def parse_problem_pdf(self, pdf_form):
-        HEADINGS = ['sample input', 'sample output', 'categories']
+        HEADINGS = ['sample input', 'sample output', 'paradigms']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
         problem_pdf_content = self.getPDFContent(file_name)
         title = problem_pdf_content[0]
@@ -491,7 +525,7 @@ class Upload(View):
                     problem_description += problem_pdf_content[line]+'\n'
         sample_input = ""
         sample_output = ""
-        categories = ""
+        paradigms = ""
         max_index = len(problem_pdf_content)-1
         not_end_of_file = True
         while not_end_of_file:
@@ -511,13 +545,13 @@ class Upload(View):
                     else:
                         sample_output += problem_pdf_content[line]+'\n'
                         start_next_section += 1
-            elif problem_pdf_content[start_next_section].lower() == 'categories':
+            elif problem_pdf_content[start_next_section].lower() == 'paradigms':
                 start = start_next_section+1
                 for line in range(start, len(problem_pdf_content)):
                     if problem_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        categories += problem_pdf_content[line]+'\n'
+                        paradigms += problem_pdf_content[line]+'\n'
                         start_next_section += 1
             start_next_section += 1
             if start_next_section >= max_index:
@@ -526,8 +560,8 @@ class Upload(View):
         problem = Problem()
         problem.title = title +" unique mothafucka. I said unique!"
         problem.save()
-        if categories != "":
-            add_category(categories, problem)
+        if paradigms != "":
+            add_paradigms(paradigms, problem)
         problem_form = ProblemForm(instance=problem)
         content = Content()
         content.problem_description = problem_description
@@ -589,7 +623,7 @@ class Upload(View):
 
 
 class AddProblem(View):
-    method_decorator(login_required)
+    #method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -648,7 +682,7 @@ class AddProblem(View):
 
 
 class EditProblem(View):
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)

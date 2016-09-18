@@ -54,7 +54,7 @@ class Category(models.Model):
 
 class Problem(models.Model):
     DIFFICULTIES = zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult'])
-    created_by = models.ForeignKey(User)
+    created_by = models.ForeignKey(User, null=True, blank=True)
     title = models.CharField(max_length=200)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
     problem_privacy = models.BooleanField(default=True)
