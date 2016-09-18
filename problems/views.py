@@ -632,6 +632,7 @@ class AddProblem(View):
             content.save()
             solution = solution_form.save(commit=False)
             solution.problem = problem
+            solution.save()
             if complexity:
                 add_complexity(complexity, solution)
             if languages:
@@ -640,7 +641,6 @@ class AddProblem(View):
                 add_algorithms(algorithms, solution)
             if data_structures:
                 add_ds(data_structures, solution)
-            solution.save()
             messages.success(request, 'Problem Added')
         else:
             messages.error(request, 'Invalid Form')
