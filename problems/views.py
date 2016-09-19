@@ -466,14 +466,14 @@ class Upload(View):
             messages.info(request, "Error when uploading file. Please try again.")
             return redirect('index')
 
-    def parse_solution_pdf(self, pdf_form, problem):
-        HEADINGS = ['complexity', 'links', 'example code', 'language', 'algorithms', 'data structures']
+    def parse_solution_pdf(self, pdf_form):
+        HEADINGS = ['complexity', 'links', 'time limit', 'example code', 'languages', 'algorithms', 'data structures']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['solution']))[0]
         solution_pdf_content = self.getPDFContent(file_name)
         solution_description = ""
         start_next_section = 0
         if solution_pdf_content[start_next_section] not in HEADINGS:
-            for line in range(1, len(solution_pdf_content)):
+            for line in range(0, len(solution_pdf_content)):
                 if solution_pdf_content[line].lower() in HEADINGS:
                     start_next_section = line
                     break
@@ -514,7 +514,7 @@ class Upload(View):
                     else:
                         example_code += solution_pdf_content[line]+'\n'
                         start_next_section += 1
-            elif solution_pdf_content[start_next_section].lower() == 'language':
+            elif solution_pdf_content[start_next_section].lower() == 'languages':
                 start = start_next_section+1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
@@ -522,7 +522,7 @@ class Upload(View):
                     else:
                         language += solution_pdf_content[line]+','
                         start_next_section += 1
-            elif solution_pdf_content[start_next_section].lower() == 'data_structures':
+            elif solution_pdf_content[start_next_section].lower() == 'data structures':
                 start = start_next_section+1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
@@ -550,27 +550,56 @@ class Upload(View):
             if start_next_section >= max_index:
                 not_end_of_file = False
 
+        reject_char = [' ', '', '\n']
+        #clean up languages
+        temp_language = ""
+        for l in language.split(','):
+            if l in reject_char:
+                pass
+            else:
+                temp_language+=l+','
+        language = temp_language[:-1]
+        #clean up complexity
+        temp_complexity = ""
+        for c in complexity.split(','):
+            if c in reject_char:
+                pass
+            else:
+                temp_complexity+=c+','
+        complexity = temp_complexity[:-1]
+        #clean up datastructures input
+        temp_ds = ""
+        for ds in data_structures.split(','):
+            if ds in reject_char:
+                pass
+            else:
+                temp_ds+=ds+','
+        data_structures = temp_ds[:-1]
         #clean up time limit input
-        alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         for char in time_limit:
-            if char in alphabet:
-                time_limit.replace(char, '')
-
+            try:
+                int(char)
+            except ValueError:
+                if char=='.':
+                    pass
+                else:
+                    time_limit = time_limit.replace(char, '')
+        if time_limit == '.':
+            time_limit = float(0)
 
         s_form_data = {
             'solution_description': solution_description if solution_description!="" else "No solution description has been provided.",
-            'links': links if links !="" else "No links.",
+            'links': links.strip() if links !="" else "No links.",
             'example_code': example_code if example_code!="" else "No example solution code.",
-            'time_limit': time_limit,
+            'time_limit': time_limit if time_limit!="" else 0,
         }
         solution_form = SolutionForm(initial=s_form_data)
-        return [solution_form, language, algorithms, data_structures, complexity]
+        return [solution_form, language.strip(), algorithms.strip(), data_structures.strip(), complexity.strip()]
 
     def parse_problem_pdf(self, pdf_form):
         HEADINGS = ['sample input', 'problem description', 'sample output', 'paradigms']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
         problem_pdf_content = self.getPDFContent(file_name)
-        print(problem_pdf_content)
         title = problem_pdf_content[0]
         problem_description = ""
         start_next_section = 1
