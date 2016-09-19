@@ -4,14 +4,8 @@
         <th>Name</th>
         <th>Categories</th>
         <th>Difficulty</th>
+        <th>Solution availability</th>
         <th>Forked from</th>
-        {% if user.is_authenticated %}
-            <th>Visibility</th>
-            <th>Last used</th>
-        {% endif %}
-        {% if challenge %}
-            <th>Add/Remove from challenge</th>
-        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -21,12 +15,20 @@
             <td>
                 {% for category in problem.categories.all|slice:":5" %}
                     <a class="tag btn btn-xs btn-info" href="?paradigms={{category.name}}"> {{ category.name }} </a>
-
                 {% empty %}
                     Uncategorised
                 {% endfor %}
             </td>
             <td>{{problem.get_difficulty_display}}</td>
+            <td>{% for tup in problem_info %}
+                {% if tup.0 == problem.id %}
+                    {% if tup.1 %}
+                        Solution available.
+                    {% else %}
+                        This solution is not available to you.
+                    {% endif %}
+                {% endif %}
+                {% endfor %}</td>
             <td>
                 {% if problem.forked_from == "Original" %}
                     {{ "" }}
@@ -34,39 +36,12 @@
                     {{problem.forked_from}}
                 {% endif %}
             </td>
-            {% if user.is_authenticated %}
-                <td>
-                    {% if problem.problem_privacy %}
-                        Private
-                    {% else %}
-                        Public
-                    {% endif %}
-                </td>
-                <td>
-                    {% for prob_set in problem_sets %}
-                        {% if problem in prob_set %}
-                            {{ prob_set.name }}
-                        {% endif %}
-                    {% endfor %}
-                </td>
-            {% endif %}
-            {% if challenge %}
-                <td>
-                    {% include 'problems/edit_challenge_form.html' %}
-                </td>
-            {% endif %}
         </tr>
     {% empty %}
         <tr>
-        {% if user.is_authenticated %}
-            <td colspan=6>
-                Sorry, no problems matching this query.
-            </td>
-        {% else %}
             <td colspan=5>
                 Sorry, no problems matching this query.
             </td>
-        {% endif %}
         </tr>
     {% endfor %}
     </tbody>
