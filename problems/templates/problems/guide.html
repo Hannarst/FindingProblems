@@ -5,9 +5,9 @@
     <h1>User Guide</h1>
   </div>
   <div class="panel-body">
-    <div class="panel panel-default">
+    <div id="searchPanel" class="panel panel-default">
       <div class="panel-heading" style="cursor:pointer" data-toggle="collapse" data-target="#search">
-        <h3>Search</h3>
+        <h3>Search Function</h3>
       </div>
       <div class="panel-body panel-collapse collapse panel-group" id="search">
         <div class="panel panel-default">
@@ -21,7 +21,7 @@
             <h4>Paradigms</h4>
           </div>
           <div class="panel-body">
-            Paradigms are MMMMAAAAAAGICAL
+            Paradigms are general types of problems. For example: string manipulation.
           </div>
         </div>
         <div class="panel panel-default">
@@ -29,7 +29,7 @@
             <h4>Algorithms</h4>
           </div>
           <div class="panel-body">
-            Search for problems which require a particular algorithm to solve them.
+            Search for problems which require a particular algorithm to solve them. For example: binary search, dijkstra's algorithm.
           </div>
         </div>
         <div class="panel panel-default">
@@ -37,7 +37,7 @@
             <h4>Data Structures</h4>
           </div>
           <div class="panel-body">
-            Search for problems with solutions that use a particular data structure
+            Search for problems with solutions that use a particular data structure. For example: array, stack.
           </div>
         </div>
         <div class="panel panel-default">
@@ -45,7 +45,7 @@
             <h4>Complexity</h4>
           </div>
           <div class="panel-body">
-            Big O notation. Find problems with solutions of a particular complexity.
+            Big O notation. Find problems with solutions of a particular complexity. For example: O(nlogn), O(n!)
           </div>
         </div>
         <div class="panel panel-default">
@@ -53,7 +53,7 @@
             <h4>Languages</h4>
           </div>
           <div class="panel-body">
-            Search for problems with solutions in a particular language.
+            Search for problems with solutions in a particular language. For example: Haskell, Python.
           </div>
         </div>
         <div class="panel panel-default">
@@ -76,9 +76,37 @@
         {% endif %}
       </div>
     </div>
+    <div id="accountPanel" class="panel panel-default">
+      <div class="panel-heading" style="cursor:pointer" data-toggle="collapse" data-target="#account">
+        <h3>Account Management</h3>
+      </div>
+      <div id="account" class="panel-body panel-collapse collapse panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>Creating an Account and First Time Login</h4>
+          </div>
+          <div class="panel-body">
+            You must have access to a UCT Computer Science staff email address in order to create an account.
+            An email will be sent with an activation code. You will be prompted for this code the next time you attempt to log in.
+            An activated account is required for most of the functionality of the website.
+          </div>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>Changing and Resetting Password</h4>
+          </div>
+          <div class="panel-body">
+            
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
     {% if user.is_authenticated %}
       {% include 'problems/guide_staff.html' %}
     {% endif %}
   </div>
 </div>
+
 {% endblock %}
