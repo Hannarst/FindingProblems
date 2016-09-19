@@ -376,15 +376,28 @@ class Index(View):
                 if solution.problem not in result:
                     result.append(solution.problem)
 
-        for problem in problems.all():
-            if problem.difficulty == difficulty and problem not in result:
-                result.append(problem)
+        if difficulty:
+            marked_to_remove = []
+            for problem in result:
+                if int(problem.difficulty) != int(difficulty):
+                    marked_to_remove.append(problem)
+            for problem in marked_to_remove:
+                result.remove(problem)
+            for problem in problems.all():
+                if problem.difficulty == difficulty and problem not in result:
+                    result.append(problem)
 
         if visibility == "private":
+            for problem in result:
+                if problem.problem_privacy != True:
+                    result.remove(problem)
             for problem in problems.all():
                 if problem.problem_privacy == True and problem not in result:
                     result.append(problem)
         elif visibility == "public":
+            for problem in result:
+                if problem.problem_privacy != False:
+                    result.remove(problem)
             for problem in problems.all():
                 if problem.problem_privacy == False and problem not in result:
                     result.append(problem)
@@ -395,13 +408,20 @@ class Index(View):
         result = []
         for solution in solutions.all():
             categories = solution.get_all_categories()
-            for category in categories:
-                if category.name in search_terms and solution.problem.problem_privacy == False:
-                    result.append(solution.problem)
+            valid_result = 0
+            for term in search_terms:
+                for category in categories:
+                    if category.name == term:
+                        valid_result += 1
+            if valid_result == len(search_terms):
+                if solution.problem not in result:
+                    if solution.problem.problem_privacy == False:
+                        result.append(solution.problem)
 
-        for problem in problems.all():
-            if problem.difficulty == difficulty and problem.problem_privacy == False:
-                result.append(problem)
+        if difficulty:
+            for problem in problems.all():
+                if int(problem.difficulty) == int(difficulty) and problem.problem_privacy == False and problem not in result:
+                    result.append(problem)
         return result
 
 
@@ -415,7 +435,7 @@ class ViewProblem(View):
         problem = Problem.objects.get(pk=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
-        complexity = solution.complexity
+        complexity = [c.name for c in solution.complexity.all()]
         languages = [lang.name for lang in solution.language.all()]
         paradigms = [p.name for p in problem.categories.all()]
         algorithms = [alg.name for alg in solution.algorithms.all()]
@@ -854,7 +874,7 @@ class EditProblem(View):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
-        complexity = solution.complexity
+        complexity = ','.join([c.name for c in solution.complexity.all()])
         languages = ','.join([lang.name for lang in solution.language.all()])
         paradigms = ",".join([p.name for p in problem.categories.all()])
         algorithms = ','.join([alg.name for alg in solution.algorithms.all()])
@@ -908,7 +928,8 @@ class EditProblem(View):
             content.save()
             edited_solution = solution_form.save(commit=False)
             edited_solution.problem = edited_problem
-            if complexity!=solution.complexity:
+            prev_complexity = ','.join([c.name for c in solution.complexity.all()])
+            if complexity!=prev_complexity:
                 add_complexity(complexity, edited_solution)
             prev_lang = ','.join([l.name for l in solution.language.all()])
             if languages!=prev_lang:
@@ -933,7 +954,7 @@ class ForkProblem(View):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
-        complexity = solution.complexity
+        complexity = ','.join([c.name for c in solution.complexity.all()])
         languages = ','.join([lang.name for lang in solution.language.all()])
         data_structures = ','.join([ds.name for ds in solution.data_structures.all()])
         algorithms = ','.join([alg.name for alg in solution.algorithms.all()])

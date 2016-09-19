@@ -119,7 +119,6 @@ class Solution(models.Model):
         solution_c = self.complexity.all()
         for c in solution_c:
             categories.append(c)
-        categories.append(solution_c)
         solution_lang = self.language.all()
         for l in solution_lang:
             categories.append(l)

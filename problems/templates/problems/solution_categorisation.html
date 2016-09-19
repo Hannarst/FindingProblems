@@ -19,7 +19,7 @@
     {% if searched_complexity %}
         <input type="hidden" class="input-sm form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" required=False  type="text"  value="{{searched_complexity}}">
     {% else %}
-        <input  type="hidden" class="input-sm form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" required=False title="" type="text"  value="{{ complexity.name}}">
+        <input  type="hidden" class="input-sm form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" required=False title="" type="text"  value="{{ complexity }}">
     {% endif %}
 </div>
 <div class="form-group">
