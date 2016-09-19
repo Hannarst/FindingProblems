@@ -61,7 +61,7 @@
                             <h3> Solution </h3>
                         </div>
                         <div class="panel-body">
-                        {% if solution.solution_privacy and not user.is_authenticated %}
+                        {% if not solution.solution_privacy and not user.is_authenticated %}
                         <p>
                             This solution is not publically available.
                         </p>

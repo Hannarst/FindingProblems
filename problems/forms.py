@@ -40,6 +40,7 @@ class CreateAccountForm(forms.Form):
 
 class SolutionForm(forms.ModelForm):
     time_limit = forms.FloatField(label="Time limit (s)")
+    solution_privacy = forms.BooleanField(label='Make solution private')
     class Meta:
         model = Solution
         fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
@@ -52,6 +53,7 @@ class ContentForm(forms.ModelForm):
 
 
 class ProblemForm(forms.ModelForm):
+    problem_privacy = forms.BooleanField(label='Make problem private', required=False)
     class Meta:
         model = Problem
         exclude = ('created_by', 'content', 'solution', 'categories', 'forked_from',)

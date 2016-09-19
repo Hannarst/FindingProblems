@@ -5,7 +5,6 @@
         <th>Categories</th>
         <th>Difficulty</th>
         <th>Solution availability</th>
-        <th>Forked from</th>
     </tr>
     </thead>
     <tbody>
@@ -23,23 +22,20 @@
             <td>{% for tup in problem_info %}
                 {% if tup.0 == problem.id %}
                     {% if tup.1 %}
-                        Solution available.
+                        {% if tup.1 == 'No solution provided.' %}
+                            {{ tup.1 }}
+                        {% else %}
+                            Solution available.
+                        {% endif %}
                     {% else %}
                         This solution is not available to you.
                     {% endif %}
                 {% endif %}
                 {% endfor %}</td>
-            <td>
-                {% if problem.forked_from == "Original" %}
-                    {{ "" }}
-                {% else %}
-                    {{problem.forked_from}}
-                {% endif %}
-            </td>
         </tr>
     {% empty %}
         <tr>
-            <td colspan=5>
+            <td colspan=4>
                 Sorry, no problems matching this query.
             </td>
         </tr>

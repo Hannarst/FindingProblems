@@ -291,6 +291,8 @@ class Index(View):
                 while '' in search_terms:
                     search_terms.remove('')
                 problems = self.normal_search(problems, solutions, search_terms, difficulty)
+            else:
+                problems = Problem.objects.exclude(problem_privacy=True)
 
         suggested_paradigms = SUGGESTED_PARADIGMS()
         suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
@@ -330,10 +332,8 @@ class Index(View):
     def get_problem_data(self, problems):
         p_list = []
         for problem in problems:
-            temp = ()
             solution = Solution.objects.get(problem=problem)
-            temp[0] = problem.id,
-            temp[1] = self.get_solution_availability(solution)
+            temp = (problem.id, self.get_solution_availability(solution))
             p_list.append(temp)
         return p_list
 
