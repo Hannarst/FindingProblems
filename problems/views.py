@@ -1,6 +1,6 @@
 from hashlib import md5
 
-from io import StringIO
+from io import StringIO, BytesIO
 
 import collections
 from itertools import islice
@@ -12,18 +12,23 @@ import reportlab
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.forms import formset_factory
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template import Context
+from django.template.loader import get_template
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import View
-from .models import *
-from .forms import *
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
+from .models import *
+from .forms import *
+
 def SUGGESTED_PARADIGMS():
     return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
+
 
 def add_paradigms(paradigms, problem):
     if problem.categories:
@@ -33,22 +38,27 @@ def add_paradigms(paradigms, problem):
         problem.categories.add(paradigm)
         problem.save()
 
+
 def remove_paradigms(problem):
     paradigms = problem.categories.all()
     for p in paradigms:
         problem.categories.remove(p)
         problem.save()
 
+
 def SUGGESTED_COMPLEXITY():
     return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
+
 
 def add_complexity(complexity, solution):
     complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
     solution.complexity = complex
     solution.save()
 
+
 def SUGGESTED_LANGUAGES():
     return [str(lang.name) for lang in Category.objects.filter(type="language")]
+
 
 def add_language(langs, solution):
     if solution.language:
@@ -58,14 +68,17 @@ def add_language(langs, solution):
         solution.language.add(language)
         solution.save()
 
+
 def remove_languages(solution):
     languages = solution.language.all()
     for l in languages:
         solution.language.remove(l)
         solution.save()
 
+
 def SUGGESTED_ALGORITHMS():
     return [str(alg.name) for alg in Category.objects.filter(type="algorithm")]
+
 
 def add_algorithms(algorithms, solution):
     if solution.algorithms:
@@ -75,14 +88,17 @@ def add_algorithms(algorithms, solution):
         solution.algorithms.add(algorithm)
         solution.save()
 
+
 def remove_algorithms(solution):
     algorithms = solution.algorithms.all()
     for a in algorithms:
         solution.algorithms.remove(a)
         solution.save()
 
+
 def SUGGESTED_DATA_STRUCTURES():
     return [str(ds.name) for ds in Category.objects.filter(type="data-structure")]
+
 
 def add_ds(data_structures, solution):
     if solution.data_structures:
@@ -92,11 +108,13 @@ def add_ds(data_structures, solution):
         solution.data_structures.add(data_structure)
         solution.save()
 
+
 def remove_ds(solution):
     ds = solution.data_structures.all()
     for d in ds:
         solution.data_structures.remove(d)
         solution.save()
+
 
 class Home(View):
     def get(self, request):
@@ -104,7 +122,7 @@ class Home(View):
 
 
 class Guide(View):
-    def get (self, request):
+    def get(self, request):
         return render(request, 'problems/guide.html')
 
 
@@ -130,7 +148,7 @@ class ActivateAccount(View):
             'code_valid': False
         }
 
-        #check that the account can still be activated using this code
+        # check that the account can still be activated using this code
         if today <= account.activation_deadline:
             context['deadline_valid'] = True
             if activation_code == account.activation_code:
@@ -139,7 +157,7 @@ class ActivateAccount(View):
                 return redirect('/problems/')
             else:
                 return render(request, 'problems/activate_account.html', context)
-        #else, reset the activation code and don't allow
+        # else, reset the activation code and don't allow
         else:
             account.reset_activation_code()
             return render(request, 'problems/activate_account.html', context)
@@ -190,12 +208,12 @@ class CreateAccount(View):
         return user
 
     def create_account(self, post_info):
-        #setup user stuff
+        # setup user stuff
         user = self.create_user(post_info)
-        #setup activation stuff
+        # setup activation stuff
         activation_code = self.create_activation_code()
         activation_deadline = self.create_date()
-        #create account
+        # create account
         account = Account()
         account.user = user
         account.activation_code = activation_code
@@ -203,11 +221,12 @@ class CreateAccount(View):
         account.save()
         send_mail(
             'Activation code for FindingProblems.com',
-            'Please use the following code to activate your account when you first log into the website: '+str(account.activation_code),
+            'Please use the following code to activate your account when you first log into the website: ' + str(
+                account.activation_code),
             'findingproblemstest@gmail.com',
             [account.user.username],
             fail_silently=False,
-            )
+        )
 
 
 class Index(View):
@@ -218,8 +237,8 @@ class Index(View):
         solutions = Solution.objects.all()
 
         search = False
-        #determine whether to return full index or a search results
-        if request.GET!={}:
+        # determine whether to return full index or a search results
+        if request.GET != {}:
             search = True
             try:
                 paradigms = request.GET['paradigms']
@@ -250,20 +269,24 @@ class Index(View):
             except MultiValueDictKeyError:
                 visibility = ""
 
-        #a normal index view should be the same as a search where all parameters are empty strings
+        # a normal index view should be the same as a search where all parameters are empty strings
         if request.user.is_authenticated():
             if search:
-                search_terms = (data_structures+','+complexity+','+algorithms+','+languages+','+paradigms).split(',')
+                search_terms = (
+                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
+                    ',')
                 while '' in search_terms:
                     search_terms.remove('')
                 problems = self.auth_user_search(problems, solutions, search_terms, difficulty, visibility)
 
-            #only an authenticated user can edit and make challenges, so best have this here
+            # only an authenticated user can edit and make challenges, so best have this here
             if challenge_id:
                 challenge = get_object_or_404(Challenge, pk=challenge_id)
         else:
             if search:
-                search_terms = (data_structures+','+complexity+','+algorithms+','+languages+','+paradigms).split(',')
+                search_terms = (
+                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
+                    ',')
                 while '' in search_terms:
                     search_terms.remove('')
                 problems = self.normal_search(problems, solutions, search_terms, difficulty)
@@ -281,14 +304,14 @@ class Index(View):
             'suggested_languages': suggested_languages,
             'problems': problems,
             'problem_sets': Challenge.objects.all(),
-            'difficulties': zip(range(5),['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
-            'searched_paradigms': "" if request.GET=={} else paradigms,
-            'searched_algorithms': "" if request.GET=={} else algorithms,
-            'searched_complexity': "" if request.GET=={} else complexity,
-            'searched_data_structures': "" if request.GET=={} else data_structures,
-            'searched_languages': "" if request.GET=={} else languages,
-            'searched_difficulty': "" if request.GET=={} else difficulty,
-            'searched_visibility': "" if request.GET=={} else visibility,
+            'difficulties': zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
+            'searched_paradigms': "" if request.GET == {} else paradigms,
+            'searched_algorithms': "" if request.GET == {} else algorithms,
+            'searched_complexity': "" if request.GET == {} else complexity,
+            'searched_data_structures': "" if request.GET == {} else data_structures,
+            'searched_languages': "" if request.GET == {} else languages,
+            'searched_difficulty': "" if request.GET == {} else difficulty,
+            'searched_visibility': "" if request.GET == {} else visibility,
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)
@@ -300,9 +323,9 @@ class Index(View):
             valid_result = 0
             for term in search_terms:
                 for category in categories:
-                    if category.name==term:
-                        valid_result+=1
-            if valid_result==len(search_terms):
+                    if category.name == term:
+                        valid_result += 1
+            if valid_result == len(search_terms):
                 if solution.problem not in result:
                     result.append(solution.problem)
 
@@ -310,11 +333,11 @@ class Index(View):
             if problem.difficulty == difficulty and problem not in result:
                 result.append(problem)
 
-        if visibility=="private":
+        if visibility == "private":
             for problem in problems.all():
                 if problem.problem_privacy == True and problem not in result:
                     result.append(problem)
-        elif visibility=="public":
+        elif visibility == "public":
             for problem in problems.all():
                 if problem.problem_privacy == False and problem not in result:
                     result.append(problem)
@@ -326,11 +349,11 @@ class Index(View):
         for solution in solutions.all():
             categories = solution.get_all_categories()
             for category in categories:
-                if category.name in search_terms and solution.problem.problem_privacy==False:
+                if category.name in search_terms and solution.problem.problem_privacy == False:
                     result.append(solution.problem)
 
         for problem in problems.all():
-            if problem.difficulty == difficulty and problem.problem_privacy==False:
+            if problem.difficulty == difficulty and problem.problem_privacy == False:
                 result.append(problem)
         return result
 
@@ -366,7 +389,6 @@ class ViewProblem(View):
 
 
 class Upload(View):
-
     @method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
@@ -478,7 +500,7 @@ class Upload(View):
                     start_next_section = line
                     break
                 else:
-                    solution_description += solution_pdf_content[line]+'\n'
+                    solution_description += solution_pdf_content[line] + '\n'
         complexity = ""
         links = ""
         example_code = ""
@@ -487,100 +509,100 @@ class Upload(View):
         algorithms = ""
         time_limit = ""
 
-        max_index = len(solution_pdf_content)-1
+        max_index = len(solution_pdf_content) - 1
         not_end_of_file = True
         while not_end_of_file:
             if solution_pdf_content[start_next_section].lower() == 'complexity':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        complexity += solution_pdf_content[line]+'\n'
+                        complexity += solution_pdf_content[line] + '\n'
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'links':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        links += solution_pdf_content[line]+'\n'
+                        links += solution_pdf_content[line] + '\n'
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'example code':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        example_code += solution_pdf_content[line]+'\n'
+                        example_code += solution_pdf_content[line] + '\n'
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'languages':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        language += solution_pdf_content[line]+','
+                        language += solution_pdf_content[line] + ','
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'data structures':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        data_structures += solution_pdf_content[line]+','
+                        data_structures += solution_pdf_content[line] + ','
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'algorithms':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        algorithms += solution_pdf_content[line]+','
+                        algorithms += solution_pdf_content[line] + ','
                         start_next_section += 1
             elif solution_pdf_content[start_next_section].lower() == 'time limit':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(solution_pdf_content)):
                     if solution_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        time_limit += solution_pdf_content[line]+','
+                        time_limit += solution_pdf_content[line] + ','
                         start_next_section += 1
             start_next_section += 1
             if start_next_section >= max_index:
                 not_end_of_file = False
 
         reject_char = [' ', '', '\n']
-        #clean up languages
+        # clean up languages
         temp_language = ""
         for l in language.split(','):
             if l in reject_char:
                 pass
             else:
-                temp_language+=l+','
+                temp_language += l + ','
         language = temp_language[:-1]
-        #clean up complexity
+        # clean up complexity
         temp_complexity = ""
         for c in complexity.split(','):
             if c in reject_char:
                 pass
             else:
-                temp_complexity+=c+','
+                temp_complexity += c + ','
         complexity = temp_complexity[:-1]
-        #clean up datastructures input
+        # clean up datastructures input
         temp_ds = ""
         for ds in data_structures.split(','):
             if ds in reject_char:
                 pass
             else:
-                temp_ds+=ds+','
+                temp_ds += ds + ','
         data_structures = temp_ds[:-1]
-        #clean up time limit input
+        # clean up time limit input
         for char in time_limit:
             try:
                 int(char)
             except ValueError:
-                if char=='.':
+                if char == '.':
                     pass
                 else:
                     time_limit = time_limit.replace(char, '')
@@ -588,10 +610,10 @@ class Upload(View):
             time_limit = float(0)
 
         s_form_data = {
-            'solution_description': solution_description if solution_description!="" else "No solution description has been provided.",
-            'links': links.strip() if links !="" else "No links.",
-            'example_code': example_code if example_code!="" else "No example solution code.",
-            'time_limit': time_limit if time_limit!="" else 0,
+            'solution_description': solution_description if solution_description != "" else "No solution description has been provided.",
+            'links': links.strip() if links != "" else "No links.",
+            'example_code': example_code if example_code != "" else "No example solution code.",
+            'time_limit': time_limit if time_limit != "" else 0,
         }
         solution_form = SolutionForm(initial=s_form_data)
         return [solution_form, language.strip(), algorithms.strip(), data_structures.strip(), complexity.strip()]
@@ -606,40 +628,40 @@ class Upload(View):
         sample_input = ""
         sample_output = ""
         paradigms = ""
-        max_index = len(problem_pdf_content)-1
+        max_index = len(problem_pdf_content) - 1
         not_end_of_file = True
         while not_end_of_file:
             if problem_pdf_content[start_next_section].lower() == 'sample input':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(problem_pdf_content)):
                     if problem_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        sample_input += problem_pdf_content[line]+'\n'
+                        sample_input += problem_pdf_content[line] + '\n'
                         start_next_section += 1
             elif problem_pdf_content[start_next_section].lower() == 'problem description':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(problem_pdf_content)):
                     if problem_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        problem_description += problem_pdf_content[line]+'\n'
+                        problem_description += problem_pdf_content[line] + '\n'
                         start_next_section += 1
             elif problem_pdf_content[start_next_section].lower() == 'sample output':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(problem_pdf_content)):
                     if problem_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        sample_output += problem_pdf_content[line]+'\n'
+                        sample_output += problem_pdf_content[line] + '\n'
                         start_next_section += 1
             elif problem_pdf_content[start_next_section].lower() == 'paradigms':
-                start = start_next_section+1
+                start = start_next_section + 1
                 for line in range(start, len(problem_pdf_content)):
                     if problem_pdf_content[line].lower() in HEADINGS:
                         break
                     else:
-                        paradigms += problem_pdf_content[line]+'\n'
+                        paradigms += problem_pdf_content[line] + '\n'
                         start_next_section += 1
             start_next_section += 1
             if start_next_section >= max_index:
@@ -651,8 +673,8 @@ class Upload(View):
         problem_form = ProblemForm(initial=p_form_data)
         c_form_data = {
             'problem_description': problem_description,
-            'example_input': sample_input if sample_input!="" else "No sample input provided.",
-            'example_output': sample_output if sample_output!="" else "No sample output provided.",
+            'example_input': sample_input if sample_input != "" else "No sample input provided.",
+            'example_output': sample_output if sample_output != "" else "No sample output provided.",
         }
         content_form = ContentForm(initial=c_form_data)
 
@@ -676,18 +698,18 @@ class Upload(View):
             current_page = reader.getPage(page).extractText()
             list_of_lines = current_page.split('\n')
             out_of_range = len(list_of_lines)
-            max_index = out_of_range-1
+            max_index = out_of_range - 1
             lines_on_page = iter(range(out_of_range))
             for line in lines_on_page:
                 section = list_of_lines[line]
-                #end of file, just append the line
+                # end of file, just append the line
                 if line == max_index:
                     actual_lines.append(section)
-                #otherwise
+                # otherwise
                 else:
-                    next_section = list_of_lines[line+1]
-                    #if the next line is just a blank line, append both and continue from the line after the blank one
-                    if list_of_lines[line+1] == ' ':
+                    next_section = list_of_lines[line + 1]
+                    # if the next line is just a blank line, append both and continue from the line after the blank one
+                    if list_of_lines[line + 1] == ' ':
                         actual_lines.append(section)
                         actual_lines.append(next_section)
                         self.consume(lines_on_page, 1)
@@ -695,14 +717,14 @@ class Upload(View):
                         temp_line = line
                         paragraph = ""
                         while section != ' ':
-                            paragraph+=section
+                            paragraph += section
                             temp_line += 1
                             if temp_line <= max_index:
                                 section = list_of_lines[temp_line]
                             else:
                                 break
                         actual_lines.append(paragraph)
-                        self.consume(lines_on_page, temp_line-line)
+                        self.consume(lines_on_page, temp_line - line)
 
         pdf_file.close()
         return actual_lines
