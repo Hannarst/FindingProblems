@@ -1,0 +1,124 @@
+<div class="panel-body">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4><a href="#add-problem">Add a problem</a></h4>
+        </div>
+        <div class="panel-body">
+            <p>
+                Problems and their solutions can be added to the database using one of two methods:
+                <ul>
+                    <li>
+                        <u>
+                            Manually
+                        </u>
+                    </li>
+            <p>
+                Fill out and submit <a href="{% url 'add_problem' %}">this form</a>.
+                You may use markdown in the content and the solution fields.
+                The execution time limit is the maximum length of time a solution can run to be considered a successful solution to this problem.
+                This is done to exclude brute force solutions if necessary.
+                The problems you add are private by default and can only be seen by logged in users (CS staff), but uncheck this box if you want students to be able to practice this question on their own time.
+                Categorise this problem as you see fit.
+            </p>
+            <li>
+                <u>
+                    Uploading PDFs
+                </u>
+                <p>
+                    Problems and solutions can also be created by uploading PDF documents.
+                    Each document may contain only <u><strong>one</strong></u> problem or solution.
+                    This is enforced to allow the user time to check that the system has created a problem or solution correctly from the uploaded PDF.
+                </p>
+                <p>
+                    When doing so, please ensure that these documents conform to the following specifications:
+                </p>
+                <div class="col-sm-6">
+                    <div class="panel-heading">
+                        <h4>Problem PDF Specification</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            Title
+                        </p>
+                        <p>
+                            Problem description
+                        </p>
+                        <p>
+                            Sample input
+                        </p>
+                        <p>
+                            Sample output
+                        </p>
+                        <p>
+                            Paradigms
+                        </p>
+                        <br>
+                        <p>
+                            Download a sample problem PDF document <a href="#">here</a>.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="panel-heading">
+                        <h4>Solution PDF Specification</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            Solution description
+                        </p>
+                        <p>
+                            Complexity
+                        </p>
+                        <p>
+                            Runtime
+                        </p>
+                        <p>
+                            Links
+                        </p>
+                        <p>
+                            Coded solution
+                        </p>
+                        <p>
+                            Solution language
+                        </p>
+                        <p>
+                            Data structures
+                        </p>
+                        <p>
+                            Algorithms
+                        </p>
+                        <br>
+                        <p>
+                            Download a sample solution PDF document <a href="#">here</a>.
+                        </p>
+                    </div>
+                </div>
+                <p>
+                    Fields can be left out of the PDFs without issue, as seen in this <a href="#">problem</a> and this <a href="#">solution</a>.
+                    The importance in these specifications is the presence of the headings.
+                    Users will have an opportunity to confirm the content of problem and solution forms before submitting.
+                </p>
+            </li>
+            </ul>
+            </p>
+        </div>
+    </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4><a href="#edit-vs-fork">Editing vs forking a problem</a></h4>
+    </div>
+    <div class="panel-body">
+      Editing (<i class="fa fa-pencil" aria-hidden="true"></i>) a problem rewrites the problem, while forking (<i class="fa fa-code-fork" aria-hidden="true"></i>) a problem allows you to create a new problem from the modification.
+      The original stays the same. You can later see which problem a particular problem has been forked off in the Forked From field.
+    </div>
+  </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4><a href="#markdown">Markdown</a></h4>
+        </div>
+        <div class="panel-body">
+            Problems and solutions can be styled using Markdown. All Markdown styles are supported, courtesy of Python's <a href="https://pypi.python.org/pypi/markdown2">markdown2</a>.
+            A full description of Markdown and its syntax is provided by its inventor <a href="http://daringfireball.net/projects/markdown/">here</a>.
+        </div>
+    </div>
+</div>
