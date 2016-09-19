@@ -86,7 +86,7 @@ class Solution(models.Model):
     solution_privacy = models.BooleanField(default=True)
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
-    complexity = models.ForeignKey(Category, null=True, blank=True, related_name="complexity")
+    complexity = models.ManyToManyField(Category, blank=True, related_name="complexity")
     time_limit = models.FloatField(default=0)
     links = models.TextField(default="No links.")
     links_html = models.TextField()
@@ -116,7 +116,9 @@ class Solution(models.Model):
         solution_alg = self.algorithms.all()
         for a in solution_alg:
             categories.append(a)
-        solution_c = self.complexity
+        solution_c = self.complexity.all()
+        for c in solution_c:
+            categories.append(c)
         categories.append(solution_c)
         solution_lang = self.language.all()
         for l in solution_lang:

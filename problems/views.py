@@ -35,9 +35,12 @@ def add_paradigms(paradigms, problem):
     if problem.categories:
         remove_paradigms(problem)
     for p in paradigms.split(','):
-        paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
-        problem.categories.add(paradigm)
-        problem.save()
+        if p == '' or p == ' ':
+            pass
+        else:
+            paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
+            problem.categories.add(paradigm)
+            problem.save()
 
 
 def remove_paradigms(problem):
@@ -51,11 +54,23 @@ def SUGGESTED_COMPLEXITY():
     return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
 
 
-def add_complexity(complexity, solution):
-    complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
-    solution.complexity = complex
-    solution.save()
+def add_complexity(complexities, solution):
+    if solution.complexity:
+        remove_complexity(solution)
+    for complexity in complexities.split(','):
+        if complexity == '' or complexity == ' ':
+            pass
+        else:
+            complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
+            solution.complexity.add(complex)
+            solution.save()
 
+
+def remove_complexity(solution):
+    complexity = solution.complexity.all()
+    for c in complexity:
+        solution.complexity.remove(c)
+        solution.save()
 
 def SUGGESTED_LANGUAGES():
     return [str(lang.name) for lang in Category.objects.filter(type="language")]
@@ -65,9 +80,12 @@ def add_language(langs, solution):
     if solution.language:
         remove_languages(solution)
     for lang in langs.split(','):
-        language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
-        solution.language.add(language)
-        solution.save()
+        if lang == '' or lang == ' ':
+            pass
+        else:
+            language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
+            solution.language.add(language)
+            solution.save()
 
 
 def remove_languages(solution):
@@ -85,9 +103,12 @@ def add_algorithms(algorithms, solution):
     if solution.algorithms:
         remove_algorithms(solution)
     for a in algorithms.split(','):
-        algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
-        solution.algorithms.add(algorithm)
-        solution.save()
+        if a == '' or a == ' ':
+            pass
+        else:
+            algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
+            solution.algorithms.add(algorithm)
+            solution.save()
 
 
 def remove_algorithms(solution):
@@ -105,9 +126,12 @@ def add_ds(data_structures, solution):
     if solution.data_structures:
         remove_ds(solution)
     for ds in data_structures.split(','):
-        data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
-        solution.data_structures.add(data_structure)
-        solution.save()
+        if ds == '' or ds == ' ':
+            pass
+        else:
+            data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
+            solution.data_structures.add(data_structure)
+            solution.save()
 
 
 def remove_ds(solution):
@@ -333,7 +357,9 @@ class Index(View):
         p_list = []
         for problem in problems:
             solution = Solution.objects.get(problem=problem)
-            temp = (problem.id, self.get_solution_availability(solution))
+            solution_availability = self.get_solution_availability(solution)
+            categories = solution.get_all_categories()
+            temp = (problem.id, solution_availability, categories)
             p_list.append(temp)
         return p_list
 
@@ -873,24 +899,28 @@ class EditProblem(View):
         algorithms = request.POST.get('algorithms')
         data_structures = request.POST.get('data_structures')
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
-            problem = problem_form.save()
-            if paradigms:
-                add_paradigms(paradigms, problem)
+            edited_problem = problem_form.save()
+            prev_par = ','.join([p.name for p in problem.categories.all()])
+            if paradigms!=prev_par:
+                add_paradigms(paradigms, edited_problem)
             content = content_form.save(commit=False)
-            content.problem = problem
+            content.problem = edited_problem
             content.save()
-            solution = solution_form.save(commit=False)
-            solution.problem = problem
-            if complexity:
-                add_complexity(complexity, solution)
-            if languages:
-                remove_languages(solution)
-                add_language(languages, solution)
-            if algorithms:
-                add_algorithms(algorithms, solution)
-            if data_structures:
-                add_ds(data_structures, solution)
-            solution.save()
+            edited_solution = solution_form.save(commit=False)
+            edited_solution.problem = edited_problem
+            if complexity!=solution.complexity:
+                add_complexity(complexity, edited_solution)
+            prev_lang = ','.join([l.name for l in solution.language.all()])
+            if languages!=prev_lang:
+                remove_languages(edited_solution)
+                add_language(languages, edited_solution)
+            prev_alg = ','.join([a.name for a in solution.algorithms.all()])
+            if algorithms!=prev_alg:
+                add_algorithms(algorithms, edited_solution)
+            prev_ds = ','.join([ds.name for ds in solution.data_structures.all()])
+            if data_structures!=prev_ds:
+                add_ds(data_structures, edited_solution)
+            edited_solution.save()
             messages.success(request, 'Problem Edited')
         else:
             messages.error(request, 'Invalid Form')

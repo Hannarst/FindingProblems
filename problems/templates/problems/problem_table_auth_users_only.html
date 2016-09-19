@@ -18,11 +18,28 @@
         <tr class='clickable-row' data-href="{% url 'view_problem' problem.id %}" style="cursor: pointer;">
             <td>{{problem.title}}</td>
             <td>
-                {% for category in problem.categories.all|slice:":5" %}
-                    <a class="tag btn btn-xs btn-info" href="?paradigms={{category.name}}"> {{ category.name }} </a>
-
-                {% empty %}
-                    Uncategorised
+            {% for tup in problem_info %}
+                {% if tup.0 == problem.id %}
+                    {% for category in tup.2|slice:":5" %}
+                        {% if category.type == 'paradigm' %}
+                            <a class="tag btn btn-xs btn-info" href="?paradigms={{category.name}}"> {{ category.name }} </a>
+                        {% endif %}
+                        {% if category.type == 'complexity' %}
+                            <a class="tag btn btn-xs btn-info" href="?complexity={{category.name}}"> {{ category.name }} </a>
+                        {% endif %}
+                        {% if category.type == 'algorithm' %}
+                            <a class="tag btn btn-xs btn-info" href="?algorithms={{category.name}}"> {{ category.name }} </a>
+                        {% endif %}
+                        {% if category.type == 'language' %}
+                            <a class="tag btn btn-xs btn-info" href="?languages={{category.name}}"> {{ category.name }} </a>
+                        {% endif %}
+                        {% if category.type == 'data-structure' %}
+                            <a class="tag btn btn-xs btn-info" href="?data_structures={{category.name}}"> {{ category.name }} </a>
+                        {% endif %}
+                    {% empty %}
+                        Uncategorised
+                    {% endfor %}
+                {% endif %}
                 {% endfor %}
             </td>
             <td>{{problem.get_difficulty_display}}</td>
