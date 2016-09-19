@@ -1,0 +1,79 @@
+<table class="panel-body table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Categories</th>
+        <th>Difficulty</th>
+        <th>Solution availability</th>
+        <th>Forked from</th>
+        <th>Visibility</th>
+        <th>Last used</th>
+        {% if challenge %}
+            <th>Add/Remove from challenge</th>
+        {% endif %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for problem in problems %}
+        <tr class='clickable-row' data-href="{% url 'view_problem' problem.id %}" style="cursor: pointer;">
+            <td>{{problem.title}}</td>
+            <td>
+                {% for category in problem.categories.all|slice:":5" %}
+                    <a class="tag btn btn-xs btn-info" href="?paradigms={{category.name}}"> {{ category.name }} </a>
+
+                {% empty %}
+                    Uncategorised
+                {% endfor %}
+            </td>
+            <td>{{problem.get_difficulty_display}}</td>
+            <td>
+                {% for tup in problem_info %}
+                    {% if tup.0 == problem.id %}
+                        {% if tup.1 == False %}
+                            This solution is not available to you.
+                        {% else %}
+                            {% if tup.1 == 'No solution provided.' %}
+                                {{ tup.1 }}
+                            {% else %}
+                                Solution available.
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% if problem.forked_from == "Original" %}
+                    {{ "" }}
+                {% else %}
+                    {{problem.forked_from}}
+                {% endif %}
+            </td>
+            <td>
+                {% if problem.problem_privacy %}
+                    Private
+                {% else %}
+                    Public
+                {% endif %}
+            </td>
+            <td>
+                {% for prob_set in problem_sets %}
+                    {% if problem in prob_set %}
+                        {{ prob_set.name }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            {% if challenge %}
+                <td>
+                    {% include 'problems/edit_challenge_form.html' %}
+                </td>
+            {% endif %}
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan=7>
+                Sorry, no problems matching this query.
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

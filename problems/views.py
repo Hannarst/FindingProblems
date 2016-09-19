@@ -1,3 +1,4 @@
+import os
 from hashlib import md5
 
 from io import StringIO, BytesIO
@@ -296,6 +297,9 @@ class Index(View):
         suggested_complexity = SUGGESTED_COMPLEXITY()
         suggested_algorithms = SUGGESTED_ALGORITHMS()
         suggested_languages = SUGGESTED_LANGUAGES()
+
+        problems_tuples = self.get_problem_data(problems)
+
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_data_structures': suggested_data_structures,
@@ -303,6 +307,7 @@ class Index(View):
             'suggested_algorithms': suggested_algorithms,
             'suggested_languages': suggested_languages,
             'problems': problems,
+            'problem_info': problems_tuples,
             'problem_sets': Challenge.objects.all(),
             'difficulties': zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
             'searched_paradigms': "" if request.GET == {} else paradigms,
@@ -315,6 +320,22 @@ class Index(View):
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)
+
+    def get_solution_availability(self, solution):
+        if solution.all_defaults():
+            return 'No solution provided.'
+        else:
+            return solution.solution_privacy
+
+    def get_problem_data(self, problems):
+        p_list = []
+        for problem in problems:
+            temp = ()
+            solution = Solution.objects.get(problem=problem)
+            temp[0] = problem.id,
+            temp[1] = self.get_solution_availability(solution)
+            p_list.append(temp)
+        return p_list
 
     def auth_user_search(self, problems, solutions, search_terms, difficulty, visibility):
         result = []
@@ -388,7 +409,7 @@ class ViewProblem(View):
         return render(request, 'problems/view_problem.html', context)
 
 
-class Upload(View):
+class AddProblemFromPDF(View):
     @method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
@@ -403,10 +424,12 @@ class Upload(View):
             if request.FILES:
                 try:
                     if request.FILES['problem']:
+                        self.upload_file(pdf_form)
                         parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
                         problem_form = parsed_problem_pdf[0]
                         paradigms = parsed_problem_pdf[1]
                         content_form = parsed_problem_pdf[2]
+                        os.remove('temp.txt')
 
                 except MultiValueDictKeyError:
                     p_form_data = {
@@ -423,12 +446,15 @@ class Upload(View):
 
                 try:
                     if request.FILES['solution']:
+                        self.upload_file(pdf_form)
                         parsed_solution_pdf = self.parse_solution_pdf(pdf_form)
                         solution_form = parsed_solution_pdf[0]
                         languages = parsed_solution_pdf[1]
                         algorithms = parsed_solution_pdf[2]
                         data_structures = parsed_solution_pdf[3]
                         complexity = parsed_solution_pdf[4]
+                        os.remove('temp.txt')
+
                 except MultiValueDictKeyError:
                     s_form_data = {
                         'solution_description': 'No solution description has been provided.',
@@ -487,6 +513,12 @@ class Upload(View):
         else:
             messages.info(request, "Error when uploading file. Please try again.")
             return redirect('index')
+
+    def upload_file(self, pdf_form):
+        file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
+        with open('temp.txt', 'wb+') as destination:
+            for chunk in file_name.chunks():
+                destination.write(chunk)
 
     def parse_solution_pdf(self, pdf_form):
         HEADINGS = ['complexity', 'links', 'time limit', 'example code', 'languages', 'algorithms', 'data structures']
