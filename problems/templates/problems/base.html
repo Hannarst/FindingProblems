@@ -51,8 +51,8 @@
               singleField: false,
               placeholderText: "Complexity"
           });
-          $("ul.tagit").addClass("list-unstyled form-control input-sm");
-          $("ul.tagit").css("margin-bottom", "0px")
+          $("ul.tagit").addClass("list-unstyled form-control input-xs");
+          $("ul.tagit").css("margin-bottom", "0px");
           $("li.tagit-new").css("padding", "0px");
           $("#id_date").datepicker();
           $(".clickable-row").click(function() {
@@ -104,7 +104,7 @@
   </nav>
   {% if challenge %}
       <div class="alert alert-info">
-        <strong>Editing Challenge:</strong> {{challenge.name}} ({{challenge.date}} at {{challenge.time}})
+        <strong>Editing Problem Set:</strong> {{challenge.name}} ({{challenge.date}} at {{challenge.time}})
         <span class="pull-right" >
           <a class="btn btn-xs btn-primary" href="{% url 'view_challenge' challenge.id %}">Review Problem Set</a>
           <a class="btn btn-xs btn-danger" href="{% url 'quit_editing_challenge'%}">Quit</a>

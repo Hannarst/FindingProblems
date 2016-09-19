@@ -3,12 +3,14 @@
 
 <div class="panel panel-default">
    <div class="panel-heading clearfix">
-       <div class="">
+       <div class="pull-left">
          <h3 class="panel-title" style="padding-top:8px;">
-         Challenges <span class="badge">{{challenges.count}}</span>
+         Problem Sets <span class="badge">{{challenges.count}}</span>
          </h3>
        </div>
-       <a href="{% url 'add_challenge' %}" class="btn btn-sm" type="submit">Create challenge</a>
+       <a href="{% url 'add_challenge' %}" class="btn btn-success btn-sm pull-right" type="submit">
+         Create new problem set
+       </a>
    </div>
 
    <table class="panel-body table table-striped table-bordered">

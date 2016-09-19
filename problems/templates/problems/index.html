@@ -1,47 +1,48 @@
 {% extends 'problems/base.html' %}
 {% block content %}
     <div class="panel panel-default">
+      <div class="panel-heading clearfix">
+        <div class="">
+            {% include 'problems/search_problems.html' %}
+        </div>
+      </div>
         <div class="panel-heading clearfix">
-            <div style="">
-         <span style="float:left;padding:5px">
-         <h3 class="panel-title" style="padding-top:8px;">
-         Results <span class="badge">{{problems.count}}</span>
-         </h3>
-       </span>
+          <span style="float:left;padding:5px">
+            <h3 class="panel-title" style="padding-top:8px;">
+            Results: <span class="badge">{{problems.count}}</span>
+            </h3>
+          </span>
+        <div class="pull-right">
+            {% if user.is_authenticated %}
+                <span style="float:left;padding:5px">
+                 <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">Create problem set</a>
+               </span>
 
-                {% if user.is_authenticated %}
-                    <span style="float:left;padding:5px">
-         <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">Create problem set</a>
-       </span>
-
-                    <span class="pull-left"  style="float:left;padding:5px">
-               <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#manualOrUpload">
-                    Add Problem
-               </button>
-               <div class="modal fade" align="center" id="manualOrUpload" role="dialogue">
-                   <div class="modal-dialogue modal-sm">
-                       <div class="modal-content">
-                           <div class="modal-header">
-                               <h4>Manual or Upload?</h4>
-                           </div>
-                           <div class="modal-body">
-                               <p>
-                                   Would you like to upload a PDF or create a problem manually?
-                               </p>
-                           </div>
-                           <div class="modal-footer">
-                               <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload PDF</a>
-                               <a href="{% url 'add_problem' %}" class="btn btn-default btn-sm">Manually</a>
+                <span class="pull-left"  style="float:left;padding:5px">
+                   <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#manualOrUpload">
+                        Add Problem
+                   </button>
+                   <div class="modal fade" align="center" id="manualOrUpload" role="dialogue">
+                       <div class="modal-dialogue modal-sm">
+                           <div class="modal-content">
+                               <div class="modal-header">
+                                   <h4>Manual or Upload?</h4>
+                               </div>
+                               <div class="modal-body">
+                                   <p>
+                                       Would you like to upload a PDF or create a problem manually?
+                                   </p>
+                               </div>
+                               <div class="modal-footer">
+                                   <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload PDF</a>
+                                   <a href="{% url 'add_problem' %}" class="btn btn-default btn-sm">Manually</a>
+                               </div>
                            </div>
                        </div>
                    </div>
-               </div>
-       </span>
-                {% endif %}
-            </div>
-            <div class="pull-right">
-                {% include 'problems/search_problems.html' %}
-            </div>
+                 </span>
+            {% endif %}
+          </div>
         </div>
 
         {% include 'problems/problem_table.html' %}
