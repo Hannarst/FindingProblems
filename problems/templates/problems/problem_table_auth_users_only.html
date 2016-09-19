@@ -57,8 +57,10 @@
             </td>
             <td>
                 {% for prob_set in problem_sets %}
-                    {% if problem in prob_set %}
-                        {{ prob_set.name }}
+                    {% if problem in prob_set.problems.all %}
+                        <li>
+                        <ul>{{ prob_set.name}}, {{prob_set.date }}</ul>
+                        </li>
                     {% endif %}
                 {% endfor %}
             </td>
