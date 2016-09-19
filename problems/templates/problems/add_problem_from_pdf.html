@@ -5,6 +5,12 @@
         <div class="panel-heading">
             <h3>Add a problem</h3>
         </div>
-        {% include 'problems/problem_input.html' %}
+        <form action="{% url 'add_problem' %}" method="post" class="post-form">
+            {% csrf_token %}
+            {% include 'problems/problem_input_form_internals.html' %}
+            <div class="panel-footer">
+                <button type="submit" class="save btn btn-success">Save</button>
+            </div>
+        </form>
     </div>
 {% endblock %}

@@ -1,22 +1,6 @@
 {% load bootstrap3 %}
 <form method="POST" class="post-form">{% csrf_token %}
-    <div class="panel-body">
-        <div class="panel-heading">
-            <h4>Problem</h4>
-        </div>
-        <div class="panel-body" name="problem">
-            {% bootstrap_form problem_form %}
-            {% bootstrap_form content_form %}
-            {% include 'problems/problem_categorisation.html' %}
-        </div>
-        <div class="panel-heading">
-            <h4>Solution</h4>
-        </div>
-        <div class="panel-body" name="solution">
-            {% bootstrap_form solution_form %}
-            {% include 'problems/solution_categorisation.html' %}
-        </div>
-    </div>
+    {% include 'problems/problem_input_form_internals.html' %}
     <div class="panel-footer">
         <button type="submit" class="save btn btn-success">Save</button>
     </div>

@@ -379,33 +379,86 @@ class Upload(View):
         pdf_form = PDFForm(request.POST, request.FILES)
         if pdf_form.is_valid():
             if request.FILES:
-                if request.FILES['problem']:
-                    parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
-                    problem = parsed_problem_pdf[0]
-                    problem_form = parsed_problem_pdf[1]
-                    content_form = parsed_problem_pdf[2]
-                else:
-                    problem = Problem(title='Title 10000000000000000000').save()
+                try:
+                    if request.FILES['problem']:
+                        parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
+                        problem_form = parsed_problem_pdf[0]
+                        paradigms = parsed_problem_pdf[1]
+                        content_form = parsed_problem_pdf[2]
 
-                if request.FILES['solution']:
-                    parsed_solution_pdf = self.parse_solution_pdf(pdf_form, problem)
-                    solution_form = parsed_solution_pdf[0]
-                    solution = solution_form.save()
-                else:
-                    solution = Solution(problem=problem).save()
+                except MultiValueDictKeyError:
+                    p_form_data = {
+                        'title': '',
+                    }
+                    problem_form = ProblemForm(initial=p_form_data)
+                    paradigms = ''
+                    c_form_data = {
+                        'problem_description': '',
+                        'example_input': 'No example input provided.',
+                        'example_output': 'No example output provided.',
+                    }
+                    content_form = ContentForm(initial=c_form_data)
+
+                try:
+                    if request.FILES['solution']:
+                        parsed_solution_pdf = self.parse_solution_pdf(pdf_form)
+                        solution_form = parsed_solution_pdf[0]
+                        languages = parsed_solution_pdf[1]
+                        algorithms = parsed_solution_pdf[2]
+                        data_structures = parsed_solution_pdf[3]
+                        complexity = parsed_solution_pdf[4]
+                except MultiValueDictKeyError:
+                    s_form_data = {
+                        'solution_description': 'No solution description has been provided.',
+                        'links': 'No links.',
+                        'example_code': 'No example solution code.',
+                        'time_limit': 0,
+                        'complexity': None,
+                    }
+                    solution_form = SolutionForm(s_form_data)
+                    languages = ''
+                    algorithms = ''
+                    data_structures = ''
+                    complexity = ''
             else:
-                problem = Problem(title='Title 1000000000000000000000000000').save()
-                solution = Solution(problem=problem).save()
+                p_form_data = {
+                    'title': '',
+                }
+                problem_form = ProblemForm(initial=p_form_data)
+                c_form_data = {
+                    'problem_description': '',
+                    'example_input': 'No example input provided.',
+                    'example_output': 'No example output provided.',
+                }
+                content_form = ContentForm(initial=c_form_data)
+                s_form_data = {
+                    'solution_description': '',
+                    'links': 'No links.',
+                    'example_code': 'No example solution code.',
+                    'time_limit': 0,
+                    'complexity': None,
+                }
+                solution_form = SolutionForm(s_form_data)
+                paradigms = ''
+                languages = ''
+                algorithms = ''
+                data_structures = ''
+                complexity = ''
 
             context = {
                 'problem_form': problem_form,
                 'content_form': content_form,
                 'solution_form': solution_form,
-                'paradigms': ",".join([cat.name for cat in problem.categories.all()]),
-                'languages': ','.join([lang.name for lang in solution.language.all()]),
-                'algorithms': ','.join([alg.name for alg in solution.algorithms.all()]),
-                'data_structures': ','.join([ds.name for ds in solution.data_structures.all()]),
-                'complexity': solution.complexity
+                'paradigms': paradigms,
+                'languages': languages,
+                'algorithms': algorithms,
+                'data_structures': data_structures,
+                'complexity': complexity,
+                'suggested_paradigms': SUGGESTED_PARADIGMS,
+                'suggested_algorithms': SUGGESTED_ALGORITHMS,
+                'suggested_data_structures': SUGGESTED_DATA_STRUCTURES,
+                'suggested_languages': SUGGESTED_LANGUAGES,
+                'suggested_complexity': SUGGESTED_COMPLEXITY,
             }
             messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
             return render(request, 'problems/add_problem_from_pdf.html', context)
@@ -418,7 +471,7 @@ class Upload(View):
         file_name = self.get_file_name(str(pdf_form.cleaned_data['solution']))[0]
         solution_pdf_content = self.getPDFContent(file_name)
         solution_description = ""
-        start_next_section = 1
+        start_next_section = 0
         if solution_pdf_content[start_next_section] not in HEADINGS:
             for line in range(1, len(solution_pdf_content)):
                 if solution_pdf_content[line].lower() in HEADINGS:
@@ -432,6 +485,7 @@ class Upload(View):
         language = ""
         data_structures = ""
         algorithms = ""
+        time_limit = ""
 
         max_index = len(solution_pdf_content)-1
         not_end_of_file = True
@@ -484,45 +538,42 @@ class Upload(View):
                     else:
                         algorithms += solution_pdf_content[line]+','
                         start_next_section += 1
+            elif solution_pdf_content[start_next_section].lower() == 'time limit':
+                start = start_next_section+1
+                for line in range(start, len(solution_pdf_content)):
+                    if solution_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        time_limit += solution_pdf_content[line]+','
+                        start_next_section += 1
             start_next_section += 1
             if start_next_section >= max_index:
                 not_end_of_file = False
 
-        solution = Solution()
-        solution.problem = problem
-        if solution_description != "":
-            solution.solution_description = solution_description
-        if links != "":
-            solution.links = links
-        if example_code != "":
-            solution.example_code = example_code
-        solution.save()
-        if complexity != "":
-            add_complexity(complexity, solution)
-        if language != "":
-            add_language(language, solution)
-        if algorithms != "":
-            add_algorithms(algorithms, solution)
-        if data_structures != "":
-            add_ds(data_structures, solution)
-        solution_form = SolutionForm(instance=solution)
+        #clean up time limit input
+        alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        for char in time_limit:
+            if char in alphabet:
+                time_limit.replace(char, '')
 
-        return [solution, solution_form]
+
+        s_form_data = {
+            'solution_description': solution_description if solution_description!="" else "No solution description has been provided.",
+            'links': links if links !="" else "No links.",
+            'example_code': example_code if example_code!="" else "No example solution code.",
+            'time_limit': time_limit,
+        }
+        solution_form = SolutionForm(initial=s_form_data)
+        return [solution_form, language, algorithms, data_structures, complexity]
 
     def parse_problem_pdf(self, pdf_form):
-        HEADINGS = ['sample input', 'sample output', 'paradigms']
+        HEADINGS = ['sample input', 'problem description', 'sample output', 'paradigms']
         file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
         problem_pdf_content = self.getPDFContent(file_name)
+        print(problem_pdf_content)
         title = problem_pdf_content[0]
         problem_description = ""
         start_next_section = 1
-        if problem_pdf_content[start_next_section] not in HEADINGS:
-            for line in range(1, len(problem_pdf_content)):
-                if problem_pdf_content[line].lower() in HEADINGS:
-                    start_next_section = line
-                    break
-                else:
-                    problem_description += problem_pdf_content[line]+'\n'
         sample_input = ""
         sample_output = ""
         paradigms = ""
@@ -536,6 +587,14 @@ class Upload(View):
                         break
                     else:
                         sample_input += problem_pdf_content[line]+'\n'
+                        start_next_section += 1
+            elif problem_pdf_content[start_next_section].lower() == 'problem description':
+                start = start_next_section+1
+                for line in range(start, len(problem_pdf_content)):
+                    if problem_pdf_content[line].lower() in HEADINGS:
+                        break
+                    else:
+                        problem_description += problem_pdf_content[line]+'\n'
                         start_next_section += 1
             elif problem_pdf_content[start_next_section].lower() == 'sample output':
                 start = start_next_section+1
@@ -557,23 +616,18 @@ class Upload(View):
             if start_next_section >= max_index:
                 not_end_of_file = False
 
-        problem = Problem()
-        problem.title = title +" unique mothafucka. I said unique!"
-        problem.save()
-        if paradigms != "":
-            add_paradigms(paradigms, problem)
-        problem_form = ProblemForm(instance=problem)
-        content = Content()
-        content.problem_description = problem_description
-        content.problem = problem
-        if sample_input != "":
-            content.example_input = sample_input
-        if sample_output != "":
-            content.example_output = sample_output
-        content.save()
-        content_form = ContentForm(instance=content)
+        p_form_data = {
+            'title': title,
+        }
+        problem_form = ProblemForm(initial=p_form_data)
+        c_form_data = {
+            'problem_description': problem_description,
+            'example_input': sample_input if sample_input!="" else "No sample input provided.",
+            'example_output': sample_output if sample_output!="" else "No sample output provided.",
+        }
+        content_form = ContentForm(initial=c_form_data)
 
-        return [problem, problem_form, content_form]
+        return [problem_form, paradigms, content_form]
 
     def get_file_name(self, file):
         return file.split('<In MemoryUploadedFile: ')
@@ -614,7 +668,10 @@ class Upload(View):
                         while section != ' ':
                             paragraph+=section
                             temp_line += 1
-                            section = list_of_lines[temp_line]
+                            if temp_line <= max_index:
+                                section = list_of_lines[temp_line]
+                            else:
+                                break
                         actual_lines.append(paragraph)
                         self.consume(lines_on_page, temp_line-line)
 
@@ -643,6 +700,7 @@ class AddProblem(View):
             'content_form': content_form,
             'solution_form': solution_form
         }
+
         return render(request, 'problems/add_problem.html', context)
 
     def post(self, request):
