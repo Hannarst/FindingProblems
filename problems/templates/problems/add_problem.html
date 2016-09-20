@@ -2,8 +2,12 @@
 {% load bootstrap3 %}
 {% block content %}
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3>Add a problem</h3>
+        <div class="panel-heading clearfix" style="position:relative">
+            <h3 class="pull-left">Add a problem</h3>
+            <span class="pull-right" style="margin-top:20px" >
+              <span style="margin:10px">OR:</span>
+              <a href="{% url 'add_problem_from_pdf' %}" class="btn btn-primary btn-sm">Upload PDF</a>
+            </span>
         </div>
         <form method="POST" class="post-form">{% csrf_token %}
           <div class="panel-body">
