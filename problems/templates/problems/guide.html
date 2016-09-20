@@ -64,7 +64,7 @@
             Find problems of a particular difficulty.
           </div>
         </div>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.is_active %}
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4>Privacy</h4>
@@ -91,7 +91,7 @@
             An activated account is required for most of the functionality of the website.
           </div>
         </div>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.is_active %}
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4>Changing and Resetting Password</h4>
@@ -103,7 +103,7 @@
         {% endif %}
       </div>
     </div>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_active %}
       {% include 'problems/guide_staff.html' %}
     {% endif %}
   </div>

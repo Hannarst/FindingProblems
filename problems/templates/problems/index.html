@@ -13,7 +13,7 @@
             </h3>
           </span>
         <div class="pull-right">
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and user.is_active %}
                 <span style="float:left;padding:5px">
                  <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">
                    Create problem set
@@ -31,7 +31,7 @@
           </div>
         </div>
 
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.is_active %}
             {% include 'problems/problem_table_auth_users_only.html' %}
         {% else %}
             {% include 'problems/problem_table_default.html' %}

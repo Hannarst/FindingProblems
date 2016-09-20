@@ -12,7 +12,7 @@
                         <div style="margin-left:30px;"> Time limit: {{ solution.time_limit }} seconds</div>
                     {% endif %}
                 </div>
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and user.is_active %}
                     <div class="pull-right">
                         <a href="{% url 'edit_problem' problem.id %}" style="margin:2px;" class="btn btn-xs btn-default pull-right">
                             Edit

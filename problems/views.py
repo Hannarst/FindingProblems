@@ -258,49 +258,35 @@ class CreateAccount(View):
 class Index(View):
     def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
-        challenge = ""
         problems = Problem.objects.all()
         solutions = Solution.objects.all()
 
-        search = False
         # determine whether to return full index or a search results
-        paradigms=languages=algorithms=complexity=data_structures=difficulty=visibility = ""
-        if request.GET != {}:
-            search = True
-            try:
-                paradigms = request.GET['paradigms']
-                languages = request.GET['languages']
-                algorithms = request.GET['algorithms']
-                complexity = request.GET['complexity']
-                data_structures = request.GET['data_structures']
-                difficulty = request.GET['difficulty']
-                visibility = request.GET['visibility']
-            except MultiValueDictKeyError:
-                pass
+        challenge=paradigms=languages=algorithms=complexity=data_structures=difficulty=visibility = ""
+        paradigms = request.GET.get('paradigms', '')
+        languages = request.GET.get('languages', '')
+        algorithms = request.GET.get('algorithms', '')
+        complexity = request.GET.get('complexity', '')
+        data_structures = request.GET.get('data_structures', '')
+        difficulty = request.GET.get('difficulty', '')
 
-        # a normal index view should be the same as a search where all parameters are empty strings
-        if request.user.is_authenticated():
-            if search:
-                search_terms = (
-                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
-                    ',')
-                while '' in search_terms:
-                    search_terms.remove('')
+        search_terms = (
+            data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
+            ',')
+        while '' in search_terms:
+            search_terms.remove('')
+
+        if request.user.is_authenticated() and request.user.is_active:
+            visibility = request.GET.get('visibility', '')
+            if challenge:
+                challenge = Challenge.objects.get(pk=challenge_id)
+            if search_terms or difficulty or visibility:
                 problems = self.auth_user_search(problems, solutions, search_terms, difficulty, visibility)
-
-            # only an authenticated user can edit and make challenges, so best have this here
-            if challenge_id:
-                challenge = get_object_or_404(Challenge, pk=challenge_id)
         else:
-            if search:
-                search_terms = (
-                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
-                    ',')
-                while '' in search_terms:
-                    search_terms.remove('')
+            problems = Problem.objects.exclude(problem_privacy=True)
+            if search_terms or difficulty or visibility:
                 problems = self.normal_search(problems, solutions, search_terms, difficulty)
-            else:
-                problems = Problem.objects.exclude(problem_privacy=True)
+
 
         suggested_paradigms = SUGGESTED_PARADIGMS()
         suggested_data_structures = SUGGESTED_DATA_STRUCTURES()

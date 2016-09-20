@@ -15,7 +15,7 @@
             {% endfor %}
         </select>
     </div>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_active %}
         <div class="form-group">
             <label for="id_visibility" class="sr-only">Visibility:</label>
             <select id="id_visibility" name="visibility" class="input-sm form-control">
