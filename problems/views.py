@@ -170,7 +170,8 @@ class ActivateAccount(View):
         today = datetime.date.today()
         context = {
             'deadline_valid': False,
-            'code_valid': False
+            'code_valid': False,
+            'form': ActivateAccountForm(),
         }
 
         # check that the account can still be activated using this code
