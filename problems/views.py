@@ -11,6 +11,7 @@ import random
 import datetime
 import reportlab
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
 from django.forms import formset_factory
 from django.http import HttpResponse
@@ -24,6 +25,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
+from FindingProblems import settings
 from .models import *
 from .forms import *
 
@@ -470,12 +472,16 @@ class AddProblemFromPDF(View):
             if request.FILES:
                 try:
                     if request.FILES['problem']:
-                        self.upload_file(pdf_form)
-                        parsed_problem_pdf = self.parse_problem_pdf(pdf_form)
+                        problem_file = request.FILES['problem']
+                        fs = FileSystemStorage()
+                        f_name = fs.save(problem_file.name, problem_file)
+                        f_name = f_name.replace('%20', ' ')
+                        upload_file_url = settings.MEDIA_ROOT+'\\'+f_name
+                        parsed_problem_pdf = self.parse_problem_pdf(upload_file_url)
                         problem_form = parsed_problem_pdf[0]
                         paradigms = parsed_problem_pdf[1]
                         content_form = parsed_problem_pdf[2]
-                        os.remove('temp.txt')
+                        os.remove(upload_file_url)
 
                 except MultiValueDictKeyError:
                     p_form_data = {
@@ -492,14 +498,18 @@ class AddProblemFromPDF(View):
 
                 try:
                     if request.FILES['solution']:
-                        self.upload_file(pdf_form)
-                        parsed_solution_pdf = self.parse_solution_pdf(pdf_form)
+                        solution_file = request.FILES['solution']
+                        fs = FileSystemStorage()
+                        f_name = fs.save(solution_file.name, solution_file)
+                        f_name = f_name.replace('%20', ' ')
+                        upload_file_url = settings.MEDIA_ROOT+'\\'+f_name
+                        parsed_solution_pdf = self.parse_solution_pdf(upload_file_url)
                         solution_form = parsed_solution_pdf[0]
                         languages = parsed_solution_pdf[1]
                         algorithms = parsed_solution_pdf[2]
                         data_structures = parsed_solution_pdf[3]
                         complexity = parsed_solution_pdf[4]
-                        os.remove('temp.txt')
+                        os.remove(upload_file_url)
 
                 except MultiValueDictKeyError:
                     s_form_data = {
@@ -560,15 +570,8 @@ class AddProblemFromPDF(View):
             messages.info(request, "Error when uploading file. Please try again.")
             return redirect('index')
 
-    def upload_file(self, pdf_form):
-        file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
-        with open('temp.txt', 'wb+') as destination:
-            for chunk in file_name.chunks():
-                destination.write(chunk)
-
-    def parse_solution_pdf(self, pdf_form):
+    def parse_solution_pdf(self, file_name):
         HEADINGS = ['complexity', 'links', 'time limit', 'example code', 'languages', 'algorithms', 'data structures']
-        file_name = self.get_file_name(str(pdf_form.cleaned_data['solution']))[0]
         solution_pdf_content = self.getPDFContent(file_name)
         solution_description = ""
         start_next_section = 0
@@ -696,9 +699,8 @@ class AddProblemFromPDF(View):
         solution_form = SolutionForm(initial=s_form_data)
         return [solution_form, language.strip(), algorithms.strip(), data_structures.strip(), complexity.strip()]
 
-    def parse_problem_pdf(self, pdf_form):
+    def parse_problem_pdf(self, file_name):
         HEADINGS = ['sample input', 'problem description', 'sample output', 'paradigms']
-        file_name = self.get_file_name(str(pdf_form.cleaned_data['problem']))[0]
         problem_pdf_content = self.getPDFContent(file_name)
         title = problem_pdf_content[0]
         problem_description = ""

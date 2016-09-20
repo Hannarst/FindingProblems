@@ -14,7 +14,8 @@ import os
 from .settings_secret import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+THIS_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.abspath(os.path.join(THIS_DIR, '..'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +39,10 @@ EMAIL_HOST_USER = 'findingproblemstest@gmail.com'
 EMAIL_HOST_PASSWORD = 'FPpassword'
 DEFAULT_EMAIL_FROM = EMAIL_HOST_USER
 EMAIL_USE_TLS = True
+
+#upload stuffs
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(THIS_DIR, 'media')
 
 # Application definition
 
@@ -74,6 +79,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
+                'django.template.context_processors.media',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',

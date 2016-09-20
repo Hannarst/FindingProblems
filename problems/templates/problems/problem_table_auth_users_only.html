@@ -47,7 +47,7 @@
                 {% for tup in problem_info %}
                     {% if tup.0 == problem.id %}
                         {% if tup.1 == False %}
-                            This solution is not available to you.
+                            Solution not publically available.
                         {% else %}
                             {% if tup.1 == 'No solution provided.' %}
                                 {{ tup.1 }}

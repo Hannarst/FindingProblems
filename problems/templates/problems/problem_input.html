@@ -2,6 +2,7 @@
 <form method="POST" class="post-form">{% csrf_token %}
     {% include 'problems/problem_input_form_internals.html' %}
     <div class="panel-footer">
-        <button type="submit" class="save btn btn-success">Save</button>
+        <button type="submit" class="pull-right save btn btn-success">Save</button>
+        <div class="clearfix"></div>
     </div>
 </form>

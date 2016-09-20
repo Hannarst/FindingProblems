@@ -39,8 +39,8 @@ class CreateAccountForm(forms.Form):
 
 
 class SolutionForm(forms.ModelForm):
-    time_limit = forms.FloatField(label="Time limit (s)")
-    solution_privacy = forms.BooleanField(label='Make solution private')
+    time_limit = forms.FloatField(label="Time limit (s)", required=False)
+    solution_privacy = forms.BooleanField(label='Make solution public', required=False)
     class Meta:
         model = Solution
         fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
