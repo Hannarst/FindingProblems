@@ -6,7 +6,10 @@
             <h3 class="pull-left">Add a problem</h3>
             <span class="pull-right" style="margin-top:20px" >
               <span style="margin:10px">OR:</span>
-              <a href="{% url 'add_problem_from_pdf' %}" class="btn btn-primary btn-sm">Upload PDF</a>
+              <a href="{% url 'add_problem_from_pdf' %}" class="btn btn-primary btn-sm">
+                Upload PDF
+                <i class="fa fa-upload" aria-hidden='true'></i>
+              </a>
             </span>
         </div>
         <form method="POST" class="post-form">{% csrf_token %}
