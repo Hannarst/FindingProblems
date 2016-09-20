@@ -264,36 +264,19 @@ class Index(View):
 
         search = False
         # determine whether to return full index or a search results
+        paradigms=languages=algorithms=complexity=data_structures=difficulty=visibility = ""
         if request.GET != {}:
             search = True
             try:
                 paradigms = request.GET['paradigms']
-            except MultiValueDictKeyError:
-                paradigms = ""
-            try:
                 languages = request.GET['languages']
-            except MultiValueDictKeyError:
-                languages = ""
-            try:
                 algorithms = request.GET['algorithms']
-            except MultiValueDictKeyError:
-                algorithms = ""
-            try:
                 complexity = request.GET['complexity']
-            except MultiValueDictKeyError:
-                complexity = ""
-            try:
                 data_structures = request.GET['data_structures']
-            except MultiValueDictKeyError:
-                data_structures = ""
-            try:
                 difficulty = request.GET['difficulty']
-            except MultiValueDictKeyError:
-                difficulty = ""
-            try:
                 visibility = request.GET['visibility']
             except MultiValueDictKeyError:
-                visibility = ""
+                pass
 
         # a normal index view should be the same as a search where all parameters are empty strings
         if request.user.is_authenticated():
@@ -326,7 +309,6 @@ class Index(View):
         suggested_languages = SUGGESTED_LANGUAGES()
 
         problems_tuples = self.get_problem_data(problems)
-
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_data_structures': suggested_data_structures,
@@ -337,13 +319,13 @@ class Index(View):
             'problem_info': problems_tuples,
             'problem_sets': Challenge.objects.all(),
             'difficulties': zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
-            'searched_paradigms': "" if request.GET == {} else paradigms,
-            'searched_algorithms': "" if request.GET == {} else algorithms,
-            'searched_complexity': "" if request.GET == {} else complexity,
-            'searched_data_structures': "" if request.GET == {} else data_structures,
-            'searched_languages': "" if request.GET == {} else languages,
-            'searched_difficulty': "" if request.GET == {} else difficulty,
-            'searched_visibility': "" if request.GET == {} else visibility,
+            'searched_paradigms': paradigms,
+            'searched_algorithms': algorithms,
+            'searched_complexity': complexity,
+            'searched_data_structures': data_structures,
+            'searched_languages': languages,
+            'searched_difficulty': difficulty,
+            'searched_visibility': visibility,
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)
