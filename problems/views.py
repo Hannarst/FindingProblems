@@ -715,6 +715,7 @@ class AddProblem(HelperView):
         problem_form = ProblemForm(request.POST)
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
+        time_limit = request.POST.get('time_limit')
         complexity = request.POST.get('complexity')
         languages = request.POST.get('languages')
         paradigms = request.POST.get('paradigms')
@@ -731,6 +732,7 @@ class AddProblem(HelperView):
             content.problem = problem
             content.save()
             solution = solution_form.save(commit=False)
+            solution.time_limit = time_limit if time_limit else 0
             solution.problem = problem
             solution.save()
             if complexity:
