@@ -570,9 +570,6 @@ class AddProblemFromPDF(HelperView):
 
         return [problem_form, paradigms, content_form]
 
-    def get_file_name(self, file):
-        return file.split('<In MemoryUploadedFile: ')
-
     def consume(self, iterator, num):
         if num is None:
             collections.deque(iterator, maxlen=0)

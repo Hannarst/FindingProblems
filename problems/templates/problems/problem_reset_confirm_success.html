@@ -1,0 +1,37 @@
+<div class="panel panel-default">
+    <div class="panel-heading" style="position:relative">
+        <h1>Password Reset</h1>
+        <div style="position:relative">
+            <h3>Enter new password</h3>
+        </div>
+    </div>
+    <div>
+
+    </div>
+</div>
+<div id="content" class="colM">
+    <p>
+        Please enter your new password twice so we can verify you typed it in correctly.
+    </p>
+
+    </br>
+    <form method="POST">
+        {% csrf_token %}
+        <table>
+            <tbody>
+            <tr>
+                <td>{{ form.new_password1.errors }}
+                        <label for="id_new_password1">New password:</label></td>
+                    <td>{{ form.new_password1 }}</td>
+            </tr>
+            <tr><td colspan="2">&nbsp;</td></tr>
+            <tr>
+                <td>{{ form.new_password2.errors }}
+                    <label for="id_new_password2">Confirm password:</label></td>
+                <td>{{ form.new_password2 }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <input class="pull-right" type="submit" value="Change my password">
+    </form>
+</div>
