@@ -29,10 +29,10 @@ from django.contrib.auth.decorators import login_required
 from FindingProblems import settings
 from .models import *
 from .forms import *
+from .populate_db import populate_categories
 
 if Category.objects.count()<=0:
-    call_command('loaddata', 'data\categories.json')
-
+    populate_categories()
 
 class HelperView(View):
     def SUGGESTED_PARADIGMS(self):
@@ -80,7 +80,8 @@ class ActivateAccount(View):
         today = datetime.date.today()
         context = {
             'deadline_valid': False,
-            'code_valid': False
+            'code_valid': False,
+            'form': ActivateAccountForm(),
         }
 
         # check that the account can still be activated using this code
@@ -167,66 +168,35 @@ class CreateAccount(View):
 class Index(HelperView):
     def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
-        challenge = ""
         problems = Problem.objects.all()
         solutions = Solution.objects.all()
 
-        search = False
         # determine whether to return full index or a search results
-        if request.GET != {}:
-            search = True
-            try:
-                paradigms = request.GET['paradigms']
-            except MultiValueDictKeyError:
-                paradigms = ""
-            try:
-                languages = request.GET['languages']
-            except MultiValueDictKeyError:
-                languages = ""
-            try:
-                algorithms = request.GET['algorithms']
-            except MultiValueDictKeyError:
-                algorithms = ""
-            try:
-                complexity = request.GET['complexity']
-            except MultiValueDictKeyError:
-                complexity = ""
-            try:
-                data_structures = request.GET['data_structures']
-            except MultiValueDictKeyError:
-                data_structures = ""
-            try:
-                difficulty = request.GET['difficulty']
-            except MultiValueDictKeyError:
-                difficulty = ""
-            try:
-                visibility = request.GET['visibility']
-            except MultiValueDictKeyError:
-                visibility = ""
+        challenge=paradigms=languages=algorithms=complexity=data_structures=difficulty=visibility = ""
+        paradigms = request.GET.get('paradigms', '')
+        languages = request.GET.get('languages', '')
+        algorithms = request.GET.get('algorithms', '')
+        complexity = request.GET.get('complexity', '')
+        data_structures = request.GET.get('data_structures', '')
+        difficulty = request.GET.get('difficulty', '')
 
-        # a normal index view should be the same as a search where all parameters are empty strings
-        if request.user.is_authenticated():
-            if search:
-                search_terms = (
-                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
-                    ',')
-                while '' in search_terms:
-                    search_terms.remove('')
+        search_terms = (
+            data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
+            ',')
+        while '' in search_terms:
+            search_terms.remove('')
+
+        if request.user.is_authenticated() and request.user.is_active:
+            visibility = request.GET.get('visibility', '')
+            if challenge:
+                challenge = Challenge.objects.get(pk=challenge_id)
+            if search_terms or difficulty or visibility:
                 problems = self.auth_user_search(problems, solutions, search_terms, difficulty, visibility)
-
-            # only an authenticated user can edit and make challenges, so best have this here
-            if challenge_id:
-                challenge = get_object_or_404(Challenge, pk=challenge_id)
         else:
-            if search:
-                search_terms = (
-                    data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
-                    ',')
-                while '' in search_terms:
-                    search_terms.remove('')
+            problems = Problem.objects.exclude(problem_privacy=True)
+            if search_terms or difficulty or visibility:
                 problems = self.normal_search(problems, solutions, search_terms, difficulty)
-            else:
-                problems = Problem.objects.exclude(problem_privacy=True)
+
 
         suggested_paradigms = self.SUGGESTED_PARADIGMS()
         suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
@@ -235,7 +205,6 @@ class Index(HelperView):
         suggested_languages = self.SUGGESTED_LANGUAGES()
 
         problems_tuples = self.get_problem_data(problems)
-
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_data_structures': suggested_data_structures,
@@ -246,13 +215,13 @@ class Index(HelperView):
             'problem_info': problems_tuples,
             'problem_sets': Challenge.objects.all(),
             'difficulties': zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
-            'searched_paradigms': "" if request.GET == {} else paradigms,
-            'searched_algorithms': "" if request.GET == {} else algorithms,
-            'searched_complexity': "" if request.GET == {} else complexity,
-            'searched_data_structures': "" if request.GET == {} else data_structures,
-            'searched_languages': "" if request.GET == {} else languages,
-            'searched_difficulty': "" if request.GET == {} else difficulty,
-            'searched_visibility': "" if request.GET == {} else visibility,
+            'searched_paradigms': paradigms,
+            'searched_algorithms': algorithms,
+            'searched_complexity': complexity,
+            'searched_data_structures': data_structures,
+            'searched_languages': languages,
+            'searched_difficulty': difficulty,
+            'searched_visibility': visibility,
             'challenge': challenge,
         }
         return render(request, 'problems/index.html', context)

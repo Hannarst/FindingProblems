@@ -57,7 +57,7 @@ class Problem(models.Model):
     created_by = models.ForeignKey(User)
     title = models.CharField(max_length=200)
     difficulty = models.IntegerField(default=0, choices=DIFFICULTIES)
-    problem_privacy = models.BooleanField(default=True)
+    problem_privacy = models.BooleanField(default=True, verbose_name="Private (problem)")
     categories = models.ManyToManyField(Category, blank=True, related_name="paradigms")
     forked_from = models.CharField(max_length=200,default="Original")
 
@@ -83,8 +83,6 @@ class Problem(models.Model):
         self.save()
 
 
-
-
 class Content(models.Model):
     problem = models.ForeignKey(Problem)
     problem_description = models.TextField()
@@ -103,7 +101,7 @@ class Content(models.Model):
 
 class Solution(models.Model):
     problem = models.ForeignKey(Problem)
-    solution_privacy = models.BooleanField(default=True)
+    solution_privacy = models.BooleanField(default=True, verbose_name="Private (solution)")
     solution_description = models.TextField(default="No solution description has been provided.")
     solution_description_html = models.TextField()
     complexity = models.ManyToManyField(Category, blank=True, related_name="complexity")

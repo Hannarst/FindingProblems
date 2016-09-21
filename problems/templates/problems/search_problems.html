@@ -7,7 +7,7 @@
         <select id="id_difficulty" name="difficulty" class="input-sm form-control">
             <option value="">Difficulty (any)</option>
             {% for val, choice in difficulties %}
-                {% if val == searched_difficulty %}
+                {% if val|stringformat:"i"  == searched_difficulty %}
                     <option value="{{val}}" selected="selected">{{choice}}</option>
                 {% else %}
                     <option value="{{val}}">{{choice}}</option>
@@ -15,13 +15,13 @@
             {% endfor %}
         </select>
     </div>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_active %}
         <div class="form-group">
             <label for="id_visibility" class="sr-only">Visibility:</label>
             <select id="id_visibility" name="visibility" class="input-sm form-control">
                 <option value="">Visibility (any)</option>
-                <option value="public" {% if searched_privacy == 'public' %} selected="selected" {% endif %} >Public Only</option>
-                <option value="private" {% if searched_privacy == 'private' %} selected="selected" {% endif %}>Private Only</option>
+                <option value="public" {% if searched_visibility == "public" %} selected="selected" {% endif %} >Public Only</option>
+                <option value="private" {% if searched_visibility == "private" %} selected="selected" {% endif %}>Private Only</option>
             </select>
         </div>
     {% endif %}

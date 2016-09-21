@@ -13,39 +13,25 @@
             </h3>
           </span>
         <div class="pull-right">
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and user.is_active %}
                 <span style="float:left;padding:5px">
-                 <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">Create problem set</a>
+                 <a href="{% url 'add_challenge' %}" class="btn btn-sm btn-success" type="submit">
+                   Create problem set
+                   <i class="glyphicon glyphicon-list-alt"></i>
+                 </a>
                </span>
 
                 <span class="pull-left"  style="float:left;padding:5px">
-                   <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#manualOrUpload">
+                   <a href="{% url 'add_problem' %}" type="button" class="btn btn-success btn-sm">
                         Add Problem
-                   </button>
-                   <div class="modal fade" align="center" id="manualOrUpload" role="dialogue">
-                       <div class="modal-dialogue modal-sm">
-                           <div class="modal-content">
-                               <div class="modal-header">
-                                   <h4>Manual or Upload?</h4>
-                               </div>
-                               <div class="modal-body">
-                                   <p>
-                                       Would you like to upload a PDF or create a problem manually?
-                                   </p>
-                               </div>
-                               <div class="modal-footer">
-                                   <a href="{% url 'add_problem_from_pdf' %}" class="btn btn-primary btn-sm">Upload PDF</a>
-                                   <a href="{% url 'add_problem' %}" class="btn btn-default btn-sm">Manually</a>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
+                        <i class="glyphicon glyphicon-plus"></i>
+                   </a>
                  </span>
             {% endif %}
           </div>
         </div>
 
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.is_active %}
             {% include 'problems/problem_table_auth_users_only.html' %}
         {% else %}
             {% include 'problems/problem_table_default.html' %}
