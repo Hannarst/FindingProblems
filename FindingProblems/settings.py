@@ -44,6 +44,11 @@ EMAIL_USE_TLS = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(THIS_DIR, 'media')
 
+#default data stuffs
+FIXTURES_DIR = (
+    'data',
+)
+
 # Application definition
 
 INSTALLED_APPS = [

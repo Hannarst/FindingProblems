@@ -64,6 +64,26 @@ class Problem(models.Model):
     class Meta:
         unique_together = ['title']
 
+    def add_paradigms(self, paradigms):
+        if self.categories:
+            self.remove_paradigms()
+        for p in paradigms.split(','):
+            if p == '' or p == ' ':
+                pass
+        else:
+            paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
+        self.categories.add(paradigm)
+        self.save()
+
+
+    def remove_paradigms(self):
+        paradigms = self.categories.all()
+        for p in paradigms:
+            self.categories.remove(p)
+        self.save()
+
+
+
 
 class Content(models.Model):
     problem = models.ForeignKey(Problem)
@@ -101,6 +121,74 @@ class Solution(models.Model):
         self.links_html = get_html(self.links)
         self.example_code_html = get_html(self.example_code)
         super(Solution, self).save(*args, **kwargs)
+
+    def add_complexity(self, complexities):
+        if self.complexity:
+            self.remove_complexity()
+        for complexity in complexities.split(','):
+            if complexity == '' or complexity == ' ':
+                pass
+        else:
+            complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
+        self.complexity.add(complex)
+        self.save()
+
+    def remove_complexity(self):
+        complexity = self.complexity.all()
+        for c in complexity:
+            self.complexity.remove(c)
+            self.save()
+
+    def add_language(self, langs):
+        if self.language:
+            self.remove_languages()
+        for lang in langs.split(','):
+            if lang == '' or lang == ' ':
+                pass
+            else:
+                language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
+                self.language.add(language)
+                self.save()
+
+    def remove_languages(self):
+        languages = self.language.all()
+        for l in languages:
+            self.language.remove(l)
+        self.save()
+
+    def add_algorithms(self, algorithms):
+        if self.algorithms:
+            self.remove_algorithms()
+        for a in algorithms.split(','):
+            if a == '' or a == ' ':
+                pass
+        else:
+            algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
+        self.algorithms.add(algorithm)
+        self.save()
+
+    def remove_algorithms(self):
+        algorithms = self.algorithms.all()
+        for a in algorithms:
+            self.algorithms.remove(a)
+        self.save()
+
+    def add_ds(self, data_structures):
+        if self.data_structures:
+            self.remove_ds()
+        for ds in data_structures.split(','):
+            if ds == '' or ds == ' ':
+                pass
+        else:
+            data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
+        self.data_structures.add(data_structure)
+        self.save()
+
+    def remove_ds(self):
+        ds = self.data_structures.all()
+        for d in ds:
+            self.data_structures.remove(d)
+        self.save()
 
     def all_defaults(self):
         return self.solution_description=="No solution description has been provided." and self.links=="No links." and self.example_code=="No example solution code."

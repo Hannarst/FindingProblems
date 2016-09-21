@@ -13,6 +13,7 @@ import reportlab
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
+from django.core.management import call_command
 from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -29,118 +30,25 @@ from FindingProblems import settings
 from .models import *
 from .forms import *
 
-def SUGGESTED_PARADIGMS():
-    return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
+if Category.objects.count()<=0:
+    call_command('loaddata', 'data\categories.json')
 
 
-def add_paradigms(paradigms, problem):
-    if problem.categories:
-        remove_paradigms(problem)
-    for p in paradigms.split(','):
-        if p == '' or p == ' ':
-            pass
-        else:
-            paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
-            problem.categories.add(paradigm)
-            problem.save()
+class HelperView(View):
+    def SUGGESTED_PARADIGMS(self):
+        return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
 
+    def SUGGESTED_COMPLEXITY(self):
+        return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
 
-def remove_paradigms(problem):
-    paradigms = problem.categories.all()
-    for p in paradigms:
-        problem.categories.remove(p)
-        problem.save()
+    def SUGGESTED_LANGUAGES(self):
+        return [str(lang.name) for lang in Category.objects.filter(type="language")]
 
+    def SUGGESTED_ALGORITHMS(self):
+        return [str(alg.name) for alg in Category.objects.filter(type="algorithm")]
 
-def SUGGESTED_COMPLEXITY():
-    return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
-
-
-def add_complexity(complexities, solution):
-    if solution.complexity:
-        remove_complexity(solution)
-    for complexity in complexities.split(','):
-        if complexity == '' or complexity == ' ':
-            pass
-        else:
-            complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
-            solution.complexity.add(complex)
-            solution.save()
-
-
-def remove_complexity(solution):
-    complexity = solution.complexity.all()
-    for c in complexity:
-        solution.complexity.remove(c)
-        solution.save()
-
-def SUGGESTED_LANGUAGES():
-    return [str(lang.name) for lang in Category.objects.filter(type="language")]
-
-
-def add_language(langs, solution):
-    if solution.language:
-        remove_languages(solution)
-    for lang in langs.split(','):
-        if lang == '' or lang == ' ':
-            pass
-        else:
-            language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
-            solution.language.add(language)
-            solution.save()
-
-
-def remove_languages(solution):
-    languages = solution.language.all()
-    for l in languages:
-        solution.language.remove(l)
-        solution.save()
-
-
-def SUGGESTED_ALGORITHMS():
-    return [str(alg.name) for alg in Category.objects.filter(type="algorithm")]
-
-
-def add_algorithms(algorithms, solution):
-    if solution.algorithms:
-        remove_algorithms(solution)
-    for a in algorithms.split(','):
-        if a == '' or a == ' ':
-            pass
-        else:
-            algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
-            solution.algorithms.add(algorithm)
-            solution.save()
-
-
-def remove_algorithms(solution):
-    algorithms = solution.algorithms.all()
-    for a in algorithms:
-        solution.algorithms.remove(a)
-        solution.save()
-
-
-def SUGGESTED_DATA_STRUCTURES():
-    return [str(ds.name) for ds in Category.objects.filter(type="data-structure")]
-
-
-def add_ds(data_structures, solution):
-    if solution.data_structures:
-        remove_ds(solution)
-    for ds in data_structures.split(','):
-        if ds == '' or ds == ' ':
-            pass
-        else:
-            data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
-            solution.data_structures.add(data_structure)
-            solution.save()
-
-
-def remove_ds(solution):
-    ds = solution.data_structures.all()
-    for d in ds:
-        solution.data_structures.remove(d)
-        solution.save()
+    def SUGGESTED_DATA_STRUCTURES(self):
+        return [str(ds.name) for ds in Category.objects.filter(type="data-structure")]
 
 
 class Home(View):
@@ -256,7 +164,7 @@ class CreateAccount(View):
         )
 
 
-class Index(View):
+class Index(HelperView):
     def get(self, request):
         challenge_id = request.session.get('challenge_id', "")
         challenge = ""
@@ -320,11 +228,11 @@ class Index(View):
             else:
                 problems = Problem.objects.exclude(problem_privacy=True)
 
-        suggested_paradigms = SUGGESTED_PARADIGMS()
-        suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
-        suggested_complexity = SUGGESTED_COMPLEXITY()
-        suggested_algorithms = SUGGESTED_ALGORITHMS()
-        suggested_languages = SUGGESTED_LANGUAGES()
+        suggested_paradigms = self.SUGGESTED_PARADIGMS()
+        suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
+        suggested_complexity = self.SUGGESTED_COMPLEXITY()
+        suggested_algorithms = self.SUGGESTED_ALGORITHMS()
+        suggested_languages = self.SUGGESTED_LANGUAGES()
 
         problems_tuples = self.get_problem_data(problems)
 
@@ -457,7 +365,7 @@ class ViewProblem(View):
         return render(request, 'problems/view_problem.html', context)
 
 
-class AddProblemFromPDF(View):
+class AddProblemFromPDF(HelperView):
     @method_decorator(login_required)
     def get(self, request):
         pdf_form = PDFForm()
@@ -558,11 +466,11 @@ class AddProblemFromPDF(View):
                 'algorithms': algorithms,
                 'data_structures': data_structures,
                 'complexity': complexity,
-                'suggested_paradigms': SUGGESTED_PARADIGMS,
-                'suggested_algorithms': SUGGESTED_ALGORITHMS,
-                'suggested_data_structures': SUGGESTED_DATA_STRUCTURES,
-                'suggested_languages': SUGGESTED_LANGUAGES,
-                'suggested_complexity': SUGGESTED_COMPLEXITY,
+                'suggested_paradigms': self.SUGGESTED_PARADIGMS,
+                'suggested_algorithms': self.SUGGESTED_ALGORITHMS,
+                'suggested_data_structures': self.SUGGESTED_DATA_STRUCTURES,
+                'suggested_languages': self.SUGGESTED_LANGUAGES,
+                'suggested_complexity': self.SUGGESTED_COMPLEXITY,
             }
             messages.info(request, "File has been uploaded. Please check to make sure that all the fields are correct.")
             return render(request, 'problems/add_problem_from_pdf.html', context)
@@ -810,17 +718,17 @@ class AddProblemFromPDF(View):
         return actual_lines
 
 
-class AddProblem(View):
+class AddProblem(HelperView):
     @method_decorator(login_required)
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
         solution_form = SolutionForm()
-        suggested_paradigms = SUGGESTED_PARADIGMS()
-        suggested_algorithms = SUGGESTED_ALGORITHMS()
-        suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
-        suggested_languages = SUGGESTED_LANGUAGES()
-        suggested_complexity = SUGGESTED_COMPLEXITY()
+        suggested_paradigms = self.SUGGESTED_PARADIGMS()
+        suggested_algorithms = self.SUGGESTED_ALGORITHMS()
+        suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
+        suggested_languages = self.SUGGESTED_LANGUAGES()
+        suggested_complexity = self.SUGGESTED_COMPLEXITY()
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_algorithms': suggested_algorithms,
@@ -849,7 +757,7 @@ class AddProblem(View):
             problem.created_by = request.user
             problem.save()
             if paradigms:
-                add_paradigms(paradigms, problem)
+                problem.add_paradigms(paradigms)
             content = content_form.save(commit=False)
             content.problem = problem
             content.save()
@@ -857,20 +765,20 @@ class AddProblem(View):
             solution.problem = problem
             solution.save()
             if complexity:
-                add_complexity(complexity, solution)
+                solution.add_complexity(complexity)
             if languages:
-                add_language(languages, solution)
+                solution.add_language(languages)
             if algorithms:
-                add_algorithms(algorithms, solution)
+                solution.add_algorithms(algorithms)
             if data_structures:
-                add_ds(data_structures, solution)
+                solution.add_ds(data_structures)
             messages.success(request, 'Problem Added')
         else:
             messages.error(request, 'Invalid Form')
         return redirect('index')
 
 
-class EditProblem(View):
+class EditProblem(HelperView):
     @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
@@ -886,11 +794,11 @@ class EditProblem(View):
         content_form = ContentForm(instance=content)
         solution_form = SolutionForm(instance=solution)
 
-        suggested_paradigms = SUGGESTED_PARADIGMS()
-        suggested_algorithms = SUGGESTED_ALGORITHMS()
-        suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
-        suggested_languages = SUGGESTED_LANGUAGES()
-        suggested_complexity = SUGGESTED_COMPLEXITY()
+        suggested_paradigms = self.SUGGESTED_PARADIGMS()
+        suggested_algorithms = self.SUGGESTED_ALGORITHMS()
+        suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
+        suggested_languages = self.SUGGESTED_LANGUAGES()
+        suggested_complexity = self.SUGGESTED_COMPLEXITY()
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_algorithms': suggested_algorithms,
@@ -924,7 +832,7 @@ class EditProblem(View):
             edited_problem = problem_form.save()
             prev_par = ','.join([p.name for p in problem.categories.all()])
             if paradigms!=prev_par:
-                add_paradigms(paradigms, edited_problem)
+                edited_problem.add_paradigms(paradigms)
             content = content_form.save(commit=False)
             content.problem = edited_problem
             content.save()
@@ -932,17 +840,16 @@ class EditProblem(View):
             edited_solution.problem = edited_problem
             prev_complexity = ','.join([c.name for c in solution.complexity.all()])
             if complexity!=prev_complexity:
-                add_complexity(complexity, edited_solution)
+                edited_solution.add_complexity(complexity)
             prev_lang = ','.join([l.name for l in solution.language.all()])
             if languages!=prev_lang:
-                remove_languages(edited_solution)
-                add_language(languages, edited_solution)
+                edited_solution.add_language(languages)
             prev_alg = ','.join([a.name for a in solution.algorithms.all()])
             if algorithms!=prev_alg:
-                add_algorithms(algorithms, edited_solution)
+                edited_solution.add_algorithms(algorithms)
             prev_ds = ','.join([ds.name for ds in solution.data_structures.all()])
             if data_structures!=prev_ds:
-                add_ds(data_structures, edited_solution)
+                edited_solution.add_ds(data_structures)
             edited_solution.save()
             messages.success(request, 'Problem Edited')
         else:
@@ -950,7 +857,7 @@ class EditProblem(View):
         return redirect('index')
 
 
-class ForkProblem(View):
+class ForkProblem(HelperView):
     @method_decorator(login_required)
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
@@ -966,11 +873,11 @@ class ForkProblem(View):
         content_form = ContentForm(instance=content)
         solution_form = SolutionForm(instance=solution)
 
-        suggested_paradigms = SUGGESTED_PARADIGMS()
-        suggested_algorithms = SUGGESTED_ALGORITHMS()
-        suggested_data_structures = SUGGESTED_DATA_STRUCTURES()
-        suggested_languages = SUGGESTED_LANGUAGES()
-        suggested_complexity = SUGGESTED_COMPLEXITY()
+        suggested_paradigms = self.SUGGESTED_PARADIGMS()
+        suggested_algorithms = self.SUGGESTED_ALGORITHMS()
+        suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
+        suggested_languages = self.SUGGESTED_LANGUAGES()
+        suggested_complexity = self.SUGGESTED_COMPLEXITY()
         context = {
             'suggested_paradigms': suggested_paradigms,
             'suggested_algorithms': suggested_algorithms,
@@ -1006,7 +913,7 @@ class ForkProblem(View):
             forked_problem.forked_from = original_problem.title
             forked_problem.save()
             if paradigms:
-                add_paradigms(paradigms, forked_problem)
+                forked_problem.add_paradigms(paradigms)
             forked_content = content_form.save(commit=False)
             forked_content.pk = None
             forked_content.problem = forked_problem
@@ -1016,13 +923,13 @@ class ForkProblem(View):
             forked_solution.problem = forked_problem
             forked_solution.save()
             if languages:
-                add_language(languages, forked_solution)
+                forked_solution.add_language(languages)
             if complexity:
-                add_complexity(complexity, forked_solution)
+                forked_solution.add_complexity(complexity)
             if algorithms:
-                add_algorithms(algorithms, forked_solution)
+                forked_solution.add_algorithms(algorithms)
             if data_structures:
-                add_ds(data_structures, forked_solution)
+                forked_solution.add_ds(data_structures)
             messages.success(request, 'Problem Forked')
         else:
             messages.error(request, 'Invalid Form')

@@ -38,12 +38,11 @@ class CreateAccountForm(forms.Form):
         return form_data
 
 
-class SolutionForm(forms.ModelForm):
-    time_limit = forms.FloatField(label="Time limit (s)", required=False)
-    solution_privacy = forms.BooleanField(label='Make solution public', required=False)
+class ProblemForm(forms.ModelForm):
+    problem_privacy = forms.BooleanField(label='Make problem private', required=False)
     class Meta:
-        model = Solution
-        fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
+        model = Problem
+        exclude = ('created_by', 'content', 'solution', 'categories', 'forked_from',)
 
 
 class ContentForm(forms.ModelForm):
@@ -52,15 +51,17 @@ class ContentForm(forms.ModelForm):
         fields = ('problem_description', 'example_input', 'example_output',)
 
 
-class ProblemForm(forms.ModelForm):
-    problem_privacy = forms.BooleanField(label='Make problem private', required=False)
+class SolutionForm(forms.ModelForm):
+    time_limit = forms.FloatField(label="Time limit (s)", required=False)
+    solution_privacy = forms.BooleanField(label='Make solution public', required=False)
     class Meta:
-        model = Problem
-        exclude = ('created_by', 'content', 'solution', 'categories', 'forked_from',)
+        model = Solution
+        fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
 
 
-class CategoriesForm(forms.Form):
-    categories = forms.CharField(max_length=1000)
+class PDFForm(forms.Form):
+    problem = forms.FileField(required=False)
+    solution = forms.FileField(required=False)
 
 
 class ChallengeForm(forms.ModelForm):
@@ -68,10 +69,6 @@ class ChallengeForm(forms.ModelForm):
         model = Challenge
         exclude = ('problems',)
 
-
-class PDFForm(forms.Form):
-    problem = forms.FileField(required=False)
-    solution = forms.FileField(required=False)
 
 #default complexities
 Category.objects.get_or_create(name="o(n!)", type="complexity")
