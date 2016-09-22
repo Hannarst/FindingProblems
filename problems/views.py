@@ -29,10 +29,6 @@ from django.contrib.auth.decorators import login_required
 from FindingProblems import settings
 from .models import *
 from .forms import *
-from .populate_db import populate_categories
-
-if Category.objects.count()<=0:
-    populate_categories()
 
 class HelperView(View):
     def SUGGESTED_PARADIGMS(self):
