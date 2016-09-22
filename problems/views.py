@@ -175,39 +175,37 @@ class Index(HelperView):
         complexity = request.GET.get('complexity', '')
         data_structures = request.GET.get('data_structures', '')
         difficulty = request.GET.get('difficulty', '')
+        visibility = request.GET.get('visibility', '')
 
-        search_terms = (
-            data_structures + ',' + complexity + ',' + algorithms + ',' + languages + ',' + paradigms).split(
-            ',')
-        while '' in search_terms:
-            search_terms.remove('')
+        if paradigms:
+            problems = problems.filter(categories__name__in=[x.lower().strip() for x in paradigms.split(',')])
+        if languages:
+            problems = problems.filter(solution__language__name__in=[x.lower().strip() for x in languages.split(',')])
+        if algorithms:
+            problems = problems.filter(solution__algorithms__name__in=[x.lower().strip() for x in algorithms.split(',')])
+        if complexity:
+            problems = problems.filter(solution__complexity__name__in=[x.lower().strip() for x in complexity.split(',')])
+        if data_structures:
+            problems = problems.filter(solution__data_structures__name__in=[x.lower().strip() for x in data_structures.split(',')])
+        if difficulty:
+            problems = problems.filter(difficulty=difficulty)
 
         if request.user.is_authenticated() and request.user.is_active:
-            visibility = request.GET.get('visibility', '')
+            if visibility:
+                problems = problems.filter(problem_privacy=(visibility=="private"))
             if challenge:
                 challenge = Challenge.objects.get(pk=challenge_id)
-            if search_terms or difficulty or visibility:
-                problems = self.auth_user_search(problems, solutions, search_terms, difficulty, visibility)
         else:
-            problems = Problem.objects.exclude(problem_privacy=True)
-            if search_terms or difficulty or visibility:
-                problems = self.normal_search(problems, solutions, search_terms, difficulty)
-
-
-        suggested_paradigms = self.SUGGESTED_PARADIGMS()
-        suggested_data_structures = self.SUGGESTED_DATA_STRUCTURES()
-        suggested_complexity = self.SUGGESTED_COMPLEXITY()
-        suggested_algorithms = self.SUGGESTED_ALGORITHMS()
-        suggested_languages = self.SUGGESTED_LANGUAGES()
+            problems = problems.exclude(problem_privacy=True)
 
         problems_tuples = self.get_problem_data(problems)
         context = {
-            'suggested_paradigms': suggested_paradigms,
-            'suggested_data_structures': suggested_data_structures,
-            'suggested_complexity': suggested_complexity,
-            'suggested_algorithms': suggested_algorithms,
-            'suggested_languages': suggested_languages,
-            'problems': problems,
+            'suggested_paradigms': self.SUGGESTED_PARADIGMS(),
+            'suggested_data_structures': self.SUGGESTED_DATA_STRUCTURES(),
+            'suggested_complexity': self.SUGGESTED_COMPLEXITY(),
+            'suggested_algorithms': self.SUGGESTED_ALGORITHMS(),
+            'suggested_languages': self.SUGGESTED_LANGUAGES(),
+            'problems': problems.distinct(),
             'problem_info': problems_tuples,
             'problem_sets': Challenge.objects.all(),
             'difficulties': zip(range(5), ['Very Easy', 'Easy', 'Average', 'Difficult', 'Very Difficult']),
@@ -237,67 +235,6 @@ class Index(HelperView):
             temp = (problem.id, solution_availability, categories)
             p_list.append(temp)
         return p_list
-
-    def auth_user_search(self, problems, solutions, search_terms, difficulty, visibility):
-        result = []
-        for solution in solutions.all():
-            categories = solution.get_all_categories()
-            valid_result = 0
-            for term in search_terms:
-                for category in categories:
-                    if category.name == term:
-                        valid_result += 1
-            if valid_result == len(search_terms):
-                if solution.problem not in result:
-                    result.append(solution.problem)
-
-        if difficulty:
-            marked_to_remove = []
-            for problem in result:
-                if int(problem.difficulty) != int(difficulty):
-                    marked_to_remove.append(problem)
-            for problem in marked_to_remove:
-                result.remove(problem)
-            for problem in problems.all():
-                if problem.difficulty == difficulty and problem not in result:
-                    result.append(problem)
-
-        if visibility == "private":
-            for problem in result:
-                if problem.problem_privacy != True:
-                    result.remove(problem)
-            for problem in problems.all():
-                if problem.problem_privacy == True and problem not in result:
-                    result.append(problem)
-        elif visibility == "public":
-            for problem in result:
-                if problem.problem_privacy != False:
-                    result.remove(problem)
-            for problem in problems.all():
-                if problem.problem_privacy == False and problem not in result:
-                    result.append(problem)
-
-        return result
-
-    def normal_search(self, problems, solutions, search_terms, difficulty):
-        result = []
-        for solution in solutions.all():
-            categories = solution.get_all_categories()
-            valid_result = 0
-            for term in search_terms:
-                for category in categories:
-                    if category.name == term:
-                        valid_result += 1
-            if valid_result == len(search_terms):
-                if solution.problem not in result:
-                    if solution.problem.problem_privacy == False:
-                        result.append(solution.problem)
-
-        if difficulty:
-            for problem in problems.all():
-                if int(problem.difficulty) == int(difficulty) and problem.problem_privacy == False and problem not in result:
-                    result.append(problem)
-        return result
 
 
 class ViewProblem(View):
