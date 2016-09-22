@@ -70,9 +70,9 @@ class Problem(models.Model):
         for p in paradigms.split(','):
             if p == '' or p == ' ':
                 pass
-        else:
-            paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
-        self.categories.add(paradigm)
+            else:
+                paradigm, c = Category.objects.get_or_create(name=p.strip().lower(), type="paradigm")
+                self.categories.add(paradigm)
         self.save()
 
 
@@ -126,9 +126,9 @@ class Solution(models.Model):
         for complexity in complexities.split(','):
             if complexity == '' or complexity == ' ':
                 pass
-        else:
-            complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
-        self.complexity.add(complex)
+            else:
+                complex, c = Category.objects.get_or_create(name=complexity.strip().lower(), type="complexity")
+                self.complexity.add(complex)
         self.save()
 
     def remove_complexity(self):
@@ -146,7 +146,7 @@ class Solution(models.Model):
             else:
                 language, l = Category.objects.get_or_create(name=lang.strip().lower(), type="language")
                 self.language.add(language)
-                self.save()
+        self.save()
 
     def remove_languages(self):
         languages = self.language.all()
@@ -160,9 +160,9 @@ class Solution(models.Model):
         for a in algorithms.split(','):
             if a == '' or a == ' ':
                 pass
-        else:
-            algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
-        self.algorithms.add(algorithm)
+            else:
+                algorithm, a = Category.objects.get_or_create(name=a.strip().lower(), type="algorithm")
+                self.algorithms.add(algorithm)
         self.save()
 
     def remove_algorithms(self):
@@ -177,9 +177,9 @@ class Solution(models.Model):
         for ds in data_structures.split(','):
             if ds == '' or ds == ' ':
                 pass
-        else:
-            data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
-        self.data_structures.add(data_structure)
+            else:
+                data_structure, d = Category.objects.get_or_create(name=ds.strip().lower(), type="data-structure")
+                self.data_structures.add(data_structure)
         self.save()
 
     def remove_ds(self):
