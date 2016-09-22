@@ -25,6 +25,7 @@ $ pip install markdown2
 $ pip install reportlab
 $ python manage.py makemigrations
 $ python manage.py migrate
+$ python manage.py populate
 $ python manage.py runserver
 ```
 
