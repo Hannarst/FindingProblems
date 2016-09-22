@@ -6,7 +6,7 @@
   <div class="panel-heading">
     <h3>Create an account</h3>
   </div>
-  <form method="POST" class="post-form">{% csrf_token %}
+  <form method="POST"  onsubmit="$('#button').prop('disabled', true);"class="post-form">{% csrf_token %}
     <div class="panel-body">
       {% bootstrap_form form %}
       {% if form.errors %}
@@ -25,7 +25,7 @@
       {% endif %}
     </div>
     <div class="panel-footer">
-      <button type="submit" class="pull-right save btn btn-default">Create</button>
+      <button type="submit" id="button" class="pull-right save btn btn-default">Create</button>
         <div class="clearfix"></div>
     </div>
   </form>
