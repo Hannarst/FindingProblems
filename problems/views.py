@@ -168,7 +168,6 @@ class Index(HelperView):
         solutions = Solution.objects.all()
 
         # determine whether to return full index or a search results
-        challenge=paradigms=languages=algorithms=complexity=data_structures=difficulty=visibility = ""
         paradigms = request.GET.get('paradigms', '')
         languages = request.GET.get('languages', '')
         algorithms = request.GET.get('algorithms', '')
@@ -193,7 +192,7 @@ class Index(HelperView):
         if request.user.is_authenticated() and request.user.is_active:
             if visibility:
                 problems = problems.filter(problem_privacy=(visibility=="private"))
-            if challenge:
+            if challenge_id:
                 challenge = Challenge.objects.get(pk=challenge_id)
         else:
             problems = problems.exclude(problem_privacy=True)
