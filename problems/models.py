@@ -9,10 +9,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 
-def get_html(content):
-    return markdown2.markdown(content, extras=["fenced-code-blocks"])
-
-
 class Account(models.Model):
     user = models.ForeignKey(User)
     activation_code = models.CharField(max_length=20)
@@ -93,10 +89,13 @@ class Content(models.Model):
     example_output_html = models.TextField()
 
     def save(self, *args, **kwargs):
-        self.problem_description_html = get_html(self.problem_description)
-        self.example_input_html = get_html(self.example_input)
-        self.example_output_html = get_html(self.example_output)
+        self.problem_description_html = self.get_html(self.problem_description)
+        self.example_input_html = self.get_html(self.example_input)
+        self.example_output_html = self.get_html(self.example_output)
         super(Content, self).save(*args, **kwargs)
+
+    def get_html(self, content):
+        return markdown2.markdown(content, extras=["fenced-code-blocks"])
 
 
 class Solution(models.Model):
@@ -115,10 +114,13 @@ class Solution(models.Model):
     algorithms = models.ManyToManyField(Category, blank=True, related_name="algorithms")
 
     def save(self, *args, **kwargs):
-        self.solution_description_html = get_html(self.solution_description)
-        self.links_html = get_html(self.links)
-        self.example_code_html = get_html(self.example_code)
+        self.solution_description_html = self.get_html(self.solution_description)
+        self.links_html = self.get_html(self.links)
+        self.example_code_html = self.get_html(self.example_code)
         super(Solution, self).save(*args, **kwargs)
+
+    def get_html(self, content):
+        return markdown2.markdown(content, extras=["fenced-code-blocks"])
 
     def add_complexity(self, complexities):
         if self.complexity:
