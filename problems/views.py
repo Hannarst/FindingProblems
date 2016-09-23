@@ -166,7 +166,7 @@ class Index(HelperView):
         challenge_id = request.session.get('challenge_id', "")
         problems = Problem.objects.all()
         solutions = Solution.objects.all()
-
+        challenge = ""
         # determine whether to return full index or a search results
         paradigms = request.GET.get('paradigms', '')
         languages = request.GET.get('languages', '')
