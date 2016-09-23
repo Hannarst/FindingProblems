@@ -840,10 +840,36 @@ class DeleteProblem(View):
     @method_decorator(login_required)
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
-        Content.objects.get(problem=problem).delete()
-        Solution.objects.get(problem=problem).delete()
-        Problem.objects.get(id=problem_id).delete()
-        return redirect('index')
+        if request.user == problem.created_by:
+            Content.objects.get(problem=problem).delete()
+            Solution.objects.get(problem=problem).delete()
+            Problem.objects.get(id=problem_id).delete()
+            return redirect('index')
+        else:
+            content = Content.objects.get(problem=problem)
+            solution = Solution.object.get(problem=problem)
+            challenge_id = request.session.get('challenge_id', "")
+            challenge = ""
+            if challenge_id:
+                challenge = get_object_or_404(Challenge, pk=challenge_id)
+            complexity = [c.name for c in solution.complexity.all()]
+            languages = [lang.name for lang in solution.language.all()]
+            paradigms = [p.name for p in problem.categories.all()]
+            algorithms = [alg.name for alg in solution.algorithms.all()]
+            data_structures = [ds.name for ds in solution.data_structures.all()]
+            context = {
+                'problem': problem,
+                'content': content,
+                'solution': solution,
+                'challenge': challenge,
+                'complexity': complexity,
+                'data_structures': data_structures,
+                'paradigms': paradigms,
+                'languages': languages,
+                'algorithms': algorithms,
+            }
+            messages.error(request, 'You are not allowed to delete this problem.')
+            return render(request, 'problems/view_problem.html', context)
 
 
 class ChallengeIndex(View):
