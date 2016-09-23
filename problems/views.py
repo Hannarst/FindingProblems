@@ -24,13 +24,19 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import View
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from FindingProblems import settings
 from .models import *
 from .forms import *
 
+def is_activated(user):
+    acc = Account.objects.get(user=user)
+    return acc.activated
+
+
 class HelperView(View):
+
     def SUGGESTED_PARADIGMS(self):
         return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
 
@@ -58,6 +64,7 @@ class Guide(View):
 
 
 class ActivateAccount(View):
+    @method_decorator(login_required)
     def get(self, request):
         account = get_object_or_404(Account, user=request.user)
         if account.activated:
@@ -268,6 +275,7 @@ class ViewProblem(View):
 
 class AddProblemFromPDF(HelperView):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
         pdf_form = PDFForm()
         context = {
@@ -618,6 +626,7 @@ class AddProblemFromPDF(HelperView):
 
 class AddProblem(HelperView):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
         problem_form = ProblemForm()
         content_form = ContentForm()
@@ -680,6 +689,7 @@ class AddProblem(HelperView):
 
 class EditProblem(HelperView):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -759,6 +769,7 @@ class EditProblem(HelperView):
 
 class ForkProblem(HelperView):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
@@ -838,6 +849,7 @@ class ForkProblem(HelperView):
 
 class DeleteProblem(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, problem_id):
         problem = Problem.objects.get(id=problem_id)
         if request.user == problem.created_by:
@@ -874,6 +886,7 @@ class DeleteProblem(View):
 
 class ChallengeIndex(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
         context = {
             'challenges': Challenge.objects.all(),
@@ -883,6 +896,7 @@ class ChallengeIndex(View):
 
 class EditChallenge(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, challenge_id):
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
@@ -904,6 +918,7 @@ class EditChallenge(View):
 
 class ViewChallenge(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, challenge_id):
         request.session['challenge_id'] = challenge_id
         context = {
@@ -917,6 +932,8 @@ class ViewChallenge(View):
 
 
 class QuitEditingChallenge(View):
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
         request.session['challenge_id'] = None
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
@@ -928,6 +945,7 @@ class QuitEditingChallenge(View):
 
 class AddChallenge(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
         form = ChallengeForm()
         context = {
@@ -948,6 +966,7 @@ class AddChallenge(View):
 
 class AddToChallenge(View):
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))
@@ -956,6 +975,8 @@ class AddToChallenge(View):
 
 
 class RemoveFromChallenge(View):
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, challenge_id, problem_id):
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.remove(Problem.objects.get(pk=problem_id))
