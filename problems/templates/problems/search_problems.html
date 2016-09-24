@@ -4,7 +4,7 @@
 {% include 'problems/solution_categorisation.html' %}
     <div class="form-group">
         <label for="id_difficulty" class="sr-only">Difficulty:</label>
-        <select id="id_difficulty" name="difficulty" class="input-sm form-control">
+        <select id="id_difficulty" name="difficulty" class="form-control ui-widget ui-widget-content ui-corner-all">
             <option value="">Difficulty (any)</option>
             {% for val, choice in difficulties %}
                 {% if val|stringformat:"i"  == searched_difficulty %}
@@ -18,7 +18,7 @@
     {% if user.is_authenticated and user.is_active %}
         <div class="form-group">
             <label for="id_visibility" class="sr-only">Visibility:</label>
-            <select id="id_visibility" name="visibility" class="input-sm form-control">
+            <select id="id_visibility" name="visibility" class="form-control ui-widget ui-widget-content ui-corner-all">
                 <option value="">Visibility (any)</option>
                 <option value="public" {% if searched_visibility == "public" %} selected="selected" {% endif %} >Public Only</option>
                 <option value="private" {% if searched_visibility == "private" %} selected="selected" {% endif %}>Private Only</option>

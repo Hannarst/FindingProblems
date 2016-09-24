@@ -1,32 +1,32 @@
 <div class="form-group">
     <label class="sr-only" for="id_algorithms">Algorithms</label>
     {% if searched_algorithms %}
-        <input  type="hidden" class="input-sm form-control" id="id_algorithms" maxlength="1000" name="algorithms" placeholder="Algorithms" title="" required=False  type="text"  value="{{ searched_algorithms }}">
+        <input  type="hidden" class="form-control" id="id_algorithms" maxlength="1000" name="algorithms" placeholder="Algorithms" title="" required=False  type="text"  value="{{ searched_algorithms }}">
     {% else %}
-        <input  type="hidden" class="input-sm form-control" id="id_algorithms" maxlength="1000" name="algorithms" placeholder="Algorithms" required=False title="" type="text"  value="{{ algorithms }}">
+        <input  type="hidden" class="form-control" id="id_algorithms" maxlength="1000" name="algorithms" placeholder="Algorithms" required=False title="" type="text"  value="{{ algorithms }}">
     {% endif %}
 </div>
 <div class="form-group">
     <label class="sr-only" for="id_data_structures">Data Structures</label>
     {% if searched_data_structures %}
-        <input  type="hidden" class="input-sm form-control" id="id_data_structures" maxlength="1000" name="data_structures" placeholder="Data Structures" title="" required=False  type="text"  value="{{ searched_data_structures }}">
+        <input  type="hidden" class="form-control" id="id_data_structures" maxlength="1000" name="data_structures" placeholder="Data Structures" title="" required=False  type="text"  value="{{ searched_data_structures }}">
     {% else %}
-        <input  type="hidden" class="input-sm form-control" id="id_data_structures" maxlength="1000" name="data_structures" placeholder="Data Structures" required=False title="" type="text"  value="{{ data_structures }}">
+        <input  type="hidden" class="form-control" id="id_data_structures" maxlength="1000" name="data_structures" placeholder="Data Structures" required=False title="" type="text"  value="{{ data_structures }}">
     {% endif %}
 </div>
 <div class="form-group">
     <label class="sr-only" for="id_complexity">Complexity</label>
     {% if searched_complexity %}
-        <input type="hidden" class="input-sm form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" required=False  type="text"  value="{{searched_complexity}}">
+        <input type="hidden" class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" title="" required=False  type="text"  value="{{searched_complexity}}">
     {% else %}
-        <input  type="hidden" class="input-sm form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" required=False title="" type="text"  value="{{ complexity }}">
+        <input  type="hidden" class="form-control" id="id_complexity" maxlength="1000" name="complexity" placeholder="Complexity" required=False title="" type="text"  value="{{ complexity }}">
     {% endif %}
 </div>
 <div class="form-group">
     <label class="sr-only" for="id_languages">Languages</label>
     {% if searched_languages %}
-        <input  type="hidden" class="input-sm form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" title="" required=False type="text"  value="{{ searched_languages }}">
+        <input  type="hidden" class="form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" title="" required=False type="text"  value="{{ searched_languages }}">
     {% else %}
-        <input  type="hidden" class="input-sm form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" required=False title="" type="text"  value="{{ languages }}">
+        <input  type="hidden" class="form-control" id="id_languages" maxlength="1000" name="languages" placeholder="Languages" required=False title="" type="text"  value="{{ languages }}">
     {% endif %}
 </div>
