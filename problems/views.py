@@ -31,41 +31,92 @@ from .models import *
 from .forms import *
 
 def is_activated(user):
+    """
+    A method decorator test. Determines whether or not a user has activated their account.
+    :param user: User object
+    :return: True if the Account has been activated, otherwise False
+    """
     acc = Account.objects.get(user=user)
     return acc.activated
 
 
 class HelperView(View):
-
+    """
+    A class to containing some functionality common to a number of views.
+    """
     def SUGGESTED_PARADIGMS(self):
+        """
+        Suggested paradigms for auto-completion
+        :return: A list of the names of Category objects of type paradigm already in the system
+        """
         return [str(tag.name) for tag in Category.objects.filter(type="paradigm")]
 
     def SUGGESTED_COMPLEXITY(self):
+        """
+        Suggested complexities for auto-completion
+        :return: A list of the names of Category objects of type complexity already in the system
+        """
         return [str(tag.name) for tag in Category.objects.filter(type="complexity")]
 
     def SUGGESTED_LANGUAGES(self):
+        """
+        Suggested languages for auto-completion
+        :return: A list of the names of Category objects of type language already in the system
+        """
         return [str(lang.name) for lang in Category.objects.filter(type="language")]
 
     def SUGGESTED_ALGORITHMS(self):
+        """
+        Suggested algorithms for auto-completion
+        :return: A list of the names of Category objects of type algorithm already in the system
+        """
         return [str(alg.name) for alg in Category.objects.filter(type="algorithm")]
 
     def SUGGESTED_DATA_STRUCTURES(self):
+        """
+        Suggested data_structures for auto-completion
+        :return: A list of the names of Category objects of type data-structure already in the system
+        """
         return [str(ds.name) for ds in Category.objects.filter(type="data-structure")]
 
 
 class Home(View):
+    """
+    A view for managing requests made to the Home page
+    """
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Home page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Home page
+        """
         return render(request, 'problems/home.html')
 
 
 class Guide(View):
+    """
+    A view for managing requests made to the Guide page
+    """
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Guide page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Guide page
+        """
         return render(request, 'problems/guide.html')
 
 
 class ActivateAccount(View):
+    """
+    A class for managing requests to the Activate Account page
+    """
     @method_decorator(login_required)
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Activate Account page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Activate Account page
+        """
         account = get_object_or_404(Account, user=request.user)
         if account.activated:
             return redirect('/problems/')
@@ -77,6 +128,12 @@ class ActivateAccount(View):
             return render(request, 'problems/activate_account.html', context)
 
     def post(self, request):
+        """
+        A method for handling HTTP POST requests made to the Home page
+        :param request: A dictionary object representing the HTTP POST request
+        :return: Returns an HTTP response object which renders the Problem Catalogue page. If an error occurs a response
+        object representing the Activate Account page is returned instead.
+        """
         user = request.user
         activation_code = request.POST['activation_code']
         account = get_object_or_404(Account, user=user)
@@ -103,7 +160,15 @@ class ActivateAccount(View):
 
 
 class CreateAccount(View):
+    """
+    A class for managing requests made to the Create Account page
+    """
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Create Account page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Create Account page
+        """
         account_form = CreateAccountForm()
         context = {
             'form': account_form
@@ -112,6 +177,12 @@ class CreateAccount(View):
         return render(request, 'problems/create_account.html', context)
 
     def post(self, request):
+        """
+        A method for handling HTTP POST requests made to the Create Account page
+        :param request: A dictionary object representing the HTTP POST request
+        :return: Returns an HTTP response object which renders the New Account page. If an error occurs, the Create
+        Account page is rendered instead.
+        """
         account_form = CreateAccountForm(request.POST or None)
         context = {
             'email': request.POST['email'],
@@ -126,17 +197,30 @@ class CreateAccount(View):
         return render(request, 'problems/create_account.html', context)
 
     def create_date(self):
+        """
+        Creates a date for activation date deadline
+        :return: A datetime.date object representing the new deadline
+        """
         today = datetime.date.today()
         deadline = today + datetime.timedelta(days=7)
         return deadline
 
     def create_activation_code(self):
+        """
+        Creates an activation code for a user
+        :return: An alpha-numeric String made up of 20 characters
+        """
         random_string = str(random.random()).encode('utf-8')
         _hash = md5(random_string).hexdigest()
         activation_code = _hash[:20]
         return activation_code
 
     def create_user(self, post_info):
+        """
+        Creates a new User object for an Account
+        :param post_info: A dictionary representing the HTTP POST request sent to the class
+        :return: A new instance of the User model
+        """
         username = post_info['email']
         pwd = post_info['password_one']
         user = User()
@@ -147,6 +231,11 @@ class CreateAccount(View):
         return user
 
     def create_account(self, post_info):
+        """
+        Creates a new instance of the Account model
+        :param post_info: A dictionary representing the HTTP POST request sent to the class
+        :return: Sends an email to the user.
+        """
         # setup user stuff
         user = self.create_user(post_info)
         # setup activation stuff
@@ -169,7 +258,15 @@ class CreateAccount(View):
 
 
 class Index(HelperView):
+    """
+    A class for managing requests made to the Problem Catalogue page
+    """
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Problem Catalogue page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Problem Catalogue page
+        """
         challenge_id = request.session.get('challenge_id', "")
         problems = Problem.objects.all()
         solutions = Solution.objects.all()
@@ -183,6 +280,7 @@ class Index(HelperView):
         difficulty = request.GET.get('difficulty', '')
         visibility = request.GET.get('visibility', '')
 
+        #filter the problems by the terms in the search query
         if paradigms:
             problems = problems.filter(categories__name__in=[x.lower().strip() for x in paradigms.split(',')])
         if languages:
@@ -196,7 +294,7 @@ class Index(HelperView):
         if difficulty:
             problems = problems.filter(difficulty=difficulty)
 
-        if request.user.is_authenticated() and request.user.is_active:
+        if request.user.is_authenticated() and is_activated(request.user):
             if visibility:
                 problems = problems.filter(problem_privacy=(visibility=="private"))
             if challenge_id:
@@ -227,12 +325,23 @@ class Index(HelperView):
         return render(request, 'problems/index.html', context)
 
     def get_solution_availability(self, solution):
+        """
+        A helper method for determining the state of the solution availability for a particular problem
+        :param solution: the solution whose state of availability needs to be determined
+        :return: the state of availability of a solution. Either 'No solution provided', True (publicaly viewable), or
+        False (privately viewable)
+        """
         if solution.all_defaults():
             return 'No solution provided.'
         else:
             return solution.solution_privacy
 
     def get_problem_data(self, problems):
+        """
+        A helper method for rendering information on the Problem Catalogue page.
+        :param problems: The set of problems for which data needs to be obtained.
+        :return: A tuple representing the state of the following pieces of information (problem id, solution availability, categories for the problem)
+        """
         p_list = []
         for problem in problems:
             solution = Solution.objects.get(problem=problem)
@@ -274,9 +383,17 @@ class ViewProblem(View):
 
 
 class AddProblemFromPDF(HelperView):
+    """
+    A class for managing requests made to the Upload Problem via PDF page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Upload Problem via PDF page
+        :param request: A dictionary object representing the HTTP GET request
+        :return: Returns an HTTP response object which renders the Upload Problem via PDF page
+        """
         pdf_form = PDFForm()
         context = {
             'pdf_form': pdf_form,
@@ -284,22 +401,32 @@ class AddProblemFromPDF(HelperView):
         return render(request, 'problems/upload.html', context)
 
     def post(self, request):
+        """
+        A method for handling HTTP POST requests made to the Upload Problem via PDF page
+        :param request: A dictionary object representing the HTTP POST request
+        :return: Returns an HTTP response object which renders the Add Problem form with the information from the uploaded
+        PDF. If an error occurs, it renders the Problem Catalogue page with an error message displayed.
+        """
         pdf_form = PDFForm(request.POST, request.FILES)
         if pdf_form.is_valid():
             if request.FILES:
+                #process the problem PDF, if it exists
                 try:
                     if request.FILES['problem']:
                         problem_file = request.FILES['problem']
                         fs = FileSystemStorage()
                         f_name = fs.save(problem_file.name, problem_file)
                         f_name = f_name.replace('%20', ' ')
+                        #upload the file
                         upload_file_url = settings.MEDIA_ROOT+'\\'+f_name
+                        #parse the file
                         parsed_problem_pdf = self.parse_problem_pdf(upload_file_url)
                         problem_form = parsed_problem_pdf[0]
                         paradigms = parsed_problem_pdf[1]
                         content_form = parsed_problem_pdf[2]
                         os.remove(upload_file_url)
 
+                #set up default problem and content form
                 except MultiValueDictKeyError:
                     p_form_data = {
                         'title': '',
@@ -313,13 +440,16 @@ class AddProblemFromPDF(HelperView):
                     }
                     content_form = ContentForm(initial=c_form_data)
 
+                #process the solution PDF, if it exists
                 try:
                     if request.FILES['solution']:
                         solution_file = request.FILES['solution']
                         fs = FileSystemStorage()
                         f_name = fs.save(solution_file.name, solution_file)
                         f_name = f_name.replace('%20', ' ')
+                        #upload the file
                         upload_file_url = settings.MEDIA_ROOT+'\\'+f_name
+                        #parse the file
                         parsed_solution_pdf = self.parse_solution_pdf(upload_file_url)
                         solution_form = parsed_solution_pdf[0]
                         languages = parsed_solution_pdf[1]
@@ -328,6 +458,7 @@ class AddProblemFromPDF(HelperView):
                         complexity = parsed_solution_pdf[4]
                         os.remove(upload_file_url)
 
+                #set up default solution form
                 except MultiValueDictKeyError:
                     s_form_data = {
                         'solution_description': 'No solution description has been provided.',
@@ -341,6 +472,7 @@ class AddProblemFromPDF(HelperView):
                     algorithms = ''
                     data_structures = ''
                     complexity = ''
+            #if neither file submitted, setup default problem, content and solution forms
             else:
                 p_form_data = {
                     'title': '',
@@ -388,8 +520,17 @@ class AddProblemFromPDF(HelperView):
             return redirect('index')
 
     def parse_solution_pdf(self, file_name):
+        """
+        A helper method for parsing a PDF containing the solution to a problem
+        :param file_name: The name of the file to be parsed.
+        :return: A list, containing the following [populated solution form, string representing the languages by which the
+        solution has been categorised, a string representing the algorithms by which the solution has been categorised,
+        a string representing the data structures by which the solution has been categorised, a string representing the
+        complexities by which the solution has been categorised]
+        """
         HEADINGS = ['complexity', 'links', 'time limit', 'example code', 'languages', 'algorithms', 'data structures']
         solution_pdf_content = self.getPDFContent(file_name)
+        #parse the solution description
         solution_description = ""
         start_next_section = 0
         if solution_pdf_content[start_next_section] not in HEADINGS:
@@ -409,6 +550,7 @@ class AddProblemFromPDF(HelperView):
 
         max_index = len(solution_pdf_content) - 1
         not_end_of_file = True
+        #parse the subsections of the file based on expected HEADINGS
         while not_end_of_file:
             if solution_pdf_content[start_next_section].lower() == 'complexity':
                 start = start_next_section + 1
@@ -507,6 +649,7 @@ class AddProblemFromPDF(HelperView):
         if time_limit == '.':
             time_limit = float(0)
 
+        #populate the solution form
         s_form_data = {
             'solution_description': solution_description if solution_description != "" else "No solution description has been provided.",
             'links': links.strip() if links != "" else "No links.",
@@ -517,9 +660,16 @@ class AddProblemFromPDF(HelperView):
         return [solution_form, language.strip(), algorithms.strip(), data_structures.strip(), complexity.strip()]
 
     def parse_problem_pdf(self, file_name):
+        """
+        A helper method for parsing a PDF of a problem
+        :param file_name: The name of the file containing the problem
+        :return: A list containing the following values: [populated problem form, paradigms by which the problem should
+        be categorised, populated content form]
+        """
         HEADINGS = ['sample input', 'problem description', 'sample output', 'paradigms']
         problem_pdf_content = self.getPDFContent(file_name)
         title = problem_pdf_content[0]
+        #parse the problem description
         problem_description = ""
         start_next_section = 1
         sample_input = ""
@@ -527,6 +677,7 @@ class AddProblemFromPDF(HelperView):
         paradigms = ""
         max_index = len(problem_pdf_content) - 1
         not_end_of_file = True
+        #parse the rest of the file based on expected HEADINGS
         while not_end_of_file:
             if problem_pdf_content[start_next_section].lower() == 'sample input':
                 start = start_next_section + 1
@@ -564,10 +715,12 @@ class AddProblemFromPDF(HelperView):
             if start_next_section >= max_index:
                 not_end_of_file = False
 
+        #populate the problem form
         p_form_data = {
             'title': title,
         }
         problem_form = ProblemForm(initial=p_form_data)
+        #populate the content form
         c_form_data = {
             'problem_description': problem_description,
             'example_input': sample_input if sample_input != "" else "No sample input provided.",
@@ -578,12 +731,23 @@ class AddProblemFromPDF(HelperView):
         return [problem_form, paradigms, content_form]
 
     def consume(self, iterator, num):
+        """
+        A helper method to increment the current iteration of a loop
+        :param iterator: An Iterator for a loop
+        :param num: The number of iterations the Iterator needs to be moved through
+        :return: The incremented iterator
+        """
         if num is None:
             collections.deque(iterator, maxlen=0)
         else:
             next(islice(iterator, num, num), None)
 
     def getPDFContent(self, file_name):
+        """
+        A helper method for reading and saving information from the PDF
+        :param file_name: The name of the file to be read in
+        :return: A list containing the contents of the PDF on a line- by-line basis
+        """
         pdf_file = open(file_name, 'rb')
         reader = PdfFileReader(pdf_file)
         actual_lines = []
@@ -625,9 +789,17 @@ class AddProblemFromPDF(HelperView):
 
 
 class AddProblem(HelperView):
+    """
+    A class for managing requests made to the Add Problem page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
+        """
+        A method for managing HTTP GET requests made to the Add Problem page
+        :param request: A dictionary representing the HTTP GET request
+        :return: An HTTP response object rendering the Add Problem page
+        """
         problem_form = ProblemForm()
         content_form = ContentForm()
         solution_form = SolutionForm()
@@ -650,6 +822,13 @@ class AddProblem(HelperView):
         return render(request, 'problems/add_problem.html', context)
 
     def post(self, request):
+        """
+        A method for managing HTTP POST requests made to the Add Problem page
+        :param request: A dictionary representing the HTTP POST request
+        :return: An HTTP response object rendering the Problem Catalogue page. If an error occurs, an error message is
+        displayed
+        """
+        #get the relevant data
         problem_form = ProblemForm(request.POST)
         content_form = ContentForm(request.POST)
         solution_form = SolutionForm(request.POST)
@@ -660,7 +839,9 @@ class AddProblem(HelperView):
         algorithms = request.POST.get('algorithms')
         data_structures = request.POST.get('data_structures')
 
+        #validate the data
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
+            #use the data to create new instances of the models
             problem = problem_form.save(commit=False)
             problem.created_by = request.user
             problem.save()
@@ -688,9 +869,19 @@ class AddProblem(HelperView):
 
 
 class EditProblem(HelperView):
+    """
+    A class for managing the requests made to the Edit Problem page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, problem_id):
+        """
+        A method for handling HTTP GET requests to the Edit Problem page
+        :param request: A dictionary respresenting the HTTP GET request
+        :param problem_id: The unique identifier for the problem to be edited
+        :return: An HTTP response object to render to the Edit Problem page
+        """
+        #retrive the relevant data to render the page
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
@@ -727,6 +918,14 @@ class EditProblem(HelperView):
         return render(request, 'problems/edit_problem.html', context)
 
     def post(self, request, problem_id):
+        """
+        A method for handling HTTP POST requests
+        :param request: A dictionary representing the HTTP POST request
+        :param problem_id: The unique identifier for the problem to be edited
+        :return: An HTTP response object which renders the Problem Catelogue page. If an error occurs, an error
+        message is displayed.
+        """
+        #retrieve the edited information
         problem = Problem.objects.get(id=problem_id)
         content = Content.objects.get(problem=problem)
         solution = Solution.objects.get(problem=problem)
@@ -738,7 +937,9 @@ class EditProblem(HelperView):
         paradigms = request.POST.get('paradigms')
         algorithms = request.POST.get('algorithms')
         data_structures = request.POST.get('data_structures')
+        #ensure the data is valid
         if problem_form.is_valid() and content_form.is_valid() and solution_form.is_valid():
+            #update the relevant objects
             edited_problem = problem_form.save()
             prev_par = ','.join([p.name for p in problem.categories.all()])
             if paradigms!=prev_par:
@@ -768,6 +969,9 @@ class EditProblem(HelperView):
 
 
 class ForkProblem(HelperView):
+    """
+    A class for managing requests made to the Fork Problem page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, problem_id):
@@ -848,9 +1052,19 @@ class ForkProblem(HelperView):
 
 
 class DeleteProblem(View):
+    """
+    A class for managing requests made to the Delete Problem page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, problem_id):
+        """
+        A method for handling HTTP POST requests made to the Delete Problem page
+        :param request: A dictionary representing the HTTP POST request
+        :param problem_id: The unique identifier for the problem which is to be deleted
+        :return: An HTTP object representing the Problem Catalogue page. If an error occurs, the view of the problem is
+        rendered
+        """
         problem = Problem.objects.get(id=problem_id)
         if request.user == problem.created_by:
             Content.objects.get(problem=problem).delete()
@@ -885,9 +1099,17 @@ class DeleteProblem(View):
 
 
 class ChallengeIndex(View):
+    """
+    A class for handling requests made to the Challenge Catalogue page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Challenge Catalogue page
+        :param request: A dictionary represnting the HTTP GET requst
+        :return: An HTTP response object which renders the Challenge Catalogue page
+        """
         context = {
             'challenges': Challenge.objects.all(),
         }
@@ -895,9 +1117,18 @@ class ChallengeIndex(View):
 
 
 class EditChallenge(View):
+    """
+    A class for handling requests made to the Edit Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, challenge_id):
+        """
+        A method for handling HTTP GET requests made to the Edit Challenge page
+        :param request: A dictionary representing the HTTP GET request
+        :param challenge_id: The unique identifier for the challenge from which a problem is to be edited
+        :return: An HTTP response object which renders the Challenge Catalogue page
+        """
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(instance=challenge)
         context = {
@@ -906,6 +1137,13 @@ class EditChallenge(View):
         return render(request, 'problems/view_challenge.html', context)
 
     def post(self, request, challenge_id):
+        """
+        A method for handling HTTP POST requests made to the Edit Challenge page
+        :param request: A dictionary representing the HTTP POST request
+        :param challenge_id: The unique identifier for the challenge from which a problem is to be edited
+        :return: An HTTP response object which renders the Challenge Catalogue page. If an error occurs the system
+        displays an error message.
+        """
         challenge = Challenge.objects.get(id=challenge_id)
         form = ChallengeForm(request.POST, instance=challenge)
         if form.is_valid():
@@ -917,36 +1155,62 @@ class EditChallenge(View):
 
 
 class ViewChallenge(View):
+    """
+    A class for handling requests made to the View Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request, challenge_id):
+        """
+        A method for handling HTTP GET requests made to the View Challenge page
+        :param request: A dictionary represnting the HTTP GET request
+        :param challenge_id: The unique identifier for the challenge which is to be viewed
+        :return: An HTTP response object which renders the View Challenge page
+        """
         request.session['challenge_id'] = challenge_id
         context = {
             'challenge2': Challenge.objects.get(pk=challenge_id),
         }
         return render(request, 'problems/view_challenge.html', context)
 
-    def post(self, request, challenge_id):
-        # remove problems
-        pass
-
 
 class QuitEditingChallenge(View):
+    """
+    A class for handling requests made to the Quit Editing Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Remove from Challenge page
+        :param request: A dictionary represnting the HTTP GET request
+        :return: An HTTP response object which renders the previous page
+        """
         request.session['challenge_id'] = None
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
     def post(self, request):
+        """
+        A method for handling HTTP POST requests made to the Remove from Challenge page
+        :param request: A dictionary represnting the HTTP POST request
+        :return: An HTTP response object which renders the previous page
+        """
         request.session['challenge_id'] = None
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 class AddChallenge(View):
+    """
+    A class for handling requests made to the Add Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def get(self, request):
+        """
+        A method for handling HTTP GET requests made to the Add Challenge page
+        :param request: A dictionary representing the HTTP GET request
+        :return: An HTTP response object which renders the Add Challenge page.
+        """
         form = ChallengeForm()
         context = {
             'form': form,
@@ -954,6 +1218,12 @@ class AddChallenge(View):
         return render(request, 'problems/add_challenge.html', context)
 
     def post(self, request):
+        """
+        A method for handling HTTP POST requests made to the Add Challenge page
+        :param request: A dictionary representing the HTTP POST request
+        :return: An HTTP response object which renders the Problem Catalogue page. If an error occurs and the Challenge
+        is not added an error message is displayed.
+        """
         form = ChallengeForm(request.POST)
         if form.is_valid():
             challenge = form.save()
@@ -965,9 +1235,19 @@ class AddChallenge(View):
 
 
 class AddToChallenge(View):
+    """
+    A class for handling requests made to the Add To Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, challenge_id, problem_id):
+        """
+        A method for handling HTTP POST requests made to the Add To hallenge page
+        :param request: A dictionary representing the HTTP POST request
+        :param challenge_id: The unique identifier for the challenge to which a problem is to be added
+        :param problem_id: The unique identifier for the problem which is to be added to the challenge
+        :return: An HTTP response object which renders the Problem Catalogue page
+        """
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.add(Problem.objects.get(pk=problem_id))
         challenge.save()
@@ -975,9 +1255,19 @@ class AddToChallenge(View):
 
 
 class RemoveFromChallenge(View):
+    """
+    A class for handling requests made to the Remove From Challenge page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(is_activated, login_url="/problems/accounts/activate/"))
     def post(self, request, challenge_id, problem_id):
+        """
+        A method for handling HTTP POST requests made to the Remove from Challenge page
+        :param request: A dictionary representing the HTTP POST request
+        :param challenge_id: The unique identifier for the challenge from which a problem is to be removed
+        :param problem_id: The unique identifier for the problem which is to be removed from the challenge
+        :return: An HTTP response object which renders the Problem Catalogue page
+        """
         challenge = Challenge.objects.get(pk=challenge_id)
         challenge.problems.remove(Problem.objects.get(pk=problem_id))
         challenge.save()

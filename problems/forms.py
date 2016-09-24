@@ -4,6 +4,9 @@ from django.db import models
 from .models import *
 
 class LoginForm(AuthenticationForm):
+    """
+    A form for handling the data for a user's login
+    """
     username = forms.CharField(label="Username", max_length=30,
                                widget=forms.TextInput(attrs={'class': 'form-control',
                                                              'name': 'username'}))
@@ -12,10 +15,14 @@ class LoginForm(AuthenticationForm):
 
 
 class ActivateAccountForm(forms.Form):
+    """
+    A form for handling the data relating to a user's account activation
+    """
     activation_code = forms.CharField(label="Activation Code:", max_length=20)
 
 
 class CreateAccountForm(forms.Form):
+    """A form for handling the data relating to creating a new account"""
     email = forms.EmailField(label="UCT Computer Science Department staff email address:", max_length=300,
                               widget=forms.EmailInput())
     password_one = forms.CharField(label="Password:", max_length=30,
@@ -39,6 +46,9 @@ class CreateAccountForm(forms.Form):
 
 
 class ProblemForm(forms.ModelForm):
+    """
+    A form for handling the data surrounding creating, editing and forking an instance of a problem
+    """
     problem_privacy = forms.BooleanField(label='Make problem private', required=False)
     class Meta:
         model = Problem
@@ -46,12 +56,18 @@ class ProblemForm(forms.ModelForm):
 
 
 class ContentForm(forms.ModelForm):
+    """
+    A form for handling the data surrounding creating, editing and forking an instance of the content model
+    """
     class Meta:
         model = Content
         fields = ('problem_description', 'example_input', 'example_output',)
 
 
 class SolutionForm(forms.ModelForm):
+    """
+    A form for handling the data surrounding creating, editing and forking an instance of the solution model
+    """
     time_limit = forms.FloatField(label="Time limit (s)", required=False)
     solution_privacy = forms.BooleanField(label='Make solution public', required=False)
     class Meta:
@@ -60,11 +76,17 @@ class SolutionForm(forms.ModelForm):
 
 
 class PDFForm(forms.Form):
+    """
+    A form for handling the data surrounding creating a problem from a PDF
+    """
     problem = forms.FileField(required=False)
     solution = forms.FileField(required=False)
 
 
 class ChallengeForm(forms.ModelForm):
+    """
+    A form for handling the data surrounding creating, editing and forking an instance of the challenge model
+    """
     class Meta:
         model = Challenge
         exclude = ('problems',)
