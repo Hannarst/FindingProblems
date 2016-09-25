@@ -67,7 +67,7 @@
         {% if user.is_authenticated and user.is_active %}
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h4>Privacy</h4>
+            <h4>Visibility</h4>
           </div>
           <div class="panel-body">
             Search for public problems, private (can only be seen by logged in staff) problems or both.
@@ -96,9 +96,10 @@
           <div class="panel-heading">
             <h4>Changing and Resetting Password</h4>
           </div>
-          <div class="panel-body">
-
-          </div>
+            <div class="panel-body">
+                You may request a password reset from the login page. The system will send a password reset email to the account which you registered yourself on the system with.
+                Once logged in, you may change your password. You will require your current password in order to do this.
+            </div>
         </div>
         {% endif %}
       </div>

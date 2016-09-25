@@ -287,9 +287,9 @@ class Solution(models.Model):
         A helper method for determining if the user has supplied any details to the solution model
         :return: True if the user has made no changes to the default values for the model, otherwise False
         """
-        default_categories = self.language.objects.count()>0 and self.data_structures.objects.count()>0 and self.algorithms.objects.count()>0 and self.complexity.objects.count()>0
+        default_categories = self.language.count()==0 and self.data_structures.count()==0 and self.algorithms.count()==0 and self.complexity.count()==0
         default_string = self.solution_description=="No solution description has been provided." and self.links=="No links." and self.example_code=="No example solution code."
-        return default_categories and default_string and self.time_limit!=0
+        return default_categories and default_string and self.time_limit==0.0
 
     def get_all_categories(self):
         """
