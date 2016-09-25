@@ -2,7 +2,6 @@
 {% load staticfiles%}
 {% load bootstrap3 %}
 {% block content %}
-    {% bootstrap_messages %}
     <form method="post" action="{{ action }}" enctype="multipart/form-data">
         <div class="panel-body">
             {% csrf_token %}
