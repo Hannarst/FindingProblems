@@ -49,7 +49,6 @@ class ProblemForm(forms.ModelForm):
     """
     A form for handling the data surrounding creating, editing and forking an instance of a problem
     """
-    problem_privacy = forms.BooleanField(label='Make problem private', required=False)
     class Meta:
         model = Problem
         exclude = ('created_by', 'content', 'solution', 'categories', 'forked_from',)
@@ -68,8 +67,6 @@ class SolutionForm(forms.ModelForm):
     """
     A form for handling the data surrounding creating, editing and forking an instance of the solution model
     """
-    time_limit = forms.FloatField(label="Time limit (s)", required=False)
-    solution_privacy = forms.BooleanField(label='Make solution public', required=False)
     class Meta:
         model = Solution
         fields = ('solution_description', 'links', 'example_code',  'time_limit', "solution_privacy",)
