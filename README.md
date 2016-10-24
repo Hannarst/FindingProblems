@@ -28,4 +28,4 @@ $ python manage.py migrate
 $ python manage.py populate
 $ python manage.py runserver
 ```
-
+Follow the instructions given in the terminal to get to the website.
